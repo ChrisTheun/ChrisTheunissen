@@ -111,7 +111,18 @@
 
 							<a href="#" class="image featured"><img src="images/pic08small.jpg" alt="" /></a>
 
-							<p>This is the data understanding phase.</p>
+							<p>The OULAD is a public dataset which contains anonymized data on roughly 30.000 students over seven distinct courses. The data covers a timespan of two years divided into a maximum of 4 periods (or <i>presentations</i>).
+								The four distinct course presentations in this dataset include courses started in February 2013 <i>(2013B)</i> and February 2014 <i>(2014B)</i> as well as courses that started in October 2013 <i>(2013J)</i> and October 2014 <i>(2014J)</i>.
+								For each student in those courses, the dataset contains not only student information such as gender, highest education level, age band and region but also information on the clicks of the students in the Virtual Learning Environment (VLE) 
+								as well as data on the assessments that the students took and their assessment scores.</p>
+								
+							<p>I ran some tests using backward selection to end up with a selection of variables appropriate to predict whether a student will pass or fail a certain course.
+								The performance of the models did not appear to improve beyond the three variables of (1) the amount of times a student clicks in the VLE every day,
+								(2) the amount of assessments the student completed every day and (3) the student's average assessment score updated daily.
+								However, since it's also possible with the OULAD to break down the clicks in the VLE, it would be interesting to explore the effects of including the categories of resources that students clicked on in the VLE as additional predictors at a later stage.</p>
+
+							<p>Only three out of the seven courses were taught for all four of the course presentations. Their course codes are BBB, DDD and FFF. Because those are the three courses with the most data samples, I decided to only make models and keep the data for those three courses.
+								Moreover, I removed all of the students that did not finish the course from the dataset as nothing can be said about their final result in the course. Specific drop-out prediction models are better suited to identify the students that will withdraw from the course. </p>
 
 						</div>
 					</section>
