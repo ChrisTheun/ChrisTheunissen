@@ -87,7 +87,7 @@
 							<p>In January 2019, I obtained my master's degree after defending my master's thesis in which I showed that LSTMs can be of value when used to predict student performance compared to more commonly used machine learning models.
 								In this project I replicate the research done in said thesis, be it with some modifications. The biggest change being the ability of this project's models to account for students joining the university's courses at different points in time.
 								Consequently, the results of this project are better generalizable to educational settings in which students do not all start a course simultaneously, as is for example the case in most Massive Open Online Courses (MOOCs).</p>
-
+								
 							<p>Predicting student performance is one of the most popular streams of research in the field of educational data mining. Being able to accurately predict student performance at an early stage could prove valuable in numerous ways.
 								For example, when students that are at risk of failing a course can be identified appropriate measures could be taken to assist these students. Pilot tests of these type of systems have already been conducted at Purdue University with promising results. <a href="https://www.researchgate.net/publication/254462830_Course_signals_at_Purdue_Using_learning_analytics_to_increase_student_success" target="_blank"><i>(Arnold & Pistilli, 2012)</i></a>
 								The implemented systems managed to increase student retention rates as well as improve course grades. In addition, better admission policies could be designed when accurate prediction of student performance is feasible.
@@ -115,6 +115,24 @@
 								The four distinct course presentations in this dataset include courses started in February 2013 <i>(2013B)</i> and February 2014 <i>(2014B)</i> as well as courses that started in October 2013 <i>(2013J)</i> and October 2014 <i>(2014J)</i>.
 								For each student in those courses, the dataset contains not only student information such as gender, highest education level, age band and region but also information on the clicks of the students in the Virtual Learning Environment (VLE) 
 								as well as data on the assessments that the students took and their assessment scores.</p>
+								
+								<p>In order to make some visualizations of the data in R, it is first necessary to load the required packages and import the CSV files.</p>
+								
+							<pre class="prettyprint lang-r"><code>	
+ library("dplyr")
+ library("tidyr")
+ library("ggplot2")
+ library("scales")
+
+ # Import public Open University dataset
+ assessments <- read.csv("assessments.csv")
+ courses <- read.csv("courses.csv")
+ studentAssessment <- read.csv("studentAssessment.csv")
+ studentInfo <- read.csv("studentInfo.csv")
+ studentRegistration <- read.csv("studentRegistration.csv")
+ studentVle <- read.csv("studentVle.csv")
+ vle <- read.csv("vle.csv")
+							</code></pre>
 								
 							<p>I ran some tests using backward selection to end up with a selection of variables appropriate to predict whether a student will pass or fail a certain course.
 								The performance of the models did not appear to improve beyond the three variables of (1) the amount of times a student clicks in the VLE every day,
@@ -210,6 +228,7 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
+			<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
 
 	</body>
 </html>
