@@ -114,33 +114,67 @@
 							<p>The OULAD is a public dataset which contains anonymized data on roughly 30.000 students over seven distinct courses. The data covers a timespan of two years divided into a maximum of 4 periods (or <i>presentations</i>).
 								The four distinct course presentations in this dataset include courses started in February 2013 <i>(2013B)</i> and February 2014 <i>(2014B)</i> as well as courses that started in October 2013 <i>(2013J)</i> and October 2014 <i>(2014J)</i>.
 								For each student in those courses, the dataset contains not only student information such as gender, highest education level, age band and region but also information on the clicks of the students in the Virtual Learning Environment (VLE) 
-								as well as data on the assessments that the students took and their assessment scores.</p>
+								but also data on the assessments that the students took and their assessment scores.</p>
 								
-								<p>In order to make some visualizations of the data in R, it is first necessary to load the required packages and import the CSV files.</p>
+								<p>In order to make some visualizations of the data in R, it is first necessary to load the required packages and import the CSV files. I used the dplyr package for data formatting and the ggplot2 package for visualization purposes.</p>
 								
 							<pre class="prettyprint lang-r"><code>	
- library("dplyr")
- library("tidyr")
- library("ggplot2")
- library("scales")
+library("dplyr")
+library("ggplot2")
 
- # Import public Open University dataset
- assessments <- read.csv("assessments.csv")
- courses <- read.csv("courses.csv")
- studentAssessment <- read.csv("studentAssessment.csv")
- studentInfo <- read.csv("studentInfo.csv")
- studentRegistration <- read.csv("studentRegistration.csv")
- studentVle <- read.csv("studentVle.csv")
- vle <- read.csv("vle.csv")
+# Import public Open University dataset
+assessments <- read.csv("assessments.csv")
+courses <- read.csv("courses.csv")
+studentAssessment <- read.csv("studentAssessment.csv")
+studentInfo <- read.csv("studentInfo.csv")
+studentRegistration <- read.csv("studentRegistration.csv")
+studentVle <- read.csv("studentVle.csv")
+vle <- read.csv("vle.csv")
 							</code></pre>
-								
+							
+							<p>Now that the packages and datasets are loaded in, we can make our first graph visualizing the distribution of students over the different course presentations.</p>
+							
+							<pre class="prettyprint lang-r"><code>	
+SD_plot <- ggplot(data = studentInfo, aes(x = code_presentation,            # Create a barchart with the data from the studentInfo dataframe
+                                          fill = code_module)) +           
+  geom_bar(stat = 'count', position=position_dodge()) +                     # Make sure the height of the bars represents the count of students
+  facet_grid(.~code_module) +                                               # Create the bar charts for each course (code_module)
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),                # Add some visual polish
+        axis.ticks.x = element_blank(),       
+        panel.grid.major.x = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        panel.background = element_rect(fill = "grey85"),
+        plot.background = element_rect(fill = "transparent", color = NA),
+        strip.background = element_rect(fill = "grey75", colour = NA))+
+  scale_fill_brewer(palette="Set2") +
+  guides(fill=FALSE) +
+  ggtitle("Student Distribution") +                                         # Add plot title
+  xlab("Code presentation") +                                               # Add x-label
+  ylab("Student count") +                                                   # Add y-label
+ggsave(SD_plot, filename = "Student Distribution.png",                      # Export the graph as a .png file
+       bg = "transparent", dpi = 600)               
+							</code></pre>
+							
+							<p> The code above generates the figure depicted below. The figure shows that not all the courses are taught in all four periods. Only three out of the seven courses were taught for all four of the course presentations. Their course codes are BBB, DDD and FFF.
+								Because those are the three courses with the most data samples, I decided to only make models and keep the data for those three courses. Moreover, I removed all of the students that did not finish the course from the dataset as nothing can be said about their final result in the course.
+								Specific drop-out prediction models are better suited to identify the students that will withdraw from the course. The final results of the students are categorized as either "fail", "pass", or "distinction". The models' prediction accuracy are likely to suffer significantly from having three target variable labels instead of two.
+								That combined with the notion that the distinction between students that pass or fail a course is likely to be of more importance than that between students that pass or pass with distinction, made me decide to merge the "distinction" and "pass" target labels into one combined "pass" label.</p>
+							
+							<img src="images/Student Distribution.png" width = "800", heigth = "600" alt="" />
+
+
+							<pre class="prettyprint lang-r"><code>	
+studentInfo <- studentInfo[studentInfo$code_module %in% c("BBB","DDD","FFF"),]    # Only retain students from courses BBB, DDD and FFF in the studentInfo df
+studentInfo <- studentInfo[studentInfo$final_result != "Withdrawn",]	          # Remove those students that dropped out
+studentVle <- studentVle[studentVle$code_module %in% c("BBB","DDD","FFF"),]       # Only retain students from courses BBB, DDD and FFF in the studentVle df
+studentInfo$final_result[studentInfo$final_result == "Distinction"] <- "Pass"     # Turn the "Distinction" final result into "Pass"
+							</code></pre>
+							
 							<p>I ran some tests using backward selection to end up with a selection of variables appropriate to predict whether a student will pass or fail a certain course.
 								The performance of the models did not appear to improve beyond the three variables of (1) the amount of times a student clicks in the VLE every day,
 								(2) the amount of assessments the student completed every day and (3) the student's average assessment score updated daily.
 								However, since it's also possible with the OULAD to break down the clicks in the VLE, it would be interesting to explore the effects of including the categories of resources that students clicked on in the VLE as additional predictors at a later stage.</p>
 
-							<p>Only three out of the seven courses were taught for all four of the course presentations. Their course codes are BBB, DDD and FFF. Because those are the three courses with the most data samples, I decided to only make models and keep the data for those three courses.
-								Moreover, I removed all of the students that did not finish the course from the dataset as nothing can be said about their final result in the course. Specific drop-out prediction models are better suited to identify the students that will withdraw from the course. </p>
 
 						</div>
 					</section>
