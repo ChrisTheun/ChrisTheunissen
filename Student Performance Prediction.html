@@ -170,6 +170,47 @@ studentVle <- studentVle[studentVle$code_module %in% c("BBB","DDD","FFF"),]     
 studentInfo$final_result[studentInfo$final_result == "Distinction"] <- "Pass"     # Turn the "Distinction" final result into "Pass"
 							</code></pre>
 							
+							<pre class="prettyprint lang-r"><code>	
+studentInfo %>%
+  mutate(code_presentation = as.factor(code_presentation),     # Make sure factors have the right type
+         final_result = as.factor(final_result),
+         code_module = as.factor(code_module)) %>%
+  group_by(code_module, code_presentation, final_result) %>%   # Group the data
+  summarise(count_final_result = n()) %>%                      # Get the count of students per group   
+  mutate(count_man = sum(count_final_result)) %>%              # Get the count of student in each course presentation
+  mutate(percent = count_final_result / count_man * 100) %>%   # Compute the pass rate per presentation
+  ungroup() %>%
+  ggplot(aes(x = code_presentation,                            # Plot barchart with student pass rates
+             y = count_final_result,
+             group = final_result)) +
+  geom_bar(aes(fill = final_result), 
+           stat = "identity") +
+  geom_text(aes(label = sprintf("%0.0f%%", percent)),          # Add visual polish 
+            position = position_stack(vjust = 0.5),
+            check_overlap = TRUE) +
+  theme(plot.title = element_text(hjust = 0.5),
+        panel.background = element_rect(fill = "grey85"),
+        plot.background = element_rect(fill = "transparent", color = NA),
+        strip.background = element_rect(fill = "grey75", colour = NA),
+        legend.background = element_rect(fill = "transparent", color = NA)) +
+  ggtitle("Student Pass Rate by Period") +                     # Add plot title
+  xlab("Code presentation") +                                  # Add x-label
+  ylab("Student count") +                                      # Add y-label
+  facet_grid(.~code_module) +                                  # Create the bar charts for each course (code_module)
+  ggsave(filename = "PR_plot.png",                             # Export the graph as a .png file
+         bg = "transparent", dpi = 600)   
+							</code></pre>
+							
+							<img src="images/PR_plot.png" width = "800", heigth = "600" alt="" />		
+
+							<img src="images/PR_Gender_plot.png" width = "800", heigth = "600" alt="" />							
+							
+							<img src="images/PR_Age_plot.png" width = "800", heigth = "600" alt="" />
+							
+							<img src="images/PR_HE_plot.png" width = "800", heigth = "600" alt="" />
+							
+							<img src="images/PR_IMD_plot.png" width = "1000", heigth = "750" alt="" />
+							
 							<p>I ran some tests using backward selection to end up with a selection of variables appropriate to predict whether a student will pass or fail a certain course.
 								The performance of the models did not appear to improve beyond the three variables of (1) the amount of times a student clicks in the VLE every day,
 								(2) the amount of assessments the student completed every day and (3) the student's average assessment score updated daily.
