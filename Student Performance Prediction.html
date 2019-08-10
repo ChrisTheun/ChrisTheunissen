@@ -135,8 +135,8 @@ vle <- read.csv("vle.csv")
 							<p>Now that the packages and datasets are loaded in, we can make our first graph visualizing the distribution of students over the different course presentations.</p>
 							
 							<pre class="prettyprint lang-r"><code>	
-SD_plot <- ggplot(data = studentInfo, aes(x = code_presentation,            # Create a barchart with the data from the studentInfo dataframe
-                                          fill = code_module)) +           
+ggplot(data = studentInfo, aes(x = code_presentation,                       # Create a barchart with the data from the studentInfo dataframe
+                               fill = code_module)) +           
   geom_bar(stat = 'count', position=position_dodge()) +                     # Make sure the height of the bars represents the count of students
   facet_grid(.~code_module) +                                               # Create the bar charts for each course (code_module)
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5),                # Add some visual polish
@@ -151,8 +151,8 @@ SD_plot <- ggplot(data = studentInfo, aes(x = code_presentation,            # Cr
   ggtitle("Student Distribution") +                                         # Add plot title
   xlab("Code presentation") +                                               # Add x-label
   ylab("Student count") +                                                   # Add y-label
-ggsave(SD_plot, filename = "Student Distribution.png",                      # Export the graph as a .png file
-       bg = "transparent", dpi = 600)               
+  ggsave(filename = "Student Distribution.png",                             # Export the graph as a .png file
+         bg = "transparent", dpi = 600)                        
 							</code></pre>
 							
 							<p> The code above generates the figure depicted below. The figure shows that not all the courses are taught in all four periods. Only three out of the seven courses were taught for all four of the course presentations. Their course codes are BBB, DDD and FFF.
@@ -196,20 +196,83 @@ studentInfo %>%
   ggtitle("Student Pass Rate by Period") +                     # Add plot title
   xlab("Code presentation") +                                  # Add x-label
   ylab("Student count") +                                      # Add y-label
+  labs(fill = "Final result") +                                # Add legend title
   facet_grid(.~code_module) +                                  # Create the bar charts for each course (code_module)
   ggsave(filename = "PR_plot.png",                             # Export the graph as a .png file
          bg = "transparent", dpi = 600)   
 							</code></pre>
 							
-							<img src="images/PR_plot.png" width = "800", heigth = "600" alt="" />		
+							<img src="images/Project1/PR_plot.png" width = "800", heigth = "600" alt="" />		
 
-							<img src="images/PR_Gender_plot.png" width = "800", heigth = "600" alt="" />							
+							<img src="images/Project1/PR_Gender_plot.png" width = "800", heigth = "600" alt="" />							
 							
-							<img src="images/PR_Age_plot.png" width = "800", heigth = "600" alt="" />
+							<img src="images/Project1/PR_Age_plot.png" width = "800", heigth = "600" alt="" />
 							
-							<img src="images/PR_HE_plot.png" width = "800", heigth = "600" alt="" />
+							<img src="images/Project1/PR_HE_plot.png" width = "800", heigth = "600" alt="" />
 							
-							<img src="images/PR_IMD_plot.png" width = "1000", heigth = "750" alt="" />
+							<img src="images/Project1/PR_PrevAttempts_plot.png" width = "800", heigth = "600" alt="" />
+							
+							<img src="images/Project1/PR_Disability_plot.png" width = "800", heigth = "600" alt="" />
+							
+							<img src="images/Project1/PR_IMD_plot.png" width = "1000", heigth = "750" alt="" />
+							
+							<pre class="prettyprint lang-r"><code>
+ggplot(data = studentInfo,aes(x = final_result,                                               
+                              y = studied_credits,
+                              fill = factor(final_result, levels = c("Fail", "Pass")))) +
+  geom_boxplot() +                                                                  # Create a boxplot 
+  scale_y_continuous(limits=c(0, 450)) +                                            # Determine scale cut-off values
+  theme(plot.title = element_text(hjust = 0.5),                                     # Add visual polish
+        panel.background = element_rect(fill = "grey85"),
+        plot.background = element_rect(fill = "transparent", color = NA),
+        strip.background = element_rect(fill = "grey75", colour = NA),
+        legend.background = element_rect(fill = "transparent", color = NA)) +
+  ggtitle("Student Pass Rate by Studied Credits") +                     
+  xlab("Final result") +                                  
+  ylab("Studied credits") +
+  labs(fill = "Final result") +
+  facet_grid(.~code_module) +
+  ggsave(filename = "PR_credits_plot.png",                      
+         bg = "transparent", dpi = 600) 
+							</code></pre>
+							
+							<img src="images/Project1/PR_credits_plot.png" width = "800", heigth = "600" alt="" />
+							
+							<pre class="prettyprint lang-r"><code>
+studentVle_fr <- merge(studentVle, studentInfo[,c(1:3,12)], by.x = c(1,2,3))             # Merge studentVle and studentInfo dataframes
+
+studentVle_fr[,-c(4)] %>%                                                                # Use the new df without site_id variable
+  mutate(date = as.integer(date),                                                        # Make sure variables have appropriate types
+         sum_click = as.integer(sum_click),
+         code_module = as.factor(code_module),
+         final_result = as.factor(final_result),
+         code_presentation = as.factor(code_presentation)) %>%
+  distinct(code_module, code_presentation,id_student, sum_click, date, final_result) %>% # Remove duplicate rows
+  group_by(code_module,code_presentation, final_result, date) %>%                        # Group df
+  summarise(avg_clicks = mean(sum_click)) %>%                                            # Compute avg clicks summary statistic
+  ungroup() %>%
+  ggplot(mapping = aes(x = date, y = avg_clicks, group = final_result, color = final_result)) + # Plot linechart
+  geom_line() +
+  theme(plot.title = element_text(hjust = 0.5),                                                 # Visual polish
+        panel.background = element_rect(fill = "grey85"),
+        plot.background = element_rect(fill = "transparent", color = NA),
+        strip.background = element_rect(fill = "grey75", colour = NA),
+        legend.background = element_rect(fill = "transparent", color = NA)) +
+  ggtitle("Students' Average Clicks over Time") +                     
+  xlab("Date") +                                  
+  ylab("Average clicks") +
+  labs(color = "Final result") +
+  facet_grid(code_module ~ code_presentation) +
+  ggsave(filename = "Clicks_Time_plot.png",                      
+       bg = "transparent", dpi = 600) 
+							</code></pre>
+							
+							
+							<img src="images/Project1/Clicks_Time_plot.png" width = "800", heigth = "600" alt="" />
+							
+							<img src="images/Project1/Days_Clicks_plot.png" width = "800", heigth = "600" alt="" />
+							
+							<img src="images/Project1/Score_Date_plot.png" width = "800", heigth = "600" alt="" />
 							
 							<p>I ran some tests using backward selection to end up with a selection of variables appropriate to predict whether a student will pass or fail a certain course.
 								The performance of the models did not appear to improve beyond the three variables of (1) the amount of times a student clicks in the VLE every day,
