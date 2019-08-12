@@ -155,12 +155,13 @@ ggplot(data = studentInfo, aes(x = code_presentation,                       # Cr
          bg = "transparent", dpi = 600)                        
 							</code></pre>
 							
-							<p> The code above generates the figure depicted below. The figure shows that not all the courses are taught in all four periods. Only three out of the seven courses were taught for all four of the course presentations. Their course codes are BBB, DDD and FFF.
+							<p> The code above generates the figure depicted below. The figure made with the ggplot2 package shows that the number of students varies wildly between courses. All courses except for GGG appear to have more students that start their course in October as opposed to February.
+								The figure also illustrates that not all the courses are taught in all four periods. Only three out of the seven courses were taught for all four of the course presentations. Their course codes are BBB, DDD and FFF.
 								Because those are the three courses with the most data samples, I decided to only make models and keep the data for those three courses. Moreover, I removed all of the students that did not finish the course from the dataset as nothing can be said about their final result in the course.
 								Specific drop-out prediction models are better suited to identify the students that will withdraw from the course. The final results of the students are categorized as either "fail", "pass", or "distinction". The models' prediction accuracy are likely to suffer significantly from having three target variable labels instead of two.
 								That combined with the notion that the distinction between students that pass or fail a course is likely to be of more importance than that between students that pass or pass with distinction, made me decide to merge the "distinction" and "pass" target labels into one combined "pass" label.</p>
 							
-							<img src="images/Student Distribution.png" width = "800", heigth = "600" alt="" />
+							<img src="images/Project1/Student Distribution.png" width = "800", heigth = "600" alt="" />
 
 
 							<pre class="prettyprint lang-r"><code>	
@@ -169,6 +170,11 @@ studentInfo <- studentInfo[studentInfo$final_result != "Withdrawn",]	          #
 studentVle <- studentVle[studentVle$code_module %in% c("BBB","DDD","FFF"),]       # Only retain students from courses BBB, DDD and FFF in the studentVle df
 studentInfo$final_result[studentInfo$final_result == "Distinction"] <- "Pass"     # Turn the "Distinction" final result into "Pass"
 							</code></pre>
+							
+							<p>Now it is possible to examine the data further for the three specified courses with a particular focus on the relationship between the variables and the final result.
+							   I personally like to make stacked bar charts for this purpose conveying the student pass rate for each categorical variable's level.
+							   The dplyr package is used to compute this pass rate statistic as is shown in the code below. Afterwards, ggplot2 is used once again to generate the chart.
+							   First, we take a look at the student pass rate by course presentation. To reiterate, the course presentation can be seen as the period in which the course takes place.</p>
 							
 							<pre class="prettyprint lang-r"><code>	
 studentInfo %>%
@@ -202,19 +208,52 @@ studentInfo %>%
          bg = "transparent", dpi = 600)   
 							</code></pre>
 							
+							<p>Similar to the first graph, this bar chart shows the student count in each course presentation, but this time only for course BBB, DDD and FFF respectively.
+							   On top of that, the graph shows the pass rate in each period. On a first glance, we can say that the pass rate in each period is between 59 and 75 percent.
+							   Moreover, the courses taught in the final period, October 2014, appear to have a slightly higher passing rate than the three preceding periods for these three courses.
+							   This difference is more pronounced in course BBB and FFF than in DDD however. On average, the passing rates do not appear to be vastly different between courses.</p>
+							
 							<img src="images/Project1/PR_plot.png" width = "800", heigth = "600" alt="" />		
+							
+							<p>The next graph shows the passing rate by gender. The code in the following bar charts is virtually the same as in the code block above. The only differences are the replacement of the categorical variable on the x-axis and some changes in the visual polish such as font size.
+								Each of the three courses appears to have a significantly different gender distribution. In course BBB, a social science course, there are disproportionately more female students than male students.
+								In contrast, there are significantly more male students than female students in course FFF, which is a STEM course. Course DDD, another STEM course, also has more male than female students, but the discrepancy is not as big.
+								The one thing the three courses have in common is that female students appear to do slightly better than male students judging from their superior pass rate.</p>
 
-							<img src="images/Project1/PR_Gender_plot.png" width = "800", heigth = "600" alt="" />							
+							<img src="images/Project1/PR_Gender_plot.png" width = "800", heigth = "600" alt="" />		
+							
+							<p>The following bar chart illustrates the pass rate by age band. The student either belongs in age category 0-35, 35-55 or 55+. The figure shows that there are very little students that are 55 years or older.
+							   By far the most of the students belong in the 0-35 age category. It is interesting to note that students between 35 and 55 years old appear to perform slightly better than the younger students.
+							   The sample size of older students is too small to base conclusions off of. </p>
 							
 							<img src="images/Project1/PR_Age_plot.png" width = "800", heigth = "600" alt="" />
 							
+							<p>The relationship between the students' former education level and pass rate is depicted in the graph below. On average, it appears to be the case that the higher the education level, the higher the pass rate.
+								This indicates that highest education level might be a interesting predictor for student performance.
+							    The distributions are also widely similar among courses with the bulk of the students having either a A-level or lower qualification, while only a select few students have no formal qualifications or a post graduate degree.  </p>
+							
 							<img src="images/Project1/PR_HE_plot.png" width = "800", heigth = "600" alt="" />
+							
+							<p>The OULAD also contains information on the amount of times the students attempted the course. The next plot shows that students that do not have any previous attempts, have a higher pass rate than students students that do have one or two previous attempts.
+								The number of students that attempt a course more than three times is so small that it becomes difficult to draw any conclusions from those groups.</p>
 							
 							<img src="images/Project1/PR_PrevAttempts_plot.png" width = "800", heigth = "600" alt="" />
 							
+							<p>The following graph shows that a small fraction of the students has a disability. These students seem to perform slightly worse than students that do not have a disability.
+								The particular type of disability could provide more insight into the effect of certain disabilities on student performance, but this data is not available and due to ethical concerns it might not be appropriate to use in performance predictions.</p>
+							
 							<img src="images/Project1/PR_Disability_plot.png" width = "800", heigth = "600" alt="" />
 							
+							<<p>The relationship between pass rate and IMD band is showcased in the next plot. IMD stand for Index of Multiple Deprivation and it's England's official measure of relative deprivation for small areas or neighborhoods.
+							   This measure says something about how deprived the student's neighborhood is relative to other neighborhoods ranging from the least deprived (90-100% band) to the most deprived (0-10% band).
+							   The bar without a label comprises the students whose IMD index value was missing. It is interesting to note that a large proportion of students with missing values for IMD band passed the course.
+							   This might indicate that having a missing value for IMD band has some predictive power when it comes to predicting student performance. Therefore, it might be worth it to look into why these values are missing.
+							   In general, it seems to be the case that the less deprived the student's neighborhood, the higher the passing rate. In other words, students living in well-off areas tend to perform better. </p>
+							
 							<img src="images/Project1/PR_IMD_plot.png" width = "1000", heigth = "750" alt="" />
+							
+							<p>Due to the many categories involved in the studied credits variable, I chose to plot the relationship between the number of credits for the modules the student is currently studying and the pass rate by means of a box plot.
+							   The very similar box plots below show that there is hardly any connection to be drawn between the number of credits a student is studying and his or her likelihood to pass the course.</p> 
 							
 							<pre class="prettyprint lang-r"><code>
 ggplot(data = studentInfo,aes(x = final_result,                                               
@@ -237,6 +276,13 @@ ggplot(data = studentInfo,aes(x = final_result,
 							</code></pre>
 							
 							<img src="images/Project1/PR_credits_plot.png" width = "800", heigth = "600" alt="" />
+							
+							<p>Due to the fact that the number of times students click in the VLE each day gets recorded, it is possible to plot the average number of clicks over time for those students that passed as well as those that failed the course, which is exactly what is shown in the graph below.
+							   The graphs illustrate that there are some clear patterns when it comes to the number of clicks in the VLE for the different courses. For example, in course FFF the average number of clicks substantially increase as the course nears the end.
+							   The daily amount of clicks here also seems more volatile for failing students than for passing students. The other two courses appear to have more subtle patterns. There also are some clear outliers in the data.
+							   The sudden spike in the 2014B course period for course DDD is the most noteable. There are a few instances in which students have an extraordinarily large amount of clicks (6000+) on a certain day.
+							   It is not clear whether this is due to faulty data collection or whether the student actually clicked that many times. It could be worth it to examine whether these clicks have predictive power when it comes to predicting student performance.
+							   The type of object that the student clicked on within the VLE can also be identified. Perhaps there are certain resources students can click on that say relatively more about the students' chances of success.</p>
 							
 							<pre class="prettyprint lang-r"><code>
 studentVle_fr <- merge(studentVle, studentInfo[,c(1:3,12)], by.x = c(1,2,3))             # Merge studentVle and studentInfo dataframes
@@ -269,6 +315,8 @@ studentVle_fr[,-c(4)] %>%                                                       
 							
 							
 							<img src="images/Project1/Clicks_Time_plot.png" width = "800", heigth = "600" alt="" />
+							
+							<p></p>
 							
 							<img src="images/Project1/Days_Clicks_plot.png" width = "800", heigth = "600" alt="" />
 							
