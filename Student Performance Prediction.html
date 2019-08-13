@@ -157,12 +157,23 @@ ggplot(data = studentInfo, aes(x = code_presentation,                       # Cr
 							
 							<p> The code above generates the figure depicted below. The figure made with the ggplot2 package shows that the number of students varies wildly between courses. All courses except for GGG appear to have more students that start their course in October as opposed to February.
 								The figure also illustrates that not all the courses are taught in all four periods. Only three out of the seven courses were taught for all four of the course presentations. Their course codes are BBB, DDD and FFF.
-								Because those are the three courses with the most data samples, I decided to only make models and keep the data for those three courses. Moreover, I removed all of the students that did not finish the course from the dataset as nothing can be said about their final result in the course.
+								Because those are the three courses with the most data samples, I decided to only make models and keep the data for those three courses.</p>
+								
+								
+							
+							<img src="images/Project1/Student Distribution.png" width = "800", heigth = "600" alt="" />
+							
+							<p>Because of the anonymized nature of the dataset, the specific titles of the courses have not been revealed.
+								The only information available on these courses is that course BBB is a social science course, while courses DDD and FFF belong to the science, technology, engineering and mathemetics (STEM) field.
+								The course duration differs from period to period. When the course starts in the October period they tend to be longer than when they start in February.
+								Each of the three courses has graded assessments the students are expected to complete. However, if the student fails the final exam, they fail the course even if they have satisfactory assessment score.
+								The amount of assessments in course FFF did not change over the four course presentation. However, courses BBB and DDD did experience structural changes when it comes to their assessments.
+								The number of assessments, their dates and the course duration are depicted in the figure below.</p>
+
+							<p>Because nothing can be said about the final result of students that dropped out of the course, I removed all of the students that did not finish the course from the dataset.
 								Specific drop-out prediction models are better suited to identify the students that will withdraw from the course. The final results of the students are categorized as either "fail", "pass", or "distinction". The models' prediction accuracy are likely to suffer significantly from having three target variable labels instead of two.
 								That combined with the notion that the distinction between students that pass or fail a course is likely to be of more importance than that between students that pass or pass with distinction, made me decide to merge the "distinction" and "pass" target labels into one combined "pass" label.</p>
 							
-							<img src="images/Project1/Student Distribution.png" width = "800", heigth = "600" alt="" />
-
 
 							<pre class="prettyprint lang-r"><code>	
 studentInfo <- studentInfo[studentInfo$code_module %in% c("BBB","DDD","FFF"),]    # Only retain students from courses BBB, DDD and FFF in the studentInfo df
