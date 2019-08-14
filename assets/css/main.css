@@ -30,6 +30,7 @@ pre, code {
 	display: block;
 	font-family: monospace;
 	font-size: 80%;
+	overflow: auto;
 	line-height: 1.5em;
 	background: rgb(225, 225, 225);
 }
