@@ -82,7 +82,7 @@
 								<h2>Introduction</h2>
 							</header>
 
-							<a href="#" class="image featured"><img src="images/pic08small.jpg" alt="" /></a>
+							<img src="images/pic08small.jpg" alt="" />
 
 							<p>In January 2019, I obtained my master's degree after defending my master's thesis in which I showed that LSTMs can be of value when used to predict student performance compared to more commonly used machine learning models.
 								In this project I replicate the research done in said thesis, be it with some modifications. The biggest change being the ability of this project's models to account for students joining the university's courses at different points in time.
@@ -109,7 +109,7 @@
 								<h2>Data Understanding</h2>
 							</header>
 
-							<a href="#" class="image featured"><img src="images/pic08small.jpg" alt="" /></a>
+							<img src="images/pic08small.jpg" alt="" />
 
 							<p>The OULAD is a public dataset which contains anonymized data on roughly 30.000 students over seven distinct courses. The data covers a timespan of two years divided into a maximum of 4 periods (or <i>presentations</i>).
 								The four distinct course presentations in this dataset include courses started in February 2013 <i>(2013B)</i> and February 2014 <i>(2014B)</i> as well as courses that started in October 2013 <i>(2013J)</i> and October 2014 <i>(2014J)</i>.
@@ -428,6 +428,7 @@ studentAssessment_fr[!is.na(studentAssessment_fr$score),-c(4,5,6,8)] %>%
 							(2) the amount of assessments the student completed every day and (3) the student's average assessment score updated daily.
 							However, since it's also possible with the OULAD to break down the clicks in the VLE, it would be interesting to explore the effects of including the categories of resources that students clicked on in the VLE as additional predictors at a later stage.
 							Additionally, I still want to create a complete LSTM model with the stationary features included as auxiliary features at a later stage.
+							For now however, the focus remains on the three non-stationary features mentioned above.
 							</p>
 
 
@@ -443,7 +444,7 @@ studentAssessment_fr[!is.na(studentAssessment_fr$score),-c(4,5,6,8)] %>%
 								<h2>Data Formatting</h2>
 							</header>
 
-							<a href="#" class="image featured"><img src="images/pic08small.jpg" alt="" /></a>
+							<img src="images/pic08small.jpg" alt="" />
 
 							<p>This is the data formatting phase.</p>
 
@@ -458,7 +459,7 @@ studentAssessment_fr[!is.na(studentAssessment_fr$score),-c(4,5,6,8)] %>%
 								<h2>Data Preprocessing</h2>
 							</header>
 
-							<a href="#" class="image featured"><img src="images/pic08small.jpg" alt="" /></a>
+							<img src="images/pic08small.jpg" alt="" />
 
 							<p>This is the data preprocessing phase.</p>
 
@@ -474,7 +475,7 @@ studentAssessment_fr[!is.na(studentAssessment_fr$score),-c(4,5,6,8)] %>%
 								<h2>Modeling</h2>
 							</header>
 
-							<a href="#" class="image featured"><img src="images/pic08small.jpg" alt="" /></a>
+							<img src="images/pic08small.jpg" alt="" />
 
 							<p>This is the modeling phase.</p>
 
@@ -490,7 +491,7 @@ studentAssessment_fr[!is.na(studentAssessment_fr$score),-c(4,5,6,8)] %>%
 								<h2>Results</h2>
 							</header>
 
-							<a href="#" class="image featured"><img src="images/pic08small.jpg" alt="" /></a>
+							<img src="images/pic08small.jpg" alt="" />
 
 							<p>This is the results phase.</p>
 
