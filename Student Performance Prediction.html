@@ -223,6 +223,7 @@ studentInfo %>%
         plot.background = element_rect(fill = "transparent", color = NA),
         strip.background = element_rect(fill = "grey75", colour = NA),
         legend.background = element_rect(fill = "transparent", color = NA)) +
+  scale_fill_manual(values = c("#E68A99","#A3B9AA")) +         # Bar colors
   ggtitle("Student Pass Rate by Period") +                     # Add plot title
   xlab("Code presentation") +                                  # Add x-label
   ylab("Student count") +                                      # Add y-label
@@ -290,6 +291,7 @@ ggplot(data = studentInfo,aes(x = final_result,
         plot.background = element_rect(fill = "transparent", color = NA),
         strip.background = element_rect(fill = "grey75", colour = NA),
         legend.background = element_rect(fill = "transparent", color = NA)) +
+  scale_fill_manual(values = c("#E68A99","#A3B9AA")) +         
   ggtitle("Student Pass Rate by Studied Credits") +                     
   xlab("Final result") +                                  
   ylab("Studied credits") +
@@ -322,12 +324,13 @@ studentVle_fr[,-c(4)] %>%                                                       
   summarise(avg_clicks = mean(sum_click)) %>%                                            # Compute avg clicks summary statistic
   ungroup() %>%
   ggplot(mapping = aes(x = date, y = avg_clicks, group = final_result, color = final_result)) + # Plot linechart
-  geom_line() +
+  geom_line(size=1.0) +
   theme(plot.title = element_text(hjust = 0.5),                                                 # Visual polish
         panel.background = element_rect(fill = "grey85"),
         plot.background = element_rect(fill = "transparent", color = NA),
         strip.background = element_rect(fill = "grey75", colour = NA),
         legend.background = element_rect(fill = "transparent", color = NA)) +
+  scale_color_manual(values = c("#E68A99","#A3B9AA")) +    
   ggtitle("Students' Average Clicks over Time") +                     
   xlab("Date") +                                  
   ylab("Average clicks") +
@@ -343,6 +346,38 @@ studentVle_fr[,-c(4)] %>%                                                       
 							<p>The scatterplot below shows the relationship between the sum of clicks and the number of days the student was active in the VLE. In this case, active means that the student clicked at least one time in the VLE that specific day.
 							   Instead of showing the progression over time, this plot utilizes the measures computed by the end of the course. It is apparent that students that did not click in the VLE often and were not active on the platform for many days are more likely to fail the course than active students with a lot of clicks.
 							   Naturally, there are some exceptions but the overall pattern looks evident and makes intuitive sense.</p>
+							   
+							   
+							<pre class="prettyprint lang-r"><code>							   
+studentVle_fr[,-c(4)] %>%
+  mutate(date = as.integer(date),
+         sum_click = as.integer(sum_click),
+         code_module = as.factor(code_module),
+         final_result = as.factor(final_result),
+         id_student = as.factor(id_student),
+         code_presentation = as.factor(code_presentation)) %>%
+  distinct(code_module, code_presentation,id_student, sum_click, final_result) %>%
+  group_by(code_module,code_presentation, id_student) %>%
+  mutate(sum_clicks = sum(sum_click)) %>%
+  mutate(active_days = n())%>%
+  ungroup() %>%
+  distinct(code_module, code_presentation,id_student,active_days, sum_clicks, final_result) %>%
+  ggplot(mapping = aes(x = sum_clicks, y = active_days, color = final_result)) +
+  geom_point(alpha = 0.2) +
+  theme(plot.title = element_text(hjust = 0.5),
+        panel.background = element_rect(fill = "grey85"),
+        plot.background = element_rect(fill = "transparent", color = NA),
+        strip.background = element_rect(fill = "grey75", colour = NA),
+        legend.background = element_rect(fill = "transparent", color = NA)) +
+  scale_color_manual(values = c("#E68A99","#A3B9AA")) +  
+  ggtitle("Students' Active Days by Sum of Clicks") +                     
+  xlab("Sum of clicks") +                                  
+  ylab("Active days") +
+  labs(color = "Final result") +
+  facet_grid(code_module ~ code_presentation) +
+  ggsave(filename = "Days_Clicks_plot.png",                      
+         bg = "transparent", dpi = 600) 
+							</code></pre>
 							
 							<img src="images/Project1/Days_Clicks_plot.png" width = "800", heigth = "600" alt="" />
 							
@@ -351,13 +386,49 @@ studentVle_fr[,-c(4)] %>%                                                       
 								Since the assessment structure for course BBB changed in October 2014, the pattern is different than in the previous years. The university decided to implement a smaller amount of assessments than in the periods before.
 								The same goes for October 2013 in course DDD. The assessment structure in course FFF stayed the same over all four periods. The structural changes at different points in time might be a valuable indicator of the models' stability.
 								It would be interesting to see how much worse the models perform for courses BBB and DDD compared to course FFF if they do at all.</p>
+								
+							<pre class="prettyprint lang-r"><code>							   
+studentAssessment_fr <- merge(studentAssessment, assessments[,c(1:5)], by.x = 1)
+studentAssessment_fr <- merge(studentAssessment_fr, studentInfo[,c(1:3,12)], by.x = c(2,6,7))
+
+studentAssessment_fr[!is.na(studentAssessment_fr$score),-c(4,5,6,8)] %>%
+  mutate(date = as.integer(date),
+         score = as.integer(score),
+         code_module = as.factor(code_module),
+         final_result = as.factor(final_result),
+         code_presentation = as.factor(code_presentation)) %>%
+  distinct(code_module, code_presentation,id_student, score, date, final_result) %>%
+  group_by(code_module,code_presentation, final_result, date) %>%
+  summarise(avg_score = mean(score)) %>%
+  ungroup() %>%
+  ggplot(mapping = aes(x = date, y = avg_score, group = final_result, color = final_result)) +
+  geom_line(size = 1.2) +
+  theme(plot.title = element_text(hjust = 0.5),
+        panel.background = element_rect(fill = "grey85"),
+        plot.background = element_rect(fill = "transparent", color = NA),
+        strip.background = element_rect(fill = "grey75", colour = NA),
+        legend.background = element_rect(fill = "transparent", color = NA)) +
+  scale_color_manual(values = c("#E68A99","#A3B9AA")) +  
+  ggtitle("Assessment Score Over Time") +                     
+  xlab("Date") +                                  
+  ylab("Average score") +
+  labs(color = "Final result") +
+  facet_grid(code_module ~ code_presentation) +
+  ggsave(filename = "Score_Date_plot.png",                      
+         bg = "transparent", dpi = 600)  
+							</code></pre>
 							
 							<img src="images/Project1/Score_Date_plot.png" width = "800", heigth = "600" alt="" />
 							
-							<p>I ran some tests using backward selection to end up with a selection of variables appropriate to predict whether a student will pass or fail a certain course.
-								The performance of the models did not appear to improve beyond the three variables of (1) the amount of times a student clicks in the VLE every day,
-								(2) the amount of assessments the student completed every day and (3) the student's average assessment score updated daily.
-								However, since it's also possible with the OULAD to break down the clicks in the VLE, it would be interesting to explore the effects of including the categories of resources that students clicked on in the VLE as additional predictors at a later stage.</p>
+							<p>
+							The variables that we can consider to use for our models can be categorized into two groups. First, the variables that are not tracked over time (stationary variables) such as age, gender, highest education etc.
+							Second, the variables that are tracked over time, such as the number of clicks, the average assessment score and the number of assessments completed each day.
+							After some initial tests using backward selection, I found that the stationary variables do not significantly improve the performance of the models when added to the variables that are tracked over time.
+							The performance of the models did not appear to improve beyond the three variables of (1) the amount of times a student clicks in the VLE every day,
+							(2) the amount of assessments the student completed every day and (3) the student's average assessment score updated daily.
+							However, since it's also possible with the OULAD to break down the clicks in the VLE, it would be interesting to explore the effects of including the categories of resources that students clicked on in the VLE as additional predictors at a later stage.
+							Additionally, I still want to create a complete LSTM model with the stationary features included as auxiliary features at a later stage.
+							</p>
 
 
 						</div>
