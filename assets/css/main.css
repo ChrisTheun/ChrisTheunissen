@@ -10,7 +10,7 @@
 html, body, div, span, applet, object,
 iframe, h1, h2, h3, h4, h5, h6, p, blockquote,
 a, abbr, acronym, address, big, cite,
-del, dfn, em, img, ins, kbd, q, s, samp,
+del, dfn, em, ins, kbd, q, s, samp,
 small, strike, strong, sub, sup, tt, var, b,
 u, i, center, dl, dt, dd, ol, ul, li, fieldset,
 form, label, legend, table, caption, tbody,
@@ -33,6 +33,16 @@ pre, code {
 	overflow: auto;
 	line-height: 1.5em;
 	background: rgb(225, 225, 225);
+}
+
+img {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+    max-width: 100%;
 }
 
 article, aside, details, figcaption, figure,
@@ -1762,6 +1772,7 @@ input, select, textarea {
 		.image img {
 			display: block;
 			width: 100%;
+			max-width: 100%;
 		}
 
 		.image.avatar48 {
