@@ -451,7 +451,17 @@ studentAssessment_fr[!is.na(studentAssessment_fr$score),-c(4,5,6,8)] %>%
 
 							<img src="images/pic08small.jpg" alt="" />
 
-							<p>This is the data preparation phase.</p>
+							<p>
+							In this data preparation phase I will demonstrate how I cleaned, formatted and normalized the data so that it can be used as input for the models.
+							Because the LSTMs and the traditional machine learning models require differing data input formats, we will end up with two datasets with different formats.
+							The LSTM requires a three-dimensional array as input corresponding to (samples, time steps, features) in which the samples are the students, the time steps are the course days and the features are the variables.
+							In contrast, the traditional machine learning methods do not take into account the time steps and only require a two-dimensional array of (samples, features).
+							To make sure that both models work with exactly the same data, I merged the time steps with the features dimension for the traditional machine learning models.
+							Consequently, there will not just be a single "number of clicks" variable for example. Instead, there will be multiple feature columns for the number of clicks at each distinct day in the course.
+							The difference between the LSTMs and the traditional methods in this case is that the LSTMs by design take into account the time dimension of the data and will recognize that the clicks at course day 30 will occur later in the sequence than the clicks at course day 5.
+							Because the order of the feature columns does not matter when it comes to traditional methods, the traditional models will not be able to make this distinction.
+							More on the differences between LSTMs and the common machine learning methods can be found in the <a href="#modeling">Modeling</a> section.
+							</p>
 
 						</div>
 					</section>									
