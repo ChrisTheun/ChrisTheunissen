@@ -31,9 +31,8 @@
 								<li><a href="#top" id="top-link"><span class="icon solid fa-newspaper">Title</span></a></li>
 								<li><a href="#introduction" id="introduction-link"><span class="icon solid fa-info-circle">Introduction</span></a></li>
 								<li><a href="#data_understanding" id="data_understanding-link"><span class="icon solid fa-database">Data Understanding</span></a></li>
-								<li><a href="#data_formatting" id="data_formatting-link"><span class="icon solid fa-puzzle-piece">Data Formatting</span></a></li>
-								<li><a href="#data_preprocessing" id="data_preprocessing-link"><span class="icon solid fa-cogs">Data Preprocessing</span></a></li>						
-								<li><a href="#modeling" id="modeling-link"><span class="icon solid fa-magic">Modeling</span></a></li>
+								<li><a href="#data_preparation" id="data_formatting-link"><span class="icon solid fa-puzzle-piece">Data Preparation</span></a></li>				
+								<li><a href="#modeling" id="modeling-link"><span class="icon solid fa-cogs">Modeling</span></a></li>
 								<li><a href="#results" id="results-link"><span class="icon solid fa-flag">Results</span></a></li>
 							</ul>
 						</nav>
@@ -85,13 +84,13 @@
 							<img src="images/pic08small.jpg" alt="" />
 
 							<p>In January 2019, I obtained my master's degree after defending my master's thesis in which I showed that LSTMs can be of value when used to predict student performance compared to more commonly used machine learning models.
-								In this project I replicate the research done in said thesis, be it with some modifications. The biggest change being the ability of this project's models to account for students joining the university's courses at different points in time.
+								In this project I replicate the research done in said thesis, be it with some modifications. The biggest change being the ability of this project's models to account for students joining the university's courses at different points in time due to changes in the data normalization methods.
 								Consequently, the results of this project are better generalizable to educational settings in which students do not all start a course simultaneously, as is for example the case in most Massive Open Online Courses (MOOCs).</p>
 								
 							<p>Predicting student performance is one of the most popular streams of research in the field of educational data mining. Being able to accurately predict student performance at an early stage could prove valuable in numerous ways.
-								For example, when students that are at risk of failing a course can be identified appropriate measures could be taken to assist these students. Pilot tests of these type of systems have already been conducted at Purdue University with promising results. <a href="https://www.researchgate.net/publication/254462830_Course_signals_at_Purdue_Using_learning_analytics_to_increase_student_success" target="_blank"><i>(Arnold & Pistilli, 2012)</i></a>
+								For example, when students that are at risk of failing a course can be identified, appropriate measures could be taken to assist these students. Pilot tests of these type of systems have already been conducted at Purdue University with promising results. <a href="https://www.researchgate.net/publication/254462830_Course_signals_at_Purdue_Using_learning_analytics_to_increase_student_success" target="_blank"><i>(Arnold & Pistilli, 2012)</i></a>
 								The implemented systems managed to increase student retention rates as well as improve course grades. In addition, better admission policies could be designed when accurate prediction of student performance is feasible.
-								In order to capture these benefits, accurate algorithms are necessary. Considering that deep learning methods are currently the state-of-the-art when it comes to predictive analytics, it is peculiar that so little research that applies deep learning models to student performance prediction has been conducted.
+								In order to capture these benefits, accurate algorithms are necessary. Considering that deep learning methods are currently the state-of-the-art when it comes to predictive analytics, it is peculiar that so little research applying deep learning models to student performance prediction is available.
 								My thesis (and by extension this project) serve as an attempt to fill that gap in the literature.</p>
 								
 							<p>Public student data from the <a href="https://analyse.kmi.open.ac.uk/open_dataset" target="_blank">Open University Learning Analytics Dataset (OULAD)</a> is used to compare the student performance prediction prowess of LSTMs and traditional machine learning models including decision trees, random forests, support vector machines,
@@ -114,7 +113,7 @@
 							<p>The OULAD is a public dataset which contains anonymized data on roughly 30.000 students over seven distinct courses. The data covers a timespan of two years divided into a maximum of 4 periods (or <i>presentations</i>).
 								The four distinct course presentations in this dataset include courses started in February 2013 <i>(2013B)</i> and February 2014 <i>(2014B)</i> as well as courses that started in October 2013 <i>(2013J)</i> and October 2014 <i>(2014J)</i>.
 								For each student in those courses, the dataset contains not only student information such as gender, highest education level, age band and region but also information on the clicks of the students in the Virtual Learning Environment (VLE) 
-								but also data on the assessments that the students took and their assessment scores.</p>
+								as well as data on the assessments that the students took and their assessment scores.</p>
 								
 								<p>In order to make some visualizations of the data in R, it is first necessary to load the required packages and import the CSV files. I used the dplyr package for data formatting and the ggplot2 package for visualization purposes.</p>
 								
@@ -165,10 +164,10 @@ ggplot(data = studentInfo, aes(x = code_presentation,                       # Cr
 							
 							<p>Because of the anonymized nature of the dataset, the specific titles of the courses have not been revealed.
 								The only information available on these courses is that course BBB is a social science course, while courses DDD and FFF belong to the science, technology, engineering and mathemetics (STEM) field.
-								The course duration differs from period to period. When the course starts in the October period they tend to be longer than when they start in February.
+								The course duration differs from period to period. When the course starts in October it tends to be longer than when it starts in February.
 								Each of the three courses has graded assessments the students are expected to complete. However, if the student fails the final exam, they fail the course even if they have satisfactory assessment score.
 								The amount of assessments in course FFF did not change over the four course presentation. However, courses BBB and DDD did experience structural changes when it comes to their assessments.
-								The number of TMAs (Tutor Marked Assessments), CMAs (Computer Marked Assessments), their dates and the course duration are depicted in the figure below.</p>
+								The number of TMAs (Tutor Marked Assessments), CMAs (Computer Marked Assessments), their dates and the course duration are depicted in the three figures below.</p>
 								
 							
 							<p><font color="black"><b> Course BBB Assessments </b></font><br>
@@ -182,9 +181,12 @@ ggplot(data = studentInfo, aes(x = code_presentation,                       # Cr
 							<p><font color="black"><b> Course FFF Assessments </b></font><br>
 							<img src="images/Project1/StructureFFF.jpg" width = "529", heigth = "500" alt="" />
 							</p>
+							
+							<p> As can be seen in the figures above, the final exam date is not always available. If that is the case, I assumed that the final exam took place on the final day of the course based on the following quote in the official <a href="https://analyse.kmi.open.ac.uk/open_dataset" target="_blank">OULAD documentation</a>:
+							"If the information about the final exam date is missing, it is at the end of the last presentation week."</p>
 
 							<p>Because nothing can be said about the final result of students that dropped out of the course, I removed all of the students that did not finish the course from the dataset.
-								Specific drop-out prediction models are better suited to identify the students that will withdraw from the course. The final results of the students are categorized as either "fail", "pass", or "distinction". The models' prediction accuracy are likely to suffer significantly from having three target variable labels instead of two.
+								Specific drop-out prediction models are better suited to identify the students that will withdraw from the course. The final results of the students are categorized as either "fail", "pass", or "distinction". The models' prediction accuracy scores are likely to suffer significantly from having three target variable labels instead of two.
 								That combined with the notion that the distinction between students that pass or fail a course is likely to be of more importance than that between students that pass or pass with distinction, made me decide to merge the "distinction" and "pass" target labels into one combined "pass" label.</p>
 							
 
@@ -253,8 +255,8 @@ studentInfo %>%
 							
 							<img src="images/Project1/PR_Age_plot.png" width = "800", heigth = "600" alt="" />
 							
-							<p>The relationship between the students' former education level and pass rate is depicted in the graph below. On average, it appears to be the case that the higher the education level, the higher the pass rate.
-								This indicates that highest education level might be a interesting predictor for student performance.
+							<p>The relationship between the students' former education level and pass rate is depicted in the graph below. On average, it appears to be the case that the higher the education level, the higher the pass rate is.
+								This indicates that highest education level might be an interesting predictor for student performance.
 							    The distributions are also widely similar among courses with the bulk of the students having either a A-level or lower qualification, while only a select few students have no formal qualifications or a post graduate degree.  </p>
 							
 							<img src="images/Project1/PR_HE_plot.png" width = "800", heigth = "600" alt="" />
@@ -345,7 +347,7 @@ studentVle_fr[,-c(4)] %>%                                                       
 							
 							<p>The scatterplot below shows the relationship between the sum of clicks and the number of days the student was active in the VLE. In this case, active means that the student clicked at least one time in the VLE that specific day.
 							   Instead of showing the progression over time, this plot utilizes the measures computed by the end of the course. It is apparent that students that did not click in the VLE often and were not active on the platform for many days are more likely to fail the course than active students with a lot of clicks.
-							   Naturally, there are some exceptions but the overall pattern looks evident and makes intuitive sense.</p>
+							   Naturally, there are some exceptions but the overall pattern is evident and makes intuitive sense.</p>
 							   
 							   
 							<pre class="prettyprint lang-r"><code>							   
@@ -358,12 +360,12 @@ studentVle_fr[,-c(4)] %>%
          code_presentation = as.factor(code_presentation)) %>%
   distinct(code_module, code_presentation,id_student, sum_click, final_result) %>%
   group_by(code_module,code_presentation, id_student) %>%
-  mutate(sum_clicks = sum(sum_click)) %>%
-  mutate(active_days = n())%>%
+  mutate(sum_clicks = sum(sum_click)) %>%                                                        # compute sum of clicks for each student
+  mutate(active_days = n())%>%                                                                   # compute active days for each student
   ungroup() %>%
   distinct(code_module, code_presentation,id_student,active_days, sum_clicks, final_result) %>%
   ggplot(mapping = aes(x = sum_clicks, y = active_days, color = final_result)) +
-  geom_point(alpha = 0.2) +
+  geom_point(alpha = 0.2) +                                                                      # scatterplot
   theme(plot.title = element_text(hjust = 0.5),
         panel.background = element_rect(fill = "grey85"),
         plot.background = element_rect(fill = "transparent", color = NA),
@@ -387,7 +389,8 @@ studentVle_fr[,-c(4)] %>%
 								The same goes for October 2013 in course DDD. The assessment structure in course FFF stayed the same over all four periods. The structural changes at different points in time might be a valuable indicator of the models' stability.
 								It would be interesting to see how much worse the models perform for courses BBB and DDD compared to course FFF if they do at all.</p>
 								
-							<pre class="prettyprint lang-r"><code>							   
+							<pre class="prettyprint lang-r"><code>
+# merge dataframes to have the necessary data in one dataframe							
 studentAssessment_fr <- merge(studentAssessment, assessments[,c(1:5)], by.x = 1)
 studentAssessment_fr <- merge(studentAssessment_fr, studentInfo[,c(1:3,12)], by.x = c(2,6,7))
 
@@ -399,7 +402,7 @@ studentAssessment_fr[!is.na(studentAssessment_fr$score),-c(4,5,6,8)] %>%
          code_presentation = as.factor(code_presentation)) %>%
   distinct(code_module, code_presentation,id_student, score, date, final_result) %>%
   group_by(code_module,code_presentation, final_result, date) %>%
-  summarise(avg_score = mean(score)) %>%
+  summarise(avg_score = mean(score)) %>%                                                          # compute average score per final result class
   ungroup() %>%
   ggplot(mapping = aes(x = date, y = avg_score, group = final_result, color = final_result)) +
   geom_line(size = 1.2) +
@@ -421,6 +424,7 @@ studentAssessment_fr[!is.na(studentAssessment_fr$score),-c(4,5,6,8)] %>%
 							<img src="images/Project1/Score_Date_plot.png" width = "800", heigth = "600" alt="" />
 							
 							<p>
+							Now that we have gotten a better understanding of our data and an idea of which variables could be useful to predict student performance, we can conclude the data understanding phase.
 							The variables that we can consider to use for our models can be categorized into two groups. First, the variables that are not tracked over time (stationary variables) such as age, gender, highest education etc.
 							Second, the variables that are tracked over time, such as the number of clicks, the average assessment score and the number of assessments completed each day.
 							After some initial tests using backward selection, I found that the stationary variables do not significantly improve the performance of the models when added to the variables that are tracked over time.
@@ -429,6 +433,7 @@ studentAssessment_fr[!is.na(studentAssessment_fr$score),-c(4,5,6,8)] %>%
 							However, since it's also possible with the OULAD to break down the clicks in the VLE, it would be interesting to explore the effects of including the categories of resources that students clicked on in the VLE as additional predictors at a later stage.
 							Additionally, I still want to create a complete LSTM model with the stationary features included as auxiliary features at a later stage.
 							For now however, the focus remains on the three non-stationary features mentioned above.
+							The next challenge is to prepare the data in such a way that it can be used as input for the models.
 							</p>
 
 
@@ -436,35 +441,20 @@ studentAssessment_fr[!is.na(studentAssessment_fr$score),-c(4,5,6,8)] %>%
 					</section>
 					
 					
-				<!-- Data Formatting -->
-					<section id="data_formatting" class="three">
+				<!-- Data Preparation -->
+					<section id="data_preparation" class="three">
 						<div class="container">
 
 							<header>
-								<h2>Data Formatting</h2>
+								<h2>Data Preparation</h2>
 							</header>
 
 							<img src="images/pic08small.jpg" alt="" />
 
-							<p>This is the data formatting phase.</p>
+							<p>This is the data preparation phase.</p>
 
 						</div>
-					</section>				
-					
-				<!-- Data Preprocessing -->
-					<section id="data_preprocessing" class="three">
-						<div class="container">
-
-							<header>
-								<h2>Data Preprocessing</h2>
-							</header>
-
-							<img src="images/pic08small.jpg" alt="" />
-
-							<p>This is the data preprocessing phase.</p>
-
-						</div>
-					</section>						
+					</section>									
 					
 
 				<!-- Modeling -->
