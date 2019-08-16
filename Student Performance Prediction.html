@@ -462,7 +462,106 @@ studentAssessment_fr[!is.na(studentAssessment_fr$score),-c(4,5,6,8)] %>%
 							Because the order of the feature columns does not matter when it comes to traditional methods, the traditional models will not be able to make this distinction.
 							More on the differences between LSTMs and the common machine learning methods can be found in the <a href="#modeling">Modeling</a> section.
 							</p>
+							
+							<p>
+							Just like in the previous section we have to load in the packages and data as well as only retain non-dropouts from courses BBB, DDD and FFF.
+							Additionally, we create a new student identifier feature merging the student ID with the course code and course presentation for more convenient data formatting.
+							</p>
+							
+							<pre class="prettyprint lang-r"><code>
+#Load packages
+library("dplyr")
 
+# Import public Open University dataset
+assessments <- read.csv("assessments.csv")
+courses <- read.csv("courses.csv")
+studentAssessment <- read.csv("studentAssessment.csv")
+studentInfo <- read.csv("studentInfo.csv")
+studentRegistration <- read.csv("studentRegistration.csv")
+studentVle <- read.csv("studentVle.csv")
+vle <- read.csv("vle.csv")
+
+# Create an identifier for each student combining course module, course presentation and student id
+studentInfo$identifier <- paste(studentInfo$code_module, studentInfo$code_presentation, studentInfo$id_student)
+
+# Only retain students in courses BBB, DDD and FFF & remove those that dropped out
+studentInfo <- studentInfo[studentInfo$code_module %in% c("BBB","DDD","FFF"),]
+withdrawnStudents <- studentInfo[studentInfo$final_result == "Withdrawn",]
+studentInfo <- studentInfo[studentInfo$final_result != "Withdrawn",]
+studentVle <- studentVle[studentVle$code_module %in% c("BBB","DDD","FFF"),]
+studentRegistration <- studentRegistration[studentRegistration$code_module %in% c("BBB","DDD","FFF"),]
+							</code></pre>
+							
+							<p>
+							As we have seen in the previous section, not all the exam dates are available. Some of them are registered as missing values.
+							The OULAD documentation showed that if the exam date is missing, it took place at the end of the final course week.
+							Therefore, I imputed the missing values with the final course presentation day using a for-loop.
+							I also ended up merging datasets to get a more comprehensive representation of the data instead of information being spread out over multiple datasets.
+							</p>
+							
+							<pre class="prettyprint lang-r"><code>
+# Impute missing exam dates with the final day of the course 
+# [Official documentation: "If the information about the final exam date is missing, it is at the end of the last presentation week."]
+for(i in 1:nrow(assessments)){
+  m <- as.character(assessments$code_module[i])
+  p <- as.character(assessments$code_presentation[i])
+  if (is.na(assessments$date[i]) & assessments$assessment_type[i] == "Exam"){
+    assessments$date[i] <- courses$module_presentation_length[courses$code_module == m & courses$code_presentation == p]
+  }
+}
+
+# Merge dataframes
+FullAssessments <- merge(x = studentAssessment, y = assessments[assessments$code_module %in% c("BBB","DDD","FFF"),], by = "id_assessment")
+FullVle <- merge(x = studentVle, y = vle[,c(1,4)], by = "id_site")
+							</code></pre>							
+							
+							<p>
+							Because I want to predict whether a student passes or fails the course before the final exam is over, I remove all the assessments that have been submitted after the final exam date for the specific course presentation.
+							</p>
+							
+							<pre class="prettyprint lang-r"><code>							
+# Remove assessments that have been submitted on or after the final exam date conditional on course and semester
+FullAssessments <- merge(x = FullAssessments, y = assessments[assessments$assessment_type == "Exam",c(1,2,5)], by = c("code_module", "code_presentation"), all.x = TRUE)
+FullAssessments <- FullAssessments[!duplicated(FullAssessments),]
+names(FullAssessments)[c(9,11)] <- c("date", "exam_date")
+FullAssessments <- FullAssessments[FullAssessments$date_submitted < FullAssessments$exam_date,]
+							</code></pre>	
+							
+							
+							<p>
+							</p>
+							
+							<pre class="prettyprint lang-r"><code>	
+							</code></pre>	
+							
+							<p>
+							</p>
+							
+							<pre class="prettyprint lang-r"><code>	
+							</code></pre>
+							
+							<p>
+							</p>
+							
+							<pre class="prettyprint lang-r"><code>	
+							</code></pre>
+							
+							<p>
+							</p>
+							
+							<pre class="prettyprint lang-r"><code>	
+							</code></pre>
+							
+							<p>
+							</p>
+							
+							<pre class="prettyprint lang-r"><code>	
+							</code></pre>
+							
+							
+							
+							
+							
 						</div>
 					</section>									
 					
