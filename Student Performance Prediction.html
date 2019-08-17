@@ -496,7 +496,6 @@ studentRegistration <- studentRegistration[studentRegistration$code_module %in% 
 							As we have seen in the previous section, not all the exam dates are available. Some of them are registered as missing values.
 							The OULAD documentation showed that if the exam date is missing, it took place at the end of the final course week.
 							Therefore, I imputed the missing values with the final course presentation day using a for-loop.
-							I also ended up merging datasets to get a more comprehensive representation of the data instead of information being spread out over multiple datasets.
 							</p>
 							
 							<pre class="prettyprint lang-r"><code>
@@ -509,35 +508,116 @@ for(i in 1:nrow(assessments)){
     assessments$date[i] <- courses$module_presentation_length[courses$code_module == m & courses$code_presentation == p]
   }
 }
-
-# Merge dataframes
-FullAssessments <- merge(x = studentAssessment, y = assessments[assessments$code_module %in% c("BBB","DDD","FFF"),], by = "id_assessment")
-FullVle <- merge(x = studentVle, y = vle[,c(1,4)], by = "id_site")
 							</code></pre>							
 							
 							<p>
-							Because I want to predict whether a student passes or fails the course before the final exam is over, I remove all the assessments that have been submitted after the final exam date for the specific course presentation.
+							Next, I ended up merging datasets to get a more comprehensive representation of the data instead of information being spread out over multiple datasets.
+							The FullVle dataframe combines data on the students' actions in the VLE and the information on the resources in the VLE.
+							The FullAssessments dataframe combines data on the students' activity when it comes to assessments as well as the information on the assessments themselves.
+							The final exam date is also added as a column to the FullAssessments dataframe.
+							Additionally, the duplicated data instances are removed and the names of two columns are updated to better reflect their meaning.
 							</p>
 							
-							<pre class="prettyprint lang-r"><code>							
-# Remove assessments that have been submitted on or after the final exam date conditional on course and semester
-FullAssessments <- merge(x = FullAssessments, y = assessments[assessments$assessment_type == "Exam",c(1,2,5)], by = c("code_module", "code_presentation"), all.x = TRUE)
-FullAssessments <- FullAssessments[!duplicated(FullAssessments),]
-names(FullAssessments)[c(9,11)] <- c("date", "exam_date")
-FullAssessments <- FullAssessments[FullAssessments$date_submitted < FullAssessments$exam_date,]
+							<pre class="prettyprint lang-r"><code>		
+# Merge dataframes
+FullAssessments <- merge(x = studentAssessment, y = assessments[assessments$code_module %in% c("BBB","DDD","FFF"),], by = "id_assessment")
+FullVle <- merge(x = studentVle, y = vle[,c(1,4)], by = "id_site")
+							
+FullAssessments <- merge(x = FullAssessments, y = assessments[assessments$assessment_type == "Exam",c(1,2,5)], by = c("code_module", "code_presentation"), all.x = TRUE) # Add final exam date to FullAssessments df
+FullAssessments <- FullAssessments[!duplicated(FullAssessments),] # Remove duplicate rows
+names(FullAssessments)[c(9,11)] <- c("date", "exam_date")         # Change column names
 							</code></pre>	
 							
+							
+							<p>
+							Next, a new dataframe is created to store the exam submission dates of students, since students in course DDD have differing submission dates.
+							In other words, the exam was not taken by all students at the same moment in time.
+							Afterwards, we add this "exam_submitted_date" column to the bigger FullAssessments dataframe.
+							This column features the exam submission dates of DDD students that we just retrieved, while it shows missing values for students from course BBB and FFF since their exam submission date is not avaiable.
+							For these students we use the final exam date as their submission date, assuming that everyone in these two courses has a predetermined examination date.
+							Finally, only the assessments that took place before the final exam are retained because I want to predict whether the student passes or fails the course before the final exam has taken place.
+							</p>
+							
+							<pre class="prettyprint lang-r"><code>	
+# In course DDD students have differing exam submission dates, so a dataframe is created to collect those.
+DDD_examdates <- FullAssessments %>%
+  select(code_module, code_presentation, id_student,assessment_type, date_submitted) %>%
+  filter(assessment_type == "Exam")
+DDD_examdates$assessment_type <- NULL
+names(DDD_examdates)[4] <- "exam_submitted_date"
+
+
+FullAssessments <- merge(x = FullAssessments, y = DDD_examdates, by = c("code_module", "code_presentation", "id_student"), all.x=TRUE)                   # Add exam_submitted date column of DDD course to the FullAssessments dataframe
+FullAssessments$exam_submitted_date[is.na(FullAssessments$exam_submitted_date)] <- FullAssessments$exam_date[is.na(FullAssessments$exam_submitted_date)] # Impute the exam_submitted dates of the other two courses with exam_date
+FullAssessments <- FullAssessments[FullAssessments$date_submitted < FullAssessments$exam_submitted_date,]                                                # Only retain those assessments that occured before the final exam submission date
+							</code></pre>	
+							
+							<p>
+							Furthermore, I add the exam submission date to the studentRegistration dataframe which contains information on the registration and deregistration of students.
+							I also did not retain the deregistered students in the dataset in line with the reasoning to exclude drop-outs explained earlier.
+							The for-loop below makes sure that the exam_submission_date is imputed with the course presentation's exam date whenever the submission date is missing.
+							</p>
+							
+							<pre class="prettyprint lang-r"><code>
+# Add the exam submission date from the FullAssesments df to each student record in the studentRegistration df
+studentRegistration <- merge(x = studentRegistration[is.na(studentRegistration$date_unregistration),], y = FullAssessments[,c(1,2,3,12)], by = c("code_module", "code_presentation", "id_student"), all.x = TRUE)
+studentRegistration <- studentRegistration[!duplicated(studentRegistration),]
+
+# Make sure that if the exam_submission_date is not available, it is imputed with exam date of the course presentation from the assessments df
+for (i in 1:nrow(studentRegistration)){
+  if (is.na(studentRegistration$exam_submitted_date[i]) == TRUE){
+    studentRegistration$exam_submitted_date[i] <- assessments$date[assessments$assessment_type == "Exam" & 
+                                                                  assessments$code_module == studentRegistration$code_module[i] &
+                                                                  assessments$code_presentation == studentRegistration$code_presentation[i]]
+  }
+}							
+							</code></pre>
+							
+							<p>
+							The following piece of code is used to compute the variables we wanted to use for the prediction.
+							In particular, the number of assignments submitted before the final exam date, the student's average score updated daily and the student's daily number of clicks in the VLE.
+							</p>
+							
+							<pre class="prettyprint lang-r"><code>
+# Compute the number of assignments submitted before the final exam date and the average score which is updated daily  
+FullAssessments <- merge(x = FullAssessments[,1:8], y = studentRegistration[,c(1:4,6)],   by = c("code_module", "code_presentation", "id_student"), all.y = TRUE)  # Add registration date & finalized exam submission date to FullAssessments df
+AsgmtCounts <- aggregate(id_assessment ~ code_module + code_presentation + id_student + date_submitted, data = FullAssessments, FUN = length)                      # Compute the number of assessments each student submitted every day
+names(AsgmtCounts)[5] <- "Asgmt_Count"
+AsgmtScores <- aggregate(score ~ code_module + code_presentation + id_student + date_submitted, data = FullAssessments, FUN = sum)                                 # Compute the sum of assessment scores every day
+names(AsgmtScores)[5] <- "Asgmt_sumScore"
+
+# Create a new dataframe in which daily assessment counts and scores are added to the studentRegistration dataframe
+Asgmts <- merge(x = studentRegistration[,c(1:4,6)], y = AsgmtCounts,by = c("code_module", "code_presentation", "id_student"))                                      
+Asgmts <- merge(x = Asgmts, y = AsgmtScores,by = c("code_module", "code_presentation", "id_student", "date_submitted"))
+names(Asgmts)[4] <- "date"			
+
+# Compute the number of clicks a student made in a particular course and semester
+Clicks <- aggregate(sum_click ~ code_module + code_presentation + id_student + date, data = FullVle, FUN=sum)
+Clicks <- merge(x = Clicks[Clicks$code_module %in% c("BBB","DDD","FFF"),], y = studentRegistration[,c(1:4,6)], by = c("code_module", "code_presentation", "id_student"), all.y = TRUE) 
+Clicks <- Clicks[!duplicated(Clicks),]  # Remove duplicated rows
+Clicks <- Clicks[Clicks$date < Clicks$exam_submitted_date,]  # Remove clicks that have been made on or after the final exam date conditional on course and semester
+
+ClicksAsgmts <- merge(x = Clicks, y=Asgmts, by = c("code_module", "code_presentation", "id_student", "date", "date_registration", "exam_submitted_date"), all.x = TRUE, all.y = TRUE) # Merge Clicks and Asgmts dataframes
+ClicksAsgmts <- ClicksAsgmts[apply(ClicksAsgmts,1,function(x)any(!is.na(x))),]	# Remove rows in which all values are missing	
+							</code></pre>
 							
 							<p>
 							</p>
 							
 							<pre class="prettyprint lang-r"><code>	
-							</code></pre>	
-							
-							<p>
-							</p>
-							
-							<pre class="prettyprint lang-r"><code>	
+# Expand the date range from -25 to the end of the course
+min_date_BBB <- min(ClicksAsgmts$date[ClicksAsgmts$code_module == "BBB"])
+min_date_DDD <- min(ClicksAsgmts$date[ClicksAsgmts$code_module == "DDD"])
+min_date_FFF <- min(ClicksAsgmts$date[ClicksAsgmts$code_module == "FFF"])
+ClicksAsgmts$min_date[ClicksAsgmts$code_module == "BBB"] <- min_date_BBB
+ClicksAsgmts$min_date[ClicksAsgmts$code_module == "DDD"] <- min_date_DDD
+ClicksAsgmts$min_date[ClicksAsgmts$code_module == "FFF"] <- min_date_FFF
+max_date_BBB <- max(ClicksAsgmts$exam_submitted_date[ClicksAsgmts$code_module == "BBB"])
+max_date_DDD <- max(ClicksAsgmts$exam_submitted_date[ClicksAsgmts$code_module == "DDD"])
+max_date_FFF <- max(ClicksAsgmts$exam_submitted_date[ClicksAsgmts$code_module == "FFF"])
+ClicksAsgmts$days[ClicksAsgmts$code_module == "BBB"] <- max_date_BBB - ClicksAsgmts$min_date[ClicksAsgmts$code_module == "BBB"]
+ClicksAsgmts$days[ClicksAsgmts$code_module == "DDD"] <- max_date_DDD - ClicksAsgmts$min_date[ClicksAsgmts$code_module == "DDD"]
+ClicksAsgmts$days[ClicksAsgmts$code_module == "FFF"] <- max_date_FFF - ClicksAsgmts$min_date[ClicksAsgmts$code_module == "FFF"]
 							</code></pre>
 							
 							<p>
