@@ -463,6 +463,9 @@ studentAssessment_fr[!is.na(studentAssessment_fr$score),-c(4,5,6,8)] %>%
 							More on the differences between LSTMs and the common machine learning methods can be found in the <a href="#modeling">Modeling</a> section.
 							</p>
 							
+							<h3> Section 1: Data Transformation Using R </h3>
+							</br>
+							
 							<p>
 							Just like in the previous section we have to load in the packages and data as well as only retain non-dropouts from courses BBB, DDD and FFF.
 							Additionally, we create a new student identifier feature merging the student ID with the course code and course presentation for more convenient data formatting.
@@ -711,7 +714,13 @@ write.csv(x = DDD_Train, "DDD_Train.csv")
 write.csv(x = FFF_Train, "FFF_Train.csv")
 							</code></pre>
 							
+							</br>
+							
+							<h3> Section 2: Data Transformation and Normalization Using Python </h3>
+							</br>
+							
 							<p>
+							
 							From now on, Python will be used to transform the datasets into their final format so they can serve as input for the LSTM.
 							The additional transformations required to make the dataset compatible for the traditional machine learning models will also be done in Python.
 							</p>
