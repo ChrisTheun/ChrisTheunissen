@@ -602,16 +602,22 @@ ClicksAsgmts <- ClicksAsgmts[apply(ClicksAsgmts,1,function(x)any(!is.na(x))),]	#
 							</code></pre>
 							
 							<p>
+							The start of every course is marked as day 0. Students can often access the VLE before the course actually starts however.
+							For example, when a student clicked in the VLE 25 days before his course actually starts, this is indicated by a value of -25 for the "date" variable.
+							For modeling purposes, we want to create sequences from the point at which data started to be tracked for the specific course to the final day of the course.
+							In the next block of code, the minimum and maximum dates of the courses are retrieved and the number of days the student has been active in the course are computed by subtracting the minimum date of each course by the maximum date.
+							Additionally, values of 0 are imputed whenever no clicks or assignments have been observed on a certain day.
 							</p>
 							
 							<pre class="prettyprint lang-r"><code>	
-# Expand the date range from -25 to the end of the course
-min_date_BBB <- min(ClicksAsgmts$date[ClicksAsgmts$code_module == "BBB"])
-min_date_DDD <- min(ClicksAsgmts$date[ClicksAsgmts$code_module == "DDD"])
-min_date_FFF <- min(ClicksAsgmts$date[ClicksAsgmts$code_module == "FFF"])
+# Expand the date range from the earliest day in the course to the end of the course
+min_date_BBB <- min(ClicksAsgmts$date[ClicksAsgmts$code_module == "BBB"])  # Minimum date of course BBB
+min_date_DDD <- min(ClicksAsgmts$date[ClicksAsgmts$code_module == "DDD"])  # Minimum date of course DDD
+min_date_FFF <- min(ClicksAsgmts$date[ClicksAsgmts$code_module == "FFF"])  # Minumum date of course FFF
 ClicksAsgmts$min_date[ClicksAsgmts$code_module == "BBB"] <- min_date_BBB
 ClicksAsgmts$min_date[ClicksAsgmts$code_module == "DDD"] <- min_date_DDD
 ClicksAsgmts$min_date[ClicksAsgmts$code_module == "FFF"] <- min_date_FFF
+
 max_date_BBB <- max(ClicksAsgmts$exam_submitted_date[ClicksAsgmts$code_module == "BBB"])
 max_date_DDD <- max(ClicksAsgmts$exam_submitted_date[ClicksAsgmts$code_module == "DDD"])
 max_date_FFF <- max(ClicksAsgmts$exam_submitted_date[ClicksAsgmts$code_module == "FFF"])
@@ -621,15 +627,39 @@ ClicksAsgmts$days[ClicksAsgmts$code_module == "FFF"] <- max_date_FFF - ClicksAsg
 							</code></pre>
 							
 							<p>
+							There is no record if the student does not click in the VLE or submit an assessment on that specific day.
+							However, we need all three of our variables to be full sequences in which all the days of the course are represented.
+							Therefore, we make another dataframe to help construct this full sequence by replicating each row in the dataframe as many times as the amount of days the student spends in the course.
+							Afterwards, we create a date column that accurately represents the order of days in each student's sequence.
+							By merging this dataframe and the ClicksAsgmts dataframe with the three variables we can make the complete dataframe.
+							The process of merging the dataset gives rise to missing values for the days in which students did not click in the VLE or did not submit any assignments.
+							We impute these missing values with zeroes instead.
 							</p>
 							
-							<pre class="prettyprint lang-r"><code>	
+							<pre class="prettyprint lang-r"><code>
+# Make another df to help constructing a range of day registered until day before final exam for each student
+dateReference <- merge(x= studentRegistration[,c(1:4,6)], y = ClicksAsgmts[,c(1,2,3,10,11,12)], by = c("code_module", "code_presentation", "id_student"), all.y = TRUE)
+dateReference <- dateReference[!duplicated(dateReference),]
+row.names(dateReference) <- NULL
+dateReference <-dateReference[rep(row.names(dateReference), dateReference$day),]
+dateReference$date <- sequence(rle(as.character(dateReference$identifier))$lengths)+dateReference$min_date-1
+
+fulldf <- merge(x = ClicksAsgmts, y = dateReference, by = c("code_module", "code_presentation", "id_student","identifier", "date", "date_registration", "exam_submitted_date", "min_date", "days"), all.y = TRUE)
+fulldf <- fulldf[with(fulldf, order(code_module, code_presentation, id_student, date)),]
+fulldf$sum_click[is.na(fulldf$sum_click) & fulldf$date < fulldf$exam_submitted_date & fulldf$date >= fulldf$date_registration] <- 0
+fulldf$Asgmt_Count[is.na(fulldf$Asgmt_Count) & fulldf$date < fulldf$exam_submitted_date & fulldf$date >= fulldf$date_registration] <- 0
+fulldf$Asgmt_sumScore[is.na(fulldf$Asgmt_sumScore) & fulldf$date < fulldf$exam_submitted_date & fulldf$date >= fulldf$date_registration] <- 0							
 							</code></pre>
 							
 							<p>
 							</p>
 							
 							<pre class="prettyprint lang-r"><code>	
+# Compute average assignment score by using the cumulative sum of scores updated daily
+fulldf$csum_score[!is.na(fulldf$sum_click)] <- ave(fulldf$Asgmt_sumScore[!is.na(fulldf$sum_click)], fulldf$identifier[!is.na(fulldf$sum_click)], FUN = cumsum)
+fulldf$csum_asgmts[!is.na(fulldf$Asgmt_Count)] <- ave(fulldf$Asgmt_Count[!is.na(fulldf$Asgmt_Count)], fulldf$identifier[!is.na(fulldf$Asgmt_Count)], FUN = cumsum)
+fulldf$Avg_score <- round(fulldf$csum_score/fulldf$csum_asgmts,2)
+fulldf$Avg_score[is.nan(fulldf$Avg_score)] <- 0
 							</code></pre>
 							
 							<p>
