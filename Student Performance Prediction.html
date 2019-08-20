@@ -476,11 +476,11 @@ studentAssessment_fr[!is.na(studentAssessment_fr$score),-c(4,5,6,8)] %>%
 library("dplyr")
 
 # Import public Open University dataset
-assessments <- read.csv("assessments.csv")
-courses <- read.csv("courses.csv")
-studentAssessment <- read.csv("studentAssessment.csv")
 studentInfo <- read.csv("studentInfo.csv")
+courses <- read.csv("courses.csv")
 studentRegistration <- read.csv("studentRegistration.csv")
+assessments <- read.csv("assessments.csv")
+studentAssessment <- read.csv("studentAssessment.csv")
 studentVle <- read.csv("studentVle.csv")
 vle <- read.csv("vle.csv")
 
@@ -494,6 +494,70 @@ studentInfo <- studentInfo[studentInfo$final_result != "Withdrawn",]
 studentVle <- studentVle[studentVle$code_module %in% c("BBB","DDD","FFF"),]
 studentRegistration <- studentRegistration[studentRegistration$code_module %in% c("BBB","DDD","FFF"),]
 							</code></pre>
+							
+							
+							<font color="black"><b> studentInfo dataframe </b></font>
+							<div style="overflow-x:auto;display: block;	white-space: nowrap;">
+								<table >
+								<tr> <th>  </th> <th> code_module </th> <th> code_presentation </th> <th> id_student </th> <th> gender </th> <th> region </th> <th> highest_education </th> <th> imd_band </th> <th> age_band </th> <th> num_of_prev_attempts </th> <th> studied_credits </th> <th> disability </th> <th> final_result </th>  </tr>
+								<tr> <td align="right"> 1 </td> <td> AAA </td> <td> 2013J </td> <td align="right"> 11391 </td> <td> M </td> <td> East Anglian Region </td> <td> HE Qualification </td> <td> 90-100% </td> <td> 55&lt;= </td> <td align="right">   0 </td> <td align="right"> 240 </td> <td> N </td> <td> Pass </td> </tr>
+								<tr> <td align="right"> 2 </td> <td> AAA </td> <td> 2013J </td> <td align="right"> 28400 </td> <td> F </td> <td> Scotland </td> <td> HE Qualification </td> <td> 20-30% </td> <td> 35-55 </td> <td align="right">   0 </td> <td align="right">  60 </td> <td> N </td> <td> Pass </td> </tr>
+								<tr> <td align="right"> 3 </td> <td> AAA </td> <td> 2013J </td> <td align="right"> 30268 </td> <td> F </td> <td> North Western Region </td> <td> A Level or Equivalent </td> <td> 30-40% </td> <td> 35-55 </td> <td align="right">   0 </td> <td align="right">  60 </td> <td> Y </td> <td> Withdrawn </td> </tr>
+								</table>
+							</div>
+							</br>
+							
+							<font color="black"><b> courses dataframe </b></font>
+							<table>
+							<tr> <th>  </th> <th> code_module </th> <th> code_presentation </th> <th> module_presentation_length </th>  </tr>
+							<tr> <td align="right"> 1 </td> <td> AAA </td> <td> 2013J </td> <td align="right"> 268 </td> </tr>
+							<tr> <td align="right"> 2 </td> <td> AAA </td> <td> 2014J </td> <td align="right"> 269 </td> </tr>
+							<tr> <td align="right"> 3 </td> <td> BBB </td> <td> 2013J </td> <td align="right"> 268 </td> </tr>
+							</table>
+
+							
+							<font color="black"><b> studentRegistration dataframe </b></font>
+							<table >
+							<tr> <th>  </th> <th> code_module </th> <th> code_presentation </th> <th> id_student </th> <th> date_registration </th> <th> date_unregistration </th>  </tr>
+							<tr> <td align="right"> 1 </td> <td> AAA </td> <td> 2013J </td> <td align="right"> 11391 </td> <td align="right"> -159 </td> <td align="right">  </td> </tr>
+							<tr> <td align="right"> 2 </td> <td> AAA </td> <td> 2013J </td> <td align="right"> 28400 </td> <td align="right"> -53 </td> <td align="right">  </td> </tr>
+							<tr> <td align="right"> 3 </td> <td> AAA </td> <td> 2013J </td> <td align="right"> 30268 </td> <td align="right"> -92 </td> <td align="right">  12 </td> </tr>
+							</table>
+							
+							<font color="black"><b> assessments dataframe </b></font>
+							<table >
+							<tr> <th>  </th> <th> code_module </th> <th> code_presentation </th> <th> id_assessment </th> <th> assessment_type </th> <th> date </th> <th> weight </th>  </tr>
+							<tr> <td align="right"> 1 </td> <td> AAA </td> <td> 2013J </td> <td align="right"> 1752 </td> <td> TMA </td> <td align="right">  19 </td> <td align="right"> 10.00 </td> </tr>
+							<tr> <td align="right"> 2 </td> <td> AAA </td> <td> 2013J </td> <td align="right"> 1753 </td> <td> TMA </td> <td align="right">  54 </td> <td align="right"> 20.00 </td> </tr>
+							<tr> <td align="right"> 3 </td> <td> AAA </td> <td> 2013J </td> <td align="right"> 1754 </td> <td> TMA </td> <td align="right"> 117 </td> <td align="right"> 20.00 </td> </tr>
+							</table>
+							
+							<font color="black"><b> studentAssessment dataframe </b></font>
+							<table >
+							<tr> <th>  </th> <th> id_assessment </th> <th> id_student </th> <th> date_submitted </th> <th> is_banked </th> <th> score </th>  </tr>
+							<tr> <td align="right"> 1 </td> <td align="right"> 1752 </td> <td align="right"> 11391 </td> <td align="right">  18 </td> <td align="right">   0 </td> <td align="right">  78 </td> </tr>
+							<tr> <td align="right"> 2 </td> <td align="right"> 1752 </td> <td align="right"> 28400 </td> <td align="right">  22 </td> <td align="right">   0 </td> <td align="right">  70 </td> </tr>
+							<tr> <td align="right"> 3 </td> <td align="right"> 1752 </td> <td align="right"> 31604 </td> <td align="right">  17 </td> <td align="right">   0 </td> <td align="right">  72 </td> </tr>
+							</table>
+							
+							<font color="black"><b> studentVle dataframe </b></font>
+							<table >
+							<tr> <th>  </th> <th> code_module </th> <th> code_presentation </th> <th> id_student </th> <th> id_site </th> <th> date </th> <th> sum_click </th>  </tr>
+							<tr> <td align="right"> 1 </td> <td> AAA </td> <td> 2013J </td> <td align="right"> 28400 </td> <td align="right"> 546652 </td> <td align="right"> -10 </td> <td align="right">   4 </td> </tr>
+							<tr> <td align="right"> 2 </td> <td> AAA </td> <td> 2013J </td> <td align="right"> 28400 </td> <td align="right"> 546652 </td> <td align="right"> -10 </td> <td align="right">   1 </td> </tr>
+							<tr> <td align="right"> 3 </td> <td> AAA </td> <td> 2013J </td> <td align="right"> 28400 </td> <td align="right"> 546652 </td> <td align="right"> -10 </td> <td align="right">   1 </td> </tr>
+							</table>
+							
+							<font color="black"><b> vle dataframe </b></font>
+							<table >
+							<tr> <th>  </th> <th> id_site </th> <th> code_module </th> <th> code_presentation </th> <th> activity_type </th> <th> week_from </th> <th> week_to </th>  </tr>
+							<tr> <td align="right"> 1 </td> <td align="right"> 546943 </td> <td> AAA </td> <td> 2013J </td> <td> resource </td> <td align="right">  </td> <td align="right">  </td> </tr>
+							<tr> <td align="right"> 2 </td> <td align="right"> 546712 </td> <td> AAA </td> <td> 2013J </td> <td> oucontent </td> <td align="right">  </td> <td align="right">  </td> </tr>
+							<tr> <td align="right"> 3 </td> <td align="right"> 546998 </td> <td> AAA </td> <td> 2013J </td> <td> resource </td> <td align="right">  </td> <td align="right">  </td> </tr>
+							</table>
+							
+							
+							
 							
 							<p>
 							As we have seen in the previous section, not all the exam dates are available. Some of them are registered as missing values.
@@ -531,6 +595,16 @@ FullAssessments <- FullAssessments[!duplicated(FullAssessments),] # Remove dupli
 names(FullAssessments)[c(9,11)] <- c("date", "exam_date")         # Change column names
 							</code></pre>	
 							
+							<font color="black"><b> FullAssessments dataframe </b></font>
+							<div style="overflow-x:auto;display: block;	white-space: nowrap;">
+							<table >
+							<tr> <th>  </th> <th> code_module </th> <th> code_presentation </th> <th> id_assessment </th> <th> id_student </th> <th> date_submitted </th> <th> is_banked </th> <th> score </th> <th> assessment_type </th> <th> date </th> <th> weight </th> <th> exam_date </th>  </tr>
+							<tr> <td align="right"> 1 </td> <td> BBB </td> <td> 2013B </td> <td align="right"> 14984 </td> <td align="right"> 281564 </td> <td align="right">  17 </td> <td align="right">   0 </td> <td align="right">  60 </td> <td> TMA </td> <td align="right">  19 </td> <td align="right"> 5.00 </td> <td align="right"> 240 </td> </tr>
+							<tr> <td align="right"> 2 </td> <td> BBB </td> <td> 2013B </td> <td align="right"> 14984 </td> <td align="right"> 405995 </td> <td align="right">  19 </td> <td align="right">   0 </td> <td align="right">  77 </td> <td> TMA </td> <td align="right">  19 </td> <td align="right"> 5.00 </td> <td align="right"> 240 </td> </tr>
+							<tr> <td align="right"> 3 </td> <td> BBB </td> <td> 2013B </td> <td align="right"> 14984 </td> <td align="right"> 404022 </td> <td align="right">  18 </td> <td align="right">   0 </td> <td align="right">  87 </td> <td> TMA </td> <td align="right">  19 </td> <td align="right"> 5.00 </td> <td align="right"> 240 </td> </tr>
+							</table>
+							</div>
+							</br>
 							
 							<p>
 							Next, a new dataframe is created to store the exam submission dates of students, since students in course DDD have differing submission dates.
@@ -604,6 +678,17 @@ ClicksAsgmts <- merge(x = Clicks, y=Asgmts, by = c("code_module", "code_presenta
 ClicksAsgmts <- ClicksAsgmts[apply(ClicksAsgmts,1,function(x)any(!is.na(x))),]	# Remove rows in which all values are missing	
 							</code></pre>
 							
+							<font color="black"><b> ClicksAsgmts dataframe </b></font>
+							<div style="overflow-x:auto;display: block;	white-space: nowrap;">
+							<table >
+							<tr> <th>  </th> <th> code_module </th> <th> code_presentation </th> <th> id_student </th> <th> date </th> <th> date_registration </th> <th> exam_submitted_date </th> <th> sum_click </th> <th> Asgmt_Count </th> <th> Asgmt_sumScore </th>  </tr>
+							<tr> <td align="right"> 1 </td> <td> BBB </td> <td> 2013B </td> <td align="right"> 23629 </td> <td align="right">  -6 </td> <td align="right"> -47 </td> <td align="right"> 240 </td> <td align="right">  14 </td> <td align="right">  </td> <td align="right">  </td> </tr>
+							<tr> <td align="right"> 2 </td> <td> BBB </td> <td> 2013B </td> <td align="right"> 23629 </td> <td align="right">   2 </td> <td align="right"> -47 </td> <td align="right"> 240 </td> <td align="right">   9 </td> <td align="right">  </td> <td align="right">  </td> </tr>
+							<tr> <td align="right"> 3 </td> <td> BBB </td> <td> 2013B </td> <td align="right"> 23629 </td> <td align="right">   4 </td> <td align="right"> -47 </td> <td align="right"> 240 </td> <td align="right">  14 </td> <td align="right">  </td> <td align="right">  </td> </tr>
+							 </table>
+							</div>
+							</br>
+							
 							<p>
 							The start of every course is marked as day 0. Students can often access the VLE before the course actually starts however.
 							For example, when a student clicked in the VLE 25 days before his course actually starts, this is indicated by a value of -25 for the "date" variable.
@@ -661,6 +746,17 @@ fulldf$Asgmt_Count[is.na(fulldf$Asgmt_Count) & fulldf$date < fulldf$exam_submitt
 fulldf$Asgmt_sumScore[is.na(fulldf$Asgmt_sumScore) & fulldf$date < fulldf$exam_submitted_date & fulldf$date >= fulldf$date_registration] <- 0							
 							</code></pre>
 							
+							<font color="black"><b> fulldf dataframe </b></font>
+							<div style="overflow-x:auto;display: block;	white-space: nowrap;">
+							<table >
+							<tr> <th>  </th> <th> code_module </th> <th> code_presentation </th> <th> id_student </th> <th> identifier </th> <th> date </th> <th> date_registration </th> <th> exam_submitted_date </th> <th> min_date </th> <th> days </th> <th> sum_click </th> <th> Asgmt_Count </th> <th> Asgmt_sumScore </th>  </tr>
+							<tr> <td align="right"> 1 </td> <td> BBB </td> <td> 2013B </td> <td align="right"> 23629 </td> <td> BBB 2013B 23629 </td> <td align="right"> -23.00 </td> <td align="right"> -47 </td> <td align="right"> 240 </td> <td align="right"> -23 </td> <td align="right"> 291 </td> <td align="right">  </td> <td align="right">  </td> <td align="right">  </td> </tr>
+							<tr> <td align="right"> 2 </td> <td> BBB </td> <td> 2013B </td> <td align="right"> 23629 </td> <td> BBB 2013B 23629 </td> <td align="right"> -22.00 </td> <td align="right"> -47 </td> <td align="right"> 240 </td> <td align="right"> -23 </td> <td align="right"> 291 </td> <td align="right">  </td> <td align="right">  </td> <td align="right">  </td> </tr>
+							<tr> <td align="right"> 3 </td> <td> BBB </td> <td> 2013B </td> <td align="right"> 23629 </td> <td> BBB 2013B 23629 </td> <td align="right"> -21.00 </td> <td align="right"> -47 </td> <td align="right"> 240 </td> <td align="right"> -23 </td> <td align="right"> 291 </td> <td align="right">  </td> <td align="right">  </td> <td align="right">  </td> </tr>
+							</table>
+							</div>
+							</br>
+							
 							<p>
 							One of the variables we wanted to use was the average assessment score of the student updated daily.
 							By using the daily sum of assessment scores variable and daily the sum of assessments variable stored in the dataframe we can compute this daily average score.
@@ -695,6 +791,17 @@ fulldf$Avg_score[is.na(fulldf$Avg_score)] <- -1
 fulldf$final_result <- droplevels(fulldf$final_result)
 names(fulldf)[7] <- "asgmts"						
 							</code></pre>
+							
+							<font color="black"><b> fulldf dataframe </b></font>
+							<div style="overflow-x:auto;display: block;	white-space: nowrap;">
+							<table >
+							<tr> <th>  </th> <th> code_module </th> <th> code_presentation </th> <th> id_student </th> <th> identifier </th> <th> date </th> <th> sum_click </th> <th> asgmts </th> <th> csum_asgmts </th> <th> Avg_score </th> <th> final_result </th>  </tr>
+							<tr> <td align="right"> 31138 </td> <td> BBB </td> <td> 2013B </td> <td align="right"> 23629 </td> <td> BBB 2013B 23629 </td> <td align="right"> -23.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td> Fail </td> </tr>
+							<tr> <td align="right"> 31139 </td> <td> BBB </td> <td> 2013B </td> <td align="right"> 23629 </td> <td> BBB 2013B 23629 </td> <td align="right"> -22.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td> Fail </td> </tr>
+							<tr> <td align="right"> 31140 </td> <td> BBB </td> <td> 2013B </td> <td align="right"> 23629 </td> <td> BBB 2013B 23629 </td> <td align="right"> -21.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td> Fail </td> </tr>
+							</table>
+							</div>
+							</br>
 							
 							
 							<p>
