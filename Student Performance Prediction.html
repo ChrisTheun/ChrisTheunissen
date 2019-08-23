@@ -827,12 +827,138 @@ write.csv(x = FFF_Train, "FFF_Train.csv")
 							</br>
 							
 							<p>
-							
 							From now on, Python will be used to transform the datasets into their final format so they can serve as input for the LSTM.
 							The additional transformations required to make the dataset compatible for the traditional machine learning models will also be done in Python.
+							We start by loading in the required packages and the datasets that we just created in R.
 							</p>
-														
+											
+							<pre class="prettyprint lang-py"><code>
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+BBB = pd.read_csv("BBB_Train.csv", index_col = 0)
+DDD = pd.read_csv("DDD_Train.csv", index_col = 0)
+FFF = pd.read_csv("FFF_Train.csv", index_col = 0)							
+							</code></pre>
 							
+							<p>
+							For our models we will be using the cumulative sum of assignments as a variable instead of the amount of assignments completed per day. 
+							Therefore, we drop the "asgmts" column.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>	
+# delete variable presenting the number of assignments made each day as we have the cumulative sum
+BBB = BBB.drop(["asgmts"], axis = 1)
+DDD = DDD.drop(["asgmts"], axis = 1)
+FFF = FFF.drop(["asgmts"], axis = 1)
+							</code></pre>
+							
+							<p>
+							Because the models work better when the variables are on the same scale, we normalize the data so that each value lies between 0 and 1.
+							Otherwise, the discrepancy between the scales in variables could lead to one variable being inaccurately deemed as more important.
+							Therefore, the values for the average assessment score feature are divided by 100 and the values for the cumulative sum of assignments submitted feature are divided by the total number of assignments in the corresponding course presentation.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>	
+# Divide the average score column by 100 (since 100 is the max score)
+BBB["Avg_score"][BBB["csum_asgmts"] != -1] = BBB["Avg_score"][BBB["csum_asgmts"] != -1]/100 
+DDD["Avg_score"][DDD["csum_asgmts"] != -1] = DDD["Avg_score"][DDD["csum_asgmts"] != -1]/100 
+FFF["Avg_score"][FFF["csum_asgmts"] != -1] = FFF["Avg_score"][FFF["csum_asgmts"] != -1]/100 
+
+# Divide the cumulative sum of assignments submitted column by the total number of assignments in the corresponding course presentation
+Courses = ["BBB", "DDD", "FFF"]
+Presentations = ["2013B", "2013J", "2014B", "2014J"]
+
+# Order: 2013B, 2013J, 2014B, 2014J
+total_asgmts_BBB = list(BBB.groupby(by = "code_presentation").csum_asgmts.max())
+total_asgmts_DDD = list(DDD.groupby(by = "code_presentation").csum_asgmts.max())
+total_asgmts_FFF = list(FFF.groupby(by = "code_presentation").csum_asgmts.max())
+
+for i in range(len(Presentations)):
+    BBB["csum_asgmts"][(BBB["code_presentation"]==Presentations[i]) & (BBB["csum_asgmts"] != -1)] = BBB["csum_asgmts"]/total_asgmts_BBB[i]
+    DDD["csum_asgmts"][(DDD["code_presentation"]==Presentations[i]) & (DDD["csum_asgmts"] != -1)] = DDD["csum_asgmts"]/total_asgmts_DDD[i]
+    FFF["csum_asgmts"][(FFF["code_presentation"]==Presentations[i]) & (FFF["csum_asgmts"] != -1)] = FFF["csum_asgmts"]/total_asgmts_FFF[i]							
+							</code></pre>
+							
+							<p>
+							Next, we split the datasets into train and test sets with the three first course periods serving as training set and the final presentation (October 2014) as test set.
+							I chose for this approach instead of a standard random train-test split because it will better reflect the models' performance in a real-life scenario as the model has to be able to handle structural changes in courses.
+							Fortunately, we have two courses (BBB and DDD) that changed over time and a benchmark in course FFF that did not appear to change over time.
+							Therefore, we will be able to assess the capability of the models to deal with structural changes better this way compared to going for a traditional random split.
+							After splitting up the datasets, we sort the rows based on identifier and date and we remove unnecessary variables so that only the code presentation, identifier, date, the final result and the three predictors remain.
+							</p>
+							
+							
+							<pre class="prettyprint lang-python"><code>	
+# Split the datasets in train and test sets (2014J = test set, while 2013B, 2013J and 2014B comprise the training set)
+BBB_Test = BBB[BBB["code_presentation"] == "2014J"]
+DDD_Test = DDD[DDD["code_presentation"] == "2014J"]
+FFF_Test = FFF[FFF["code_presentation"] == "2014J"]
+
+BBB_Train = BBB[BBB["code_presentation"] != "2014J"]
+DDD_Train = DDD[DDD["code_presentation"] != "2014J"]
+FFF_Train = FFF[FFF["code_presentation"] != "2014J"]
+
+# Sort by identifier and date
+BBB_Train = BBB_Train.sort_values(by = ['identifier','date'])
+DDD_Train = DDD_Train.sort_values(by = ['identifier','date'])
+FFF_Train = FFF_Train.sort_values(by = ['identifier','date'])
+
+BBB_Test = BBB_Test.sort_values(by = ['identifier','date'])
+DDD_Test = DDD_Test.sort_values(by = ['identifier','date'])
+FFF_Test = FFF_Test.sort_values(by = ['identifier','date'])
+
+# Make new datasets with only the relevant variables
+BBB_LSTM_Train = BBB_Train.loc[:,["code_presentation","identifier","date","sum_click", "csum_asgmts", "Avg_score", "final_result"]]
+BBB_LSTM_Test = BBB_Test.loc[:,["code_presentation","identifier","date","sum_click", "csum_asgmts", "Avg_score", "final_result"]]
+
+DDD_LSTM_Train = DDD_Train.loc[:,["code_presentation","identifier","date","sum_click", "csum_asgmts", "Avg_score", "final_result"]]
+DDD_LSTM_Test = DDD_Test.loc[:,["code_presentation","identifier","date","sum_click", "csum_asgmts", "Avg_score", "final_result"]]
+
+FFF_LSTM_Train = FFF_Train.loc[:,["code_presentation","identifier","date","sum_click", "csum_asgmts", "Avg_score", "final_result"]]
+FFF_LSTM_Test = FFF_Test.loc[:,["code_presentation","identifier","date","sum_click", "csum_asgmts", "Avg_score", "final_result"]]
+							</code></pre>
+							
+							<p>
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>	
+							</code></pre>
+							
+							<p>
+							</p>
+
+							<pre class="prettyprint lang-python"><code>	
+							</code></pre>
+							
+							<p>
+							</p>
+
+							<pre class="prettyprint lang-python"><code>	
+							</code></pre>
+							
+							<p>
+							</p>
+
+							<pre class="prettyprint lang-python"><code>	
+							</code></pre>
+							
+							<p>
+							</p>
+
+							<pre class="prettyprint lang-python"><code>	
+							</code></pre>
+							
+							<p>
+							</p>
+
+							<pre class="prettyprint lang-python"><code>	
+							</code></pre>
+							
+							<p>
+							</p>							
 							
 						</div>
 					</section>									
