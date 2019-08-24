@@ -844,6 +844,7 @@ FFF = pd.read_csv("FFF_Train.csv", index_col = 0)
 							</code></pre>
 							
 							<p>
+							In order to save space, course BBB will be the main example in the following code blocks. All operations that were executed on course BBB, were also applied to courses DDD and FFF.
 							For our models we will be using the cumulative sum of assignments as a variable instead of the amount of assignments completed per day. 
 							Therefore, we drop the "asgmts" column.
 							</p>
@@ -851,8 +852,6 @@ FFF = pd.read_csv("FFF_Train.csv", index_col = 0)
 							<pre class="prettyprint lang-python"><code>	
 # delete variable presenting the number of assignments made each day as we have the cumulative sum
 BBB = BBB.drop(["asgmts"], axis = 1)
-DDD = DDD.drop(["asgmts"], axis = 1)
-FFF = FFF.drop(["asgmts"], axis = 1)
 							</code></pre>
 							
 							<p>
@@ -864,8 +863,6 @@ FFF = FFF.drop(["asgmts"], axis = 1)
 							<pre class="prettyprint lang-python"><code>	
 # Divide the average score column by 100 (since 100 is the max score)
 BBB["Avg_score"][BBB["csum_asgmts"] != -1] = BBB["Avg_score"][BBB["csum_asgmts"] != -1]/100 
-DDD["Avg_score"][DDD["csum_asgmts"] != -1] = DDD["Avg_score"][DDD["csum_asgmts"] != -1]/100 
-FFF["Avg_score"][FFF["csum_asgmts"] != -1] = FFF["Avg_score"][FFF["csum_asgmts"] != -1]/100 
 
 # Divide the cumulative sum of assignments submitted column by the total number of assignments in the corresponding course presentation
 Courses = ["BBB", "DDD", "FFF"]
@@ -873,13 +870,10 @@ Presentations = ["2013B", "2013J", "2014B", "2014J"]
 
 # Order: 2013B, 2013J, 2014B, 2014J
 total_asgmts_BBB = list(BBB.groupby(by = "code_presentation").csum_asgmts.max())
-total_asgmts_DDD = list(DDD.groupby(by = "code_presentation").csum_asgmts.max())
-total_asgmts_FFF = list(FFF.groupby(by = "code_presentation").csum_asgmts.max())
 
 for i in range(len(Presentations)):
     BBB["csum_asgmts"][(BBB["code_presentation"]==Presentations[i]) & (BBB["csum_asgmts"] != -1)] = BBB["csum_asgmts"]/total_asgmts_BBB[i]
-    DDD["csum_asgmts"][(DDD["code_presentation"]==Presentations[i]) & (DDD["csum_asgmts"] != -1)] = DDD["csum_asgmts"]/total_asgmts_DDD[i]
-    FFF["csum_asgmts"][(FFF["code_presentation"]==Presentations[i]) & (FFF["csum_asgmts"] != -1)] = FFF["csum_asgmts"]/total_asgmts_FFF[i]							
+					
 							</code></pre>
 							
 							<p>
@@ -894,61 +888,142 @@ for i in range(len(Presentations)):
 							<pre class="prettyprint lang-python"><code>	
 # Split the datasets in train and test sets (2014J = test set, while 2013B, 2013J and 2014B comprise the training set)
 BBB_Test = BBB[BBB["code_presentation"] == "2014J"]
-DDD_Test = DDD[DDD["code_presentation"] == "2014J"]
-FFF_Test = FFF[FFF["code_presentation"] == "2014J"]
-
 BBB_Train = BBB[BBB["code_presentation"] != "2014J"]
-DDD_Train = DDD[DDD["code_presentation"] != "2014J"]
-FFF_Train = FFF[FFF["code_presentation"] != "2014J"]
 
 # Sort by identifier and date
 BBB_Train = BBB_Train.sort_values(by = ['identifier','date'])
-DDD_Train = DDD_Train.sort_values(by = ['identifier','date'])
-FFF_Train = FFF_Train.sort_values(by = ['identifier','date'])
-
 BBB_Test = BBB_Test.sort_values(by = ['identifier','date'])
-DDD_Test = DDD_Test.sort_values(by = ['identifier','date'])
-FFF_Test = FFF_Test.sort_values(by = ['identifier','date'])
 
 # Make new datasets with only the relevant variables
 BBB_LSTM_Train = BBB_Train.loc[:,["code_presentation","identifier","date","sum_click", "csum_asgmts", "Avg_score", "final_result"]]
 BBB_LSTM_Test = BBB_Test.loc[:,["code_presentation","identifier","date","sum_click", "csum_asgmts", "Avg_score", "final_result"]]
 
-DDD_LSTM_Train = DDD_Train.loc[:,["code_presentation","identifier","date","sum_click", "csum_asgmts", "Avg_score", "final_result"]]
-DDD_LSTM_Test = DDD_Test.loc[:,["code_presentation","identifier","date","sum_click", "csum_asgmts", "Avg_score", "final_result"]]
+							</code></pre>
+							
+							<font color="black"><b> BBB_LSTM_Train dataframe </b></font>
+							<div style="overflow-x:auto;display: block;	white-space: nowrap;">
+							<table border="1" class="dataframe">
+							<thead>    <tr style="text-align: right;">      <th></th>      <th>code_presentation</th>      <th>identifier</th>      <th>date</th>      <th>sum_click</th>      <th>csum_asgmts</th>      <th>Avg_score</th>      <th>final_result</th>    </tr>  </thead>  <tbody>    <tr>      <th>1</th>      <td>2013B</td>      <td>BBB 2013B 1008675</td>      <td>-23</td>      <td>0</td>      <td>0.0</td>      <td>0.0</td>      <td>Pass</td>    </tr>    <tr>      <th>2</th>      <td>2013B</td>      <td>BBB 2013B 1008675</td>      <td>-22</td>      <td>0</td>      <td>0.0</td>      <td>0.0</td>      <td>Pass</td>    </tr>    <tr>      <th>...</th>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>    </tr>    <tr>      <th>1122968</th>      <td>2014B</td>      <td>BBB 2014B 99799</td>      <td>266</td>      <td>-1</td>      <td>-1.0</td>      <td>-1.0</td>      <td>Pass</td>    </tr>    <tr>      <th>1122969</th>      <td>2014B</td>      <td>BBB 2014B 99799</td>      <td>267</td>      <td>-1</td>      <td>-1.0</td>      <td>-1.0</td>      <td>Pass</td>    </tr>  </tbody>
+							</table>							
+							</div>
+							</br>
+							
+							<p>
+							Because by far most of the values belonging to the "sum_click" variable are zeroes for each course presentation, the distribution of values is greatly skewed to the right.
+							Additionally, the data includes a few outliers of students who clicked thousands of times in the VLE on certain days.
+							Therefore, we do not just rescale the range from 0 to 1, but we also apply a log transformation.
+							The scaler is only fitted to the training data and afterwards applied to the test data.
+							Therefore, it is possible to make predictions on individual students and it is not required to first have a batch of students before it is possible to make predictions.
+							This in contrast to the normalization method in my thesis where I decided to use binning for each seperate course period instead.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>	
+# Import MinMaxScaler from the sci-kit learn package							
+from sklearn.preprocessing import MinMaxScaler
 
-FFF_LSTM_Train = FFF_Train.loc[:,["code_presentation","identifier","date","sum_click", "csum_asgmts", "Avg_score", "final_result"]]
-FFF_LSTM_Test = FFF_Test.loc[:,["code_presentation","identifier","date","sum_click", "csum_asgmts", "Avg_score", "final_result"]]
+# Initialize the scaler with a 0 to 1 feature range							
+scaler = MinMaxScaler(feature_range=(0,1))
+
+# Fit the scaler to the log transformed training data and apply the scaler to both the train and test data
+# Note: +1 is added to every value before the log transformation to avoid "division by 0" errors
+# Note: -1 values are not taken into account because they are simply used for padding
+scaler.fit(np.log((BBB_Train["sum_click"][BBB_Train["sum_click"]!= -1]) + 1).values.reshape(-1,1))
+BBB_LSTM_Train["sum_click"][BBB_LSTM_Train["sum_click"] != -1] = scaler.transform(np.log((BBB_Train["sum_click"][BBB_Train["sum_click"]!= -1]) + 1).values.reshape(-1,1))
+BBB_LSTM_Test["sum_click"][BBB_LSTM_Test["sum_click"] != -1] = scaler.transform(np.log((BBB_Test["sum_click"][BBB_Test["sum_click"]!= -1]) + 1).values.reshape(-1,1))
+							</code></pre>
+							
+							<p>
+							Now all three features are rescaled.
+							Before continuing with the data preparation for the LSTM networks, the dataframes can be exported to .csv files, so that they can be used for the traditional machine learning models.
+							</p>
+
+							<pre class="prettyprint lang-python"><code>	
+BBB_LSTM_Train.to_csv("BBB_Train_df.csv")
+BBB_LSTM_Test.to_csv("BBB_Test_df.csv")
+DDD_LSTM_Train.to_csv("DDD_Train_df.csv")
+DDD_LSTM_Test.to_csv("DDD_Test_df.csv")
+FFF_LSTM_Train.to_csv("FFF_Train_df.csv")
+FFF_LSTM_Test.to_csv("FFF_Test_df.csv")							
+							</code></pre>
+							
+							<p>
+							For the LSTM, we are separating the target variable from the predictors and reducing the amount of rows for the target variable to match the number of students.
+							In other words, we end up with one final result for every student in a certain course presentation.
+							Moreover, we transform the pandas dataframe into a numpy array, because that is the required input format for the LSTM networks.
+							Finally, the target variable is turned into a binary variable with a zero value for the "Fail" label and a one value for the "Pass" label.
+							</p>
+
+							<pre class="prettyprint lang-python"><code>	
+# Make a dataframe with just the student identifier and target variabe (final_result) and drop duplicates							
+BBB_Target_Train = pd.concat((BBB_Train.loc[:,"identifier"],BBB_Train.loc[:,"final_result"]), axis = 1).drop_duplicates()
+BBB_Target_Test = pd.concat((BBB_Test.loc[:,"identifier"],BBB_Test.loc[:,"final_result"]), axis = 1).drop_duplicates()		
+
+# Turn the dataframes into 1D arrays consisting of just the target variables in order
+BBB_Train_Targets_1D = np.array(BBB_Target_Train.iloc[:,-1])
+BBB_Test_Targets_1D = np.array(BBB_Target_Test.iloc[:,-1])
+	
+
+# Relabel the target classes
+BBB_Train_Targets_1D[BBB_Train_Targets_1D == "Fail"] = int(0)
+BBB_Train_Targets_1D[BBB_Train_Targets_1D == "Pass"] = int(1)
+BBB_Train_Targets_1D[BBB_Train_Targets_1D == "Distinction"] = int(1)
+
+BBB_Test_Targets_1D[BBB_Test_Targets_1D == "Fail"] = int(0)
+BBB_Test_Targets_1D[BBB_Test_Targets_1D == "Pass"] = int(1)
+BBB_Test_Targets_1D[BBB_Test_Targets_1D == "Distinction"] = int(1)
+	
+							</code></pre>
+							
+							<p>
+							As mentioned earlier, LSTMs require a three-dimensional input format consisting of samples, sequences and features.
+							In the next codeblock, the 2D pandas dataframe with predictors is transformed into a 3D numpy array.
+							Furthermore, all unnecessary variables are removed from the array. Only the three predictors remain.
+							</p>
+
+							<pre class="prettyprint lang-python"><code>	
+# Create 3D arrays with the dimensions representing [samples, sequences, features] = [students, days, (clicks/asgmts/avg_score)]							
+BBB_LSTM_Train_3D = np.asarray(list(BBB_LSTM_Train.groupby('identifier').apply(pd.DataFrame.as_matrix))) 
+BBB_LSTM_Test_3D = np.asarray(list(BBB_LSTM_Test.groupby('identifier').apply(pd.DataFrame.as_matrix)))
+
+# Remove all unnecessary features, only the clicks, asgmts and avg score are necessary
+BBB_Train_3D = np.delete(BBB_LSTM_Train_3D,[0,1,2,6],axis=2)
+BBB_Test_3D = np.delete(BBB_LSTM_Test_3D,[0,1,2,6],axis=2)					
 							</code></pre>
 							
 							<p>
 							</p>
-							
-							<pre class="prettyprint lang-python"><code>	
-							</code></pre>
-							
-							<p>
-							</p>
 
 							<pre class="prettyprint lang-python"><code>	
-							</code></pre>
-							
-							<p>
-							</p>
+# Take the maximum number of days a student made use of the VLE before the course started
+Precourse_days_BBB = abs(BBB_Train["date"].min())
 
-							<pre class="prettyprint lang-python"><code>	
-							</code></pre>
-							
-							<p>
-							</p>
+# Compute the cut-off dates for the deciles required to separate the course duration in 10 "equal" timesteps at which the models can perform predictions
+cut_off_BBB = int(round((BBB_Train_3D.shape[1] - Precourse_days_BBB)/10))
 
-							<pre class="prettyprint lang-python"><code>	
-							</code></pre>
-							
-							<p>
-							</p>
+# Create the datasets corresponding the each decile for the respective course
+BBB_Train_Decile0 = BBB_Train_3D[:,0:Precourse_days_BBB,:]
+BBB_Train_Decile1 = BBB_Train_3D[:,0:(Precourse_days_BBB+cut_off_BBB),:]
+BBB_Train_Decile2 = BBB_Train_3D[:,0:(Precourse_days_BBB+cut_off_BBB*2),:]
+BBB_Train_Decile3 = BBB_Train_3D[:,0:(Precourse_days_BBB+cut_off_BBB*3),:]
+BBB_Train_Decile4 = BBB_Train_3D[:,0:(Precourse_days_BBB+cut_off_BBB*4),:]
+BBB_Train_Decile5 = BBB_Train_3D[:,0:(Precourse_days_BBB+cut_off_BBB*5),:]
+BBB_Train_Decile6 = BBB_Train_3D[:,0:(Precourse_days_BBB+cut_off_BBB*6),:]
+BBB_Train_Decile7 = BBB_Train_3D[:,0:(Precourse_days_BBB+cut_off_BBB*7),:]
+BBB_Train_Decile8 = BBB_Train_3D[:,0:(Precourse_days_BBB+cut_off_BBB*8),:]
+BBB_Train_Decile9 = BBB_Train_3D[:,0:(Precourse_days_BBB+cut_off_BBB*9),:]
+BBB_Train_Decile10 = BBB_Train_3D
 
-							<pre class="prettyprint lang-python"><code>	
+BBB_Test_Decile0 = BBB_Test_3D[:,0:Precourse_days_BBB,:]
+BBB_Test_Decile1 = BBB_Test_3D[:,0:(Precourse_days_BBB+cut_off_BBB),:]
+BBB_Test_Decile2 = BBB_Test_3D[:,0:(Precourse_days_BBB+cut_off_BBB*2),:]
+BBB_Test_Decile3 = BBB_Test_3D[:,0:(Precourse_days_BBB+cut_off_BBB*3),:]
+BBB_Test_Decile4 = BBB_Test_3D[:,0:(Precourse_days_BBB+cut_off_BBB*4),:]
+BBB_Test_Decile5 = BBB_Test_3D[:,0:(Precourse_days_BBB+cut_off_BBB*5),:]
+BBB_Test_Decile6 = BBB_Test_3D[:,0:(Precourse_days_BBB+cut_off_BBB*6),:]
+BBB_Test_Decile7 = BBB_Test_3D[:,0:(Precourse_days_BBB+cut_off_BBB*7),:]
+BBB_Test_Decile8 = BBB_Test_3D[:,0:(Precourse_days_BBB+cut_off_BBB*8),:]
+BBB_Test_Decile9 = BBB_Test_3D[:,0:(Precourse_days_BBB+cut_off_BBB*9),:]
+BBB_Test_Decile10 = BBB_Test_3D							
 							</code></pre>
 							
 							<p>
