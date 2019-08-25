@@ -991,6 +991,11 @@ BBB_Test_3D = np.delete(BBB_LSTM_Test_3D,[0,1,2,6],axis=2)
 							</code></pre>
 							
 							<p>
+							In order to get a comprehensive idea of the performance of our models, we will let the model make predictions at 11 different points in time during the course.
+							The first prediction being when the course starts, the second prediction after 10% of the course has passed up to the last prediction one day before the final exam.
+							This way we can assess how our models perform at different points in time instead of only having a single prediction for each model to compare.
+							To accomplish this, we cut each course into 10 equal sequences and we make sure that decile 0 covers all the data before the course starts,
+							decile 1 covers all the data up until 10% of the course has passed etcetera. The longest course presentation is used as reference, and the presentations with shorter sequence lengths.
 							</p>
 
 							<pre class="prettyprint lang-python"><code>	
@@ -1027,11 +1032,145 @@ BBB_Test_Decile10 = BBB_Test_3D
 							</code></pre>
 							
 							<p>
+							Finally, we export these dataframes as pickle files, because they are 3D numpy arrays.
 							</p>
 
 							<pre class="prettyprint lang-python"><code>	
+pd.to_pickle(BBB_Train_Decile0, "BBB_Train_Decile0.pkl")
+pd.to_pickle(BBB_Train_Decile1, "BBB_Train_Decile1.pkl")
+pd.to_pickle(BBB_Train_Decile2, "BBB_Train_Decile2.pkl")
+pd.to_pickle(BBB_Train_Decile3, "BBB_Train_Decile3.pkl")
+pd.to_pickle(BBB_Train_Decile4, "BBB_Train_Decile4.pkl")
+pd.to_pickle(BBB_Train_Decile5, "BBB_Train_Decile5.pkl")
+pd.to_pickle(BBB_Train_Decile6, "BBB_Train_Decile6.pkl")
+pd.to_pickle(BBB_Train_Decile7, "BBB_Train_Decile7.pkl")
+pd.to_pickle(BBB_Train_Decile8, "BBB_Train_Decile8.pkl")
+pd.to_pickle(BBB_Train_Decile9, "BBB_Train_Decile9.pkl")
+pd.to_pickle(BBB_Train_Decile10, "BBB_Train_Decile10.pkl")
+
+pd.to_pickle(BBB_Test_Decile0, "BBB_Test_Decile0.pkl")
+pd.to_pickle(BBB_Test_Decile1, "BBB_Test_Decile1.pkl")
+pd.to_pickle(BBB_Test_Decile2, "BBB_Test_Decile2.pkl")
+pd.to_pickle(BBB_Test_Decile3, "BBB_Test_Decile3.pkl")
+pd.to_pickle(BBB_Test_Decile4, "BBB_Test_Decile4.pkl")
+pd.to_pickle(BBB_Test_Decile5, "BBB_Test_Decile5.pkl")
+pd.to_pickle(BBB_Test_Decile6, "BBB_Test_Decile6.pkl")
+pd.to_pickle(BBB_Test_Decile7, "BBB_Test_Decile7.pkl")
+pd.to_pickle(BBB_Test_Decile8, "BBB_Test_Decile8.pkl")
+pd.to_pickle(BBB_Test_Decile9, "BBB_Test_Decile9.pkl")
+pd.to_pickle(BBB_Test_Decile10, "BBB_Test_Decile10.pkl")
+
+pd.to_pickle(BBB_Train_Targets_1D, "BBB_Train_Targets_1D.pkl")
+pd.to_pickle(BBB_Test_Targets_1D, "BBB_Test_Targets_1D.pkl")
 							</code></pre>
 							
+							<p>
+							Now that the data is in the right format for the LSTMs we can move on to transform the data for the traditional machine learning models.
+							Once both are in the right format, it is time to enter the modeling stage.
+							</p>			
+
+
+
+							<pre class="prettyprint lang-python"><code>		
+BBB_Train = pd.read_csv("BBB_Train_df.csv", index_col = 0)
+DDD_Train = pd.read_csv("DDD_Train_df.csv", index_col = 0)
+FFF_Train = pd.read_csv("FFF_Train_df.csv", index_col = 0)
+
+BBB_Test = pd.read_csv("BBB_Test_df.csv", index_col = 0)
+DDD_Test = pd.read_csv("DDD_Test_df.csv", index_col = 0)
+FFF_Test = pd.read_csv("FFF_Test_df.csv", index_col = 0)							
+							</code></pre>
+
+							<p>
+							</p>		
+
+
+							<pre class="prettyprint lang-python"><code>		
+BBB_Train_pt = (BBB_Train.pivot_table(index=['code_presentation', 'identifier', 'final_result'], columns='date', values=['sum_click', 'csum_asgmts', 'Avg_score']).reset_index())
+BBB_Test_pt = (BBB_Test.pivot_table(index=['code_presentation', 'identifier', 'final_result'], columns='date', values=['sum_click', 'csum_asgmts', 'Avg_score']).reset_index())
+
+BBB_Train_pt.columns = BBB_Train_pt.columns.map('{0[0]}|{0[1]}'.format)
+BBB_Train_pt.rename(columns={'code_presentation|':'code_presentation', 'identifier|':'identifier', 'final_result|':'final_result'}, inplace=True)
+BBB_Test_pt.columns = BBB_Test_pt.columns.map('{0[0]}|{0[1]}'.format)
+BBB_Test_pt.rename(columns={'code_presentation|':'code_presentation', 'identifier|':'identifier', 'final_result|':'final_result'}, inplace=True)
+							</code></pre>
+
+							<p>
+							</p>
+
+
+							<pre class="prettyprint lang-python"><code>	
+# Take the maximum number of days a student made use of the VLE before the course started
+Precourse_days_BBB = abs(BBB_Train["date"].min())
+
+# Compute the cut-off dates for the deciles required to separate the course duration in 10 "equal" timesteps at which the models can perform predictions
+days_BBB = (BBB_Train_pt.shape[1]-3)/3
+cut_off_BBB = int(round((days_BBB - Precourse_days_BBB)/10))
+
+
+# Create the datasets corresponding the each decile for the respective course			
+BBB_Train_Dec0 = BBB_Train_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+3), (days_BBB+3):(Precourse_days_BBB + days_BBB + 3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+3)]]
+BBB_Train_Dec1 = BBB_Train_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*1+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*1+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*1+3)]]
+BBB_Train_Dec2 = BBB_Train_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*2+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*2+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*2+3)]]
+BBB_Train_Dec3 = BBB_Train_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*3+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*3+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*3+3)]]
+BBB_Train_Dec4 = BBB_Train_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*4+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*4+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*4+3)]]
+BBB_Train_Dec5 = BBB_Train_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*5+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*5+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*5+3)]]
+BBB_Train_Dec6 = BBB_Train_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*6+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*6+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*6+3)]]
+BBB_Train_Dec7 = BBB_Train_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*7+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*7+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*7+3)]]
+BBB_Train_Dec8 = BBB_Train_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*8+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*8+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*8+3)]]
+BBB_Train_Dec9 = BBB_Train_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*9+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*9+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*9+3)]]
+BBB_Train_Dec10 = BBB_Train_pt
+
+BBB_Test_Dec0 = BBB_Test_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+3), (days_BBB+3):(Precourse_days_BBB + days_BBB + 3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+3)]]
+BBB_Test_Dec1 = BBB_Test_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*1+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*1+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*1+3)]]
+BBB_Test_Dec2 = BBB_Test_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*2+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*2+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*2+3)]]
+BBB_Test_Dec3 = BBB_Test_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*3+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*3+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*3+3)]]
+BBB_Test_Dec4 = BBB_Test_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*4+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*4+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*4+3)]]
+BBB_Test_Dec5 = BBB_Test_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*5+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*5+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*5+3)]]
+BBB_Test_Dec6 = BBB_Test_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*6+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*6+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*6+3)]]
+BBB_Test_Dec7 = BBB_Test_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*7+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*7+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*7+3)]]
+BBB_Test_Dec8 = BBB_Test_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*8+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*8+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*8+3)]]
+BBB_Test_Dec9 = BBB_Test_pt.iloc[:,np.r_[0:3,3:(Precourse_days_BBB+cut_off_BBB*9+3), (days_BBB+3):(Precourse_days_BBB+days_BBB+cut_off_BBB*9+3), (days_BBB*2+3):(Precourse_days_BBB + days_BBB*2+cut_off_BBB*9+3)]]
+BBB_Test_Dec10 = BBB_Test_pt				
+							</code></pre>
+
+							<p>
+							</p>
+
+
+							<pre class="prettyprint lang-python"><code>		
+pd.to_pickle(BBB_Train_Dec0, "BBB_Train_Dec0_ML.pkl")
+pd.to_pickle(BBB_Train_Dec1, "BBB_Train_Dec1_ML.pkl")
+pd.to_pickle(BBB_Train_Dec2, "BBB_Train_Dec2_ML.pkl")
+pd.to_pickle(BBB_Train_Dec3, "BBB_Train_Dec3_ML.pkl")
+pd.to_pickle(BBB_Train_Dec4, "BBB_Train_Dec4_ML.pkl")
+pd.to_pickle(BBB_Train_Dec5, "BBB_Train_Dec5_ML.pkl")
+pd.to_pickle(BBB_Train_Dec6, "BBB_Train_Dec6_ML.pkl")
+pd.to_pickle(BBB_Train_Dec7, "BBB_Train_Dec7_ML.pkl")
+pd.to_pickle(BBB_Train_Dec8, "BBB_Train_Dec8_ML.pkl")
+pd.to_pickle(BBB_Train_Dec9, "BBB_Train_Dec9_ML.pkl")
+pd.to_pickle(BBB_Train_Dec10, "BBB_Train_Dec10_ML.pkl")
+
+pd.to_pickle(BBB_Test_Dec0, "BBB_Test_Dec0_ML.pkl")
+pd.to_pickle(BBB_Test_Dec1, "BBB_Test_Dec1_ML.pkl")
+pd.to_pickle(BBB_Test_Dec2, "BBB_Test_Dec2_ML.pkl")
+pd.to_pickle(BBB_Test_Dec3, "BBB_Test_Dec3_ML.pkl")
+pd.to_pickle(BBB_Test_Dec4, "BBB_Test_Dec4_ML.pkl")
+pd.to_pickle(BBB_Test_Dec5, "BBB_Test_Dec5_ML.pkl")
+pd.to_pickle(BBB_Test_Dec6, "BBB_Test_Dec6_ML.pkl")
+pd.to_pickle(BBB_Test_Dec7, "BBB_Test_Dec7_ML.pkl")
+pd.to_pickle(BBB_Test_Dec8, "BBB_Test_Dec8_ML.pkl")
+pd.to_pickle(BBB_Test_Dec9, "BBB_Test_Dec9_ML.pkl")
+pd.to_pickle(BBB_Test_Dec10, "BBB_Test_Dec10_ML.pkl")							
+							</code></pre>
+
+							<p>
+							</p>
+
+
+							<pre class="prettyprint lang-python"><code>		
+							</code></pre>
+
 							<p>
 							</p>							
 							
