@@ -1097,7 +1097,7 @@ BBB_Test["final_result"][BBB_Test["final_result"] == "Fail"] = 0
 							<p>
 							The traditional machine learning models require a 2D data input format, not taking into account that each feature is essentially a dimension as well.
 							The way in which we accomplish this without losing any granularity in the data is by including the time sequence in the features dimension.
-							For this purpose, we first transform the dataframe into a pivot, which we then reformat into a 2D dataframe in which the date and feature dimensions are merged as shown in the table below.
+							For this purpose, we first transform the dataframe into a pivot table, which we then reformat into a 2D dataframe in which the date and feature dimensions are merged as shown in the table below.
 							</p>		
 
 
@@ -1118,6 +1118,9 @@ BBB_Test_pt.rename(columns={'code_presentation|':'code_presentation', 'identifie
 							</br>
 
 							<p>
+							Just like for the LSTM data format, it is necessary to split the data into deciles, so that it is possible to assess predictions at different points in time.
+							The time sequence is split into 10 equal parts by subtracting the maximum number of days a student spends in the course by the maximum number of days a student accesses the VLE before the course starts, which is subsequently rounded and divided by 10.
+							Since the time dimension is intertwined with the features dimension, special care needs to be taken to make sure that the time sequence for each decile's dataset is lined up accurately for each of the three variables.
 							</p>
 
 
