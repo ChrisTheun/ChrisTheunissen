@@ -1032,7 +1032,7 @@ BBB_Test_Decile10 = BBB_Test_3D
 							</code></pre>
 							
 							<p>
-							Finally, we export these dataframes as pickle files, because they are 3D numpy arrays.
+							Finally, we export these dataframes as pickle files, so that we can easily use these 3D arrays as input for the LSTMs.
 							</p>
 
 							<pre class="prettyprint lang-python"><code>	
@@ -1160,6 +1160,7 @@ BBB_Test_Dec10 = BBB_Test_pt
 							</code></pre>
 
 							<p>
+							Finally, the arrays for each decile are exported to pickle files ready to be used as input for the traditional machine learning models.
 							</p>
 
 
@@ -1190,14 +1191,9 @@ pd.to_pickle(BBB_Test_Dec10, "BBB_Test_Dec10_ML.pkl")
 							</code></pre>
 
 							<p>
-							</p>
-
-
-							<pre class="prettyprint lang-python"><code>		
-							</code></pre>
-
-							<p>
-							</p>							
+							This concludes the data preparation section. Now that the data is in the right format, it can be used as input for our models.
+							The upcoming section will cover the modeling phase.
+							</p>				
 							
 						</div>
 					</section>									
@@ -1213,7 +1209,16 @@ pd.to_pickle(BBB_Test_Dec10, "BBB_Test_Dec10_ML.pkl")
 
 							<img src="images/pic08small.jpg" alt="" />
 
-							<p>This is the modeling phase.</p>
+							<p>
+							In this phase, the goal is to develop models that are able to predict whether students pass or fail a course in an accurate manner.
+							Additionally, we try to assess which model performs the best and why.
+							A distinction is made between the traditional machine learning models that do not explicitly model the time dimension of the data and LSTMs, which do in fact take into account the sequential nature of the input data.
+							
+							In order to understand how LSTMs take into account the time dimension, it is necessary to first look at how Recurrent Neural Networks (RNNs), a more basic version of the LSTM, processes data to make predictions.
+							
+							</p>
+							
+							<img src="images/Project1/RNN2.png">
 
 						</div>
 					</section>					
