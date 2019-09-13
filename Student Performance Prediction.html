@@ -1224,7 +1224,7 @@ pd.to_pickle(BBB_Test_Dec10, "BBB_Test_Dec10_ML.pkl")
 							This weighted sum is then usually passed through a sigmoid or hyperbolic tangent function which squashed the values to be between either 0 and 1 or between -1 and 1, because values in this space are more appropriate for the backpropagation process.
 							Intuitively, every timestep the hidden state of the model is updated with the new relevant information of the current timestep.
 							The weight matrices are there to determine which pieces of the data are actually relevant for the prediction and they are tuned during backpropagation.
-							At the final timestep, the model's final weighted hidden state is passed through a sigmoid function to determine the probability of the student passing or failing the course, resulting in the output h<sub>t</sub>
+							At the final timestep, the model's final weighted hidden state is passed through a sigmoid function to determine the probability of the student passing or failing the course, resulting in the output h<sub>t</sub>. 
 							In our case, the input at the first day of the course (X<sub>0</sub>) would be a vector consisting of three elements, namely the student's clicks on that day, the number of assignments the student submitted up to that day and the student's average assignment score on that day.
 							Such a vector will be fed into the model for each subsequent day in the course to ultimately make the prediction on whether a student passes or fails.
 							Because the architecture explicitly models the data in a sequential manner and updates the hidden state every timestep, RNNs can be thought of having memory.
