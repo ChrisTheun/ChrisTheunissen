@@ -1215,7 +1215,18 @@ pd.to_pickle(BBB_Test_Dec10, "BBB_Test_Dec10_ML.pkl")
 							A distinction is made between the traditional machine learning models that do not explicitly model the time dimension of the data and LSTMs, which do in fact take into account the sequential nature of the input data.
 							
 							In order to understand how LSTMs take into account the time dimension, it is necessary to first look at how Recurrent Neural Networks (RNNs), a more basic version of the LSTM, processes data to make predictions.
+							</p>
 							
+							<p>
+							The picture below shows the basic architecture of an RNN. Every RNN cell (denoted by A) corresponds to the data input at a certain timestep (Xt).
+							In other words, the entire sequence of timesteps is modeled as a chain of RNN cells and each timestep new information for that corresponding day is added to the model and combined with the previous hidden state of the model.
+							The hidden state at a certain timestep is nothing more than a function of the hidden state of the previous time step multiplied by a weight matrix and the input of that same timestep multiplied by its own weight matrix.
+							This weighted sum is then usually passed through a sigmoid or hyperbolic tangent function which squashed the values to be between either 0 and 1 or between -1 and 1, because values in this space are more appropriate for the backpropagation process.
+							Intuitively, every timestep the hidden state of the model is updated with the new relevant information of the current timestep.
+							The weight matrices are there to determine which pieces of the data are actually relevant for the prediction and they are tuned during backpropagation.
+							Because the architecture explicitly models the data in a sequential manner and updates the hidden state every timestep, RNNs can be thought of having memory.
+							However, in practice RNNs often have trouble modeling long sequences of events, as the events later in the sequence disproportionately overshadow the events that happened early in the sequence because of a phenomenon called vanishing gradient descent.
+							This issue is addressed by the introduction of a few critical changes to the architecture of the RNN cells, which led to the establishment of the LSTM cells.
 							</p>
 							
 							<img src="images/Project1/RNN2.png">
