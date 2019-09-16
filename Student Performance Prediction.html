@@ -1215,6 +1215,7 @@ pd.to_pickle(BBB_Test_Dec10, "BBB_Test_Dec10_ML.pkl")
 							A distinction is made between the traditional machine learning models that do not explicitly model the time dimension of the data and LSTMs, which do in fact take into account the sequential nature of the input data.
 							
 							In order to understand how LSTMs take into account the time dimension, it is necessary to first look at how Recurrent Neural Networks (RNNs), a more basic version of the LSTM, processes data to make predictions.
+							The two figures used to illustrate the difference between RNNs and LSTMs are adapted from <a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs" target="_blank">Christopher Olah's blog post on LSTMs </a>, which provides an excellent explanation on the inner workings of LSTMs.
 							</p>
 							
 							<p>
@@ -1229,12 +1230,23 @@ pd.to_pickle(BBB_Test_Dec10, "BBB_Test_Dec10_ML.pkl")
 							Such a vector will be fed into the model for each subsequent day in the course to ultimately make the prediction on whether a student passes or fails.
 							Because the architecture explicitly models the data in a sequential manner and updates the hidden state every timestep, RNNs can be thought of having memory.
 							However, in practice RNNs often have trouble modeling long sequences of events, as the events later in the sequence disproportionately overshadow the events that happened early in the sequence because of a phenomenon called vanishing gradient descent.
-							This issue is addressed by the introduction of a few critical changes to the architecture of the RNN cells, which led to the establishment of the LSTM cells.
+							In 1997, <a href="https://www.researchgate.net/publication/13853244_Long_Short-term_Memory" target="_blank"> Hochreiter and Schmidhuber introduced of a few critical changes to the architecture of the RNN cells to address this issue, which led to the establishment of the LSTM cells. </a>
 							</p>
 							
 							<img src="images/Project1/RNN2.png">
 							
 							</br>
+							
+							The figure below shows that the LSTM adopts the sequential architecture of the RNN, but builds on the inner workings of the RNN cells by adding memory cells and gate units.
+							One of the major additions to the LSTM cell was the cell state (c<sub>t</sub>), which essentially resembles the long term memory of the model and solves the problem of vanishing gradient descent by adding a cell state that is designed to be relatively stable over time, as its state is protected by the forget and input gates.
+							This cell state is signified by the upper horizontal line running through all the LSTM cells.
+							These forget and input gates are both sigmoid neural net layers combined with pointwise multiplication operation.
+							These sigmoid layers can take on values between zero and one. The forget gate regulates if their is non-relevant information in the cell state that should be forgotten.
+							If the sigmoid layer of the forget gate takes on a value of zero, that means that all of the information currently in the cell state should be forgotten, while a value of one would indicate that all information in the cell state should be kept.
+							Next, the input gate determines which information in the cell state is going to be updated. The new candidate cell state (č<sub>t</sub>) is produced by the tanh layer depicted in the figure and is a hyperbolic tangent function of the input vector (X<sub>t</sub>), the hidden state of the previous LSTM cell (a<sub>t-1</sub>), and their corresponding weight matrices.
+							This candidate cell state replaces the original cell state if deemed necessary. Just like in RNNs, the hidden state of the network (a<sub>t</sub>) represents the essence of what the model has learned up to time t.
+							In our case, the LSTM only makes a prediction after all the data passed through the model instead of at each timestep. This prediction is based on the final hidden state of the model (a<sub>T</sub>) which is a function of the hidden state and cell state of the penultimate timestep as well as the input at the final timestep.
+							More detailed information on the functioning of the LSTM can be found in <a href="https://www.researchgate.net/publication/13853244_Long_Short-term_Memory" target="_blank"> Hochreiter and Schmidhuber's influential paper </a> or <a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs" target="_blank">Christopher Olah's blog post </a> for a more accessible reading.
 							
 							<img src="images/Project1/LSTM4.png" width = "1014", heigth = "359.25">
 
