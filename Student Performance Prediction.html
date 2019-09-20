@@ -1278,6 +1278,17 @@ pd.to_pickle(BBB_Test_Dec10, "BBB_Test_Dec10_ML.pkl")
 							Second, the same process is depicted for each of the traditional classifiers by means of the scikit-learn package.
 							</p>
 							
+							<p>
+							The Keras package provides a user-friendly neural network library that in our case runs on top of Tensorflow.
+							The Hyperas package is created by Max Pumperla, a deep learning engineer at Skymind and provides a simple wrapper for hyperparameter optimization using Keras.
+							Neural networks can contain hundreds of different parameters the user can tune, such as the amount of layers, the number of hidden units, the learning rate and the activation function.
+							In order to find the best performing combination of parameters, one can test the model performance of different combinations and assess which one performs the best.
+							This wrapper automizes that process to a large extent so that the user does not have to manually train and test the same model multiple times with different sets of parameters.
+							Unfortunately, my computing power is limited, restraining my ability to do a vast grid search over a wide variety of parameter combinations.
+							Hopefully, future upgrades in terms of computing power will allow me to explore more options when it comes to hyperparameter tuning.
+							Before we develop the actual LSTM network, we first import the necessary packages and modules.
+							</p>
+							
 							<pre class="prettyprint lang-python"><code>	
 from __future__ import print_function
 import numpy as np
@@ -1298,6 +1309,10 @@ from hyperas import optim
 from hyperas.distributions import choice, uniform
 np.random.seed(7)
 							</code></pre>		
+							
+							<p>
+							
+							</p>
 
 							<pre class="prettyprint lang-python"><code>
 def data():
