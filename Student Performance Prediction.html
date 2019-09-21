@@ -1311,6 +1311,18 @@ np.random.seed(7)
 							</code></pre>		
 							
 							<p>
+							In order to make the Hyperas package function appropriately, every LSTM model for each decile in each course are located in separate files.
+							The following code blocks show how the models are created, trained and tested by using decile 10 (the full dataset) of course BBB as input data.
+							First, the data is defined. The pickle files of the 3D array with features and the 1D array of target labels for both the train and test set are loaded in.
+							The test data is only used at the end to assess the performance of the model. In order to test which combination of parameters works the best, a separate validation set is created which is comprised of a random 20% of the training data.
+							Second, the LSTM model is defined. In line with common practice we use a LSTM with one hidden layer, 16 hidden units and a hyperbolic tangent activation function.
+							The differing sequence lengths are accounted for with a masking layer which masks values of '-1'. After the LSTM layer, a drop-out rate of 50% is introduced in order to avoid overfitting.
+							The final output layer is equipped with a sigmoid activation function to determine the probability of the student passing the course.
+							When it comes to compiling the model, an adam optimizer is used with a binary cross entropy loss function.
+							The learning rate of the model is determined by hyperparameter optimization.
+							The learning rate is incrementally reduced once the validation loss stagnates for 5 training epochs in an attempt to minimize the loss function with more precision.
+							The model is fitted with batch sizes of 32 and a number of epochs determined by the Hyperas wrapper.
+							If more computing power would be available, the hyperparameter grids could be more extensive, possible allowing for more accurate results.
 							
 							</p>
 
