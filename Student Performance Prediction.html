@@ -1323,6 +1323,10 @@ np.random.seed(7)
 							The learning rate is incrementally reduced once the validation loss stagnates for 5 training epochs in an attempt to minimize the loss function with more precision.
 							The model is fitted with batch sizes of 32 and a number of epochs determined by the Hyperas wrapper.
 							If more computing power would be available, the hyperparameter grids could be more extensive, possible allowing for more accurate results.
+							The final step is to run the optimalization. 
+							Out of all runs the best model is selected through a tree-structured Parzen estimator, which is an algorithm that selects the most promising hyperparameters yielding the best performance.
+							At most 10 evaluation runs are used for the optimization process, but this could easily be extended with more computing power.
+							The evaluation metrics and prediction results will be discussed in the Results section.
 							
 							</p>
 
@@ -1390,26 +1394,194 @@ if __name__ == '__main__':
 							</code></pre>							
 							
 							
-							<pre class="prettyprint lang-python"><code>								
+							<pre class="prettyprint lang-python"><code>	
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+criteria = ["gini", "entropy"]
+max_depth = [None,10, 50, 100, 1000]
+min_samples_split = [2, 5, 10]
+min_samples_leaf = [1, 2, 5]
+param_grid = {'criterion': criteria, 'max_depth':max_depth, 'min_samples_split':min_samples_split, 'min_samples_leaf':min_samples_leaf}
+DT_tuned = GridSearchCV(DecisionTreeClassifier(), param_grid, cv=5, verbose = 2)
+
+X_train = BBB_Train_Dec10.drop(["code_presentation","identifier","final_result"],axis=1)
+y_train = BBB_Train_Dec10["final_result"]
+X_test = BBB_Test_Dec10.drop(["code_presentation","identifier","final_result"],axis=1)
+y_test = BBB_Test_Dec10["final_result"]
+
+DT_tuned.fit(X_train, y_train)
+print(DT_tuned.best_params_)
+
+best_tuned = DT_tuned.best_estimator_
+best_tuned.fit(X_train, y_train)
+predictions = best_tuned.predict(X_test)
+
+print(confusion_matrix(y_test,predictions))
+print(classification_report(y_test,predictions))
+print(accuracy_score(y_test, predictions))							
 							</code></pre>	
 
 
-							<pre class="prettyprint lang-python"><code>								
+							<pre class="prettyprint lang-python"><code>
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+Cs = [0.001,0.01,0.1,1,10,100]
+penalties = ['l1', 'l2']
+param_grid = {'C':Cs,'penalty': penalties}
+LogReg_tuned = GridSearchCV(LogisticRegression(), param_grid, cv=5, verbose = 2)
+
+X_train = BBB_Train_Dec10.drop(["code_presentation","identifier","final_result"],axis=1)
+y_train = BBB_Train_Dec10["final_result"]
+X_test = BBB_Test_Dec10.drop(["code_presentation","identifier","final_result"],axis=1)
+y_test = BBB_Test_Dec10["final_result"]
+
+LogReg_tuned.fit(X_train, y_train)
+print(LogReg_tuned.best_params_)
+
+best_tuned = LogReg_tuned.best_estimator_
+best_tuned.fit(X_train, y_train)
+predictions = best_tuned.predict(X_test)
+
+print(confusion_matrix(y_test,predictions))
+print(classification_report(y_test,predictions))
+print(accuracy_score(y_test, predictions))							
 							</code></pre>	
 
 
-							<pre class="prettyprint lang-python"><code>								
+							<pre class="prettyprint lang-python"><code>
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# Number of trees in random forest
+n_estimators = [10,100,1000, 2000]
+# Maximum number of features
+max_features = ["auto","sqrt"]
+# Maximum number of levels in tree
+max_depth = [10, 50, 100]
+max_depth.append(None)
+# Minimum number of samples required to split a node
+min_samples_split = [2, 5, 10]
+# Minimum number of samples required at each leaf node
+min_samples_leaf = [1, 2, 4]
+# Bootstrap [Yes/No]
+bootstrap =[True,False]
+
+# Create the random grid
+random_grid = {'n_estimators': n_estimators,
+               'max_features': max_features,
+               'max_depth': max_depth,
+               'min_samples_split': min_samples_split,
+               'min_samples_leaf': min_samples_leaf,
+               'bootstrap':bootstrap}
+rf = RandomForestRegressor()	
+rf_random = RandomizedSearchCV(estimator = rf, param_distributions = random_grid, n_iter = 25, cv = 5, verbose=2, random_state=7, n_jobs=1)
+
+X_train = BBB_Train_Dec10.drop(["code_presentation","identifier","final_result"],axis=1)
+y_train = pd.get_dummies(BBB_Train_Dec10["final_result"])
+X_test = BBB_Test_Dec10.drop(["code_presentation","identifier","final_result"],axis=1)
+y_test = np.asarray(pd.get_dummies(BBB_Test_Dec10["final_result"]), dtype = "int")[:,0]
+
+rf_random.fit(X_train, y_train)
+rf_random.best_params_
+
+best_random = rf_random.best_estimator_
+best_random.fit(X_train, y_train)
+predictions = best_random.predict(X_test)
+predictions = np.round(predictions)[:,0]
+
+
+print(classification_report(y_test,predictions))
+print(accuracy_score(y_test, predictions))
+print(confusion_matrix(y_test, predictions))						
 							</code></pre>	
 
-							<pre class="prettyprint lang-python"><code>								
+							<pre class="prettyprint lang-python"><code>		
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV
+from sklearn import svm
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+kernels = ["linear", "rbf"]
+Cs = [0.001, 0.01, 0.1, 1, 10]
+gammas = [0.001, 0.01, 0.1, 1, 'auto']
+param_grid = {'kernel':kernels,'C': Cs, 'gamma' : gammas}
+svm_tuned = GridSearchCV(svm.SVC(), param_grid, cv=5, verbose = 2)
+
+X_train = BBB_Train_Dec10.drop(["code_presentation","identifier","final_result"],axis=1)
+y_train = BBB_Train_Dec10["final_result"]
+X_test = BBB_Test_Dec10.drop(["code_presentation","identifier","final_result"],axis=1)
+y_test = BBB_Test_Dec10["final_result"]
+
+svm_tuned.fit(X_train, y_train)
+print(svm_tuned.best_params_)
+
+best_tuned = svm_tuned.best_estimator_
+best_tuned.fit(X_train, y_train)
+predictions = best_tuned.predict(X_test)
+
+print(confusion_matrix(y_test,predictions))
+print(classification_report(y_test,predictions))
+print(accuracy_score(y_test, predictions))
+
+
+							
 							</code></pre>	
 
 
-							<pre class="prettyprint lang-python"><code>								
+							<pre class="prettyprint lang-python"><code>
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+X_train = BBB_Train_Dec10.drop(["code_presentation","identifier","final_result"],axis=1)
+y_train = BBB_Train_Dec10["final_result"]
+X_test = BBB_Test_Dec10.drop(["code_presentation","identifier","final_result"],axis=1)
+y_test = BBB_Test_Dec10["final_result"]
+
+base_model = GaussianNB()
+base_model.fit(X_train, y_train)
+
+predictions = base_model.predict(X_test)
+
+print(classification_report(y_test,predictions))
+print(accuracy_score(y_test, predictions))
+print(confusion_matrix(y_test, predictions))							
 							</code></pre>	
 
 
-							<pre class="prettyprint lang-python"><code>								
+							<pre class="prettyprint lang-python"><code>
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+hidden_layer_sizes = [(50,),(100,),(200,),(50,50), (100,100), (200,200)]
+activation = ["logistic", "tanh", "relu"]
+alpha = [0.00001, 0.0001, 0.001]
+learning_rate = ["constant", "adaptive"]
+early_stopping = [True, False]
+param_grid = {'hidden_layer_sizes':hidden_layer_sizes,'activation': activation, 'alpha': alpha, 'learning_rate': learning_rate,
+             'early_stopping': early_stopping}
+MLP_tuned = GridSearchCV(MLPClassifier(random_state = 7), param_grid, cv=5, verbose = 2)
+
+X_train = BBB_Train_Dec10.drop(["code_presentation","identifier","final_result"],axis=1)
+y_train = BBB_Train_Dec10["final_result"]
+X_test = BBB_Test_Dec10.drop(["code_presentation","identifier","final_result"],axis=1)
+y_test = BBB_Test_Dec10["final_result"]
+
+MLP_tuned.fit(X_train, y_train)
+print(MLP_tuned.best_params_)
+
+best_tuned = MLP_tuned.best_estimator_
+best_tuned.fit(X_train, y_train)
+predictions = best_tuned.predict(X_test)
+
+print(confusion_matrix(y_test,predictions))
+print(classification_report(y_test,predictions))
+print(accuracy_score(y_test, predictions))						
 							</code></pre>	
 
 
