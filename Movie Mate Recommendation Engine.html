@@ -92,6 +92,13 @@
 							Consequently, I started to wonder whether it would be possible to design an algorithm to easily find the users that have a movie taste most similar to yours based on their movie ratings.
 							</p>
 							
+							<p>
+							I already have some knowledge on collaborative filtering algorithms, but I aim to develop an understanding of the situation from the ground up.
+							Therefore, I drafted a simple table that includes the ratings four hypothetical users of a movie community platform gave to five random movies.
+							I use this table shown below to gain some intuition on how to compare and quantify user's taste.
+							The ratings that users give to these movies can range from 1 to 5.
+							</p>
+							
 
 							<table>
 								<tr>
@@ -135,7 +142,27 @@
 									<td>3</td>
 								</tr>								
 							</table>
-									
+							
+							<p>
+							In order to be able to compare the taste of these users, it is necessary to either look at only the movies that both users have rated and compare those ratings or to make a taste profile for each user by using the genre and features of the specific movies.
+							In this simple example, I did not come up with a list of features for these films and in a lot of real life cases information like this is not readily available. Therefore, I decided to stick to the first method for the time being.
+							I purposefully made the ratings of user 1 and user 2 for the movies that they both rated identical, whereas user 3's ratings are directly the opposite.
+							This means that the formula I come up with, needs to illustrate that the movie taste of user 1 and 2 is 100% similar, while the taste of user 1 and 3 is 0% similar.
+							</p>
+							
+							<p>
+							One approach to compute taste similarity that satisfies these conditions is by using the absolute difference of the ratings between the two users being compared and the sheer number of movies both users rated.
+							For example, if we compare user 1 and 2 it becomes apparent that there are 4 movies that the users both rated. Because user 2 did not rate the film Drive, this movie is not taken into account.
+							Subsequently, the absolute difference between the ratings of user 1 and 2 equals 0. User 1 and 3 have 3 movies in common (Harry Potter 1, Pulp Fiction and Love Actually), but the absolute difference between their ratings is much higher namely 12 (4 + 4 + 4).
+							With these two variables we can create a formula that computes the users' average movie taste similarity per movie they both rated. In order to get a convenient percentage based score, the absolute rating difference can be divided by 4, which is the maximum rating difference, while being divided by the number of movies in common and subtracted by 1 afterwards.
+							Formally, this would look like:
+							</p>
+							
+							<p>
+							
+							$$ Sim_{Ui,Uj} = {1 - {\Sigma_{k=1}^n |Rating_{Ui,Mk} - Rating_{UjMk}|\ / c \over |A|}} $$
+							
+							</p>
 
 						</div>
 					</section>			
@@ -229,6 +256,8 @@
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
 			<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+			<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+			<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 	</body>
 </html>
