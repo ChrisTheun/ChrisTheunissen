@@ -86,8 +86,9 @@
 
 							<p>
 							As a movie fan, I am always looking for new films that will tickle my fancy.
-							One good way to do so is by connecting with fellow film buffs on movie-related social networking sites such as Letterboxd or the Dutch website MovieMeter.nl.
-							These sites allow you to follow others and see which movies they watch and what they think of them.
+							I have used a lot of movie recommendation systems in the past, but these type of systems tend to recommend me movies that I was already aware of instead of the real hidden gems.
+							Judging from my experience, one good way to do find these hidden gems is by connecting with fellow film buffs on movie-related social networking sites such as Letterboxd or the Dutch website MovieMeter.nl.
+							These sites allow you to get in touch with other movie lovers and see which movies they watch and what they think of them.
 							Due to the sheer amount of users these sites have it can get fairly difficult to find the ones with a similar taste to your own.
 							Consequently, I started to wonder whether it would be possible to design an algorithm to easily find the users that have a movie taste most similar to yours based on their movie ratings.
 							</p>
@@ -151,17 +152,54 @@
 							</p>
 							
 							<p>
-							One approach to compute taste similarity that satisfies these conditions is by using the absolute difference of the ratings between the two users being compared and the sheer number of movies both users rated.
+							One approach to compute taste similarity that satisfies these conditions is by using the absolute difference of the ratings between the two users being compared as well as the number of movies both users rated.
 							For example, if we compare user 1 and 2 it becomes apparent that there are 4 movies that the users both rated. Because user 2 did not rate the film Drive, this movie is not taken into account.
-							Subsequently, the absolute difference between the ratings of user 1 and 2 equals 0. User 1 and 3 have 3 movies in common (Harry Potter 1, Pulp Fiction and Love Actually), but the absolute difference between their ratings is much higher namely 12 (4 + 4 + 4).
-							With these two variables we can create a formula that computes the users' average movie taste similarity per movie they both rated. In order to get a convenient percentage based score, the absolute rating difference can be divided by 4, which is the maximum rating difference, while being divided by the number of movies in common and subtracted by 1 afterwards.
-							Formally, this would look like:
+							Furthermore, the absolute difference between the ratings of user 1 and 2 equals 0. User 1 and 3 have 3 movies in common (Harry Potter 1, Pulp Fiction and Love Actually), but the absolute difference between their ratings is much higher namely 12 (4 + 4 + 4).
+							With these two variables we can create a formula that computes the users' average movie taste similarity per movie they both rated. In order to get a convenient probability based score, the absolute rating difference can be divided by 4, which is the maximum rating difference, while being divided by the number of movies in common and subtracted by 1 afterwards.
+							Formally, this taste similarity between user <i>i and user </i>j would look like:
+							</p>
+							
+							<p>
+							$$ Sim_{i,j} = 1 - \frac{\sum_{k \in A} |Rating_{i,k}-Rating_{j,k}|}{c|A|} $$
+							</p>
+							
+							<p>
+							where set <i>A</i> is the intersection between <i>M<sub>i</sub></i> and <i>M<sub>j</sub></i>, which are the sets of movies that both user <i>i</i> and user <i>j</i> respectively have rated, so that the count of movies rated by both users <i>|A| ≡ |M<sub>i</sub> ∩ M<sub>j</sub>|</i>.
+							For example, when comparing user 1 and 2,  <i>A = {Harry Potter 1, Harry Potter 2, Pulp Fiction, Love Actually}</i> because one of the two users has not rated the movie Drive.
+							Furthermore, movie <i>k</i> is an element of set <i>A</i>. Therefore, the rating by user <i>i</i> for movie <i>k</i>, <i>Rating<sub>i,k</sub></i>, can only be a rating for a movie that both users <i>i</i> and <i>j</i> watched.
+							Finally, the maximum possible distance between ratings (<i>c</i>), is used as a normalization factor. For this example <i>c</i> = 4 as the example makes use of a 1-5 rating scale. However, for a 1-10 rating scale, the normalization factor would be 9.
+							</p>
+							
+							<p>
+							Now we can easily use this equation to compute the taste similarity between user 1 and the other users and see whether it makes intuitive sense.
 							</p>
 							
 							<p>
 							
-							$$ Sim_{Ui,Uj} = {1 - {\Sigma_{k=1}^n |Rating_{Ui,Mk} - Rating_{UjMk}|\ / c \over |A|}} $$
+							$$ Sim_{1,2} = 1 - \frac{|5-5| + |5-5| + |5-5| + |1-1|}{4\times4} = 1 $$
 							
+							As identified before, the ratings of user 1 and 2 are exactly the same for the movies that they both rated. Intuitively, the taste similarity between user 1 and 2 should therefore be 100%.
+							The defined formula indeed follows our intuitive logic as can be seen by the computation above.
+							
+							$$ Sim_{1,3} = 1 - \frac{|5-1| + |5-1| + |1-5|}{4\times3} = 0 $$
+							
+							The contrary is true for the taste similarity between user 1 and 3. The difference in movie ratings could not be more extreme based on the movies that both users saw.
+							Therefore, the taste similarity score should be 0%, which is exactly what is depicted in our computation.
+							
+							$$ Sim_{1,4} = 1 - \frac{|5-2| + |5-2| + |5-4| + |1-3|}{4\times4} = 0.44 $$
+							
+							Between these two extremes lies the taste similarity between user 1 and user 4.
+							These users have four movies in common but in terms of ratings they do seem to have a quite dissimilar taste, which is illustrated by the 44% taste similarity computed by the algorithm.
+							</p>
+							
+							<p>
+							Of course there are more distance metrics than only the absolute distance that our taste similarity score is based on, such as the Euclidean distance.
+							Different ways of computing the distance can result in different similarity scores by for example punishing large distances more heavily than short distances.
+							Alternative distance metrics will be explored in the Modeling section.
+							</p>
+							
+							<p>
+							Now that we have developed a baseline understanding of how to quantify and compare taste patterns of movie community members, it is time to delve deeper and apply our methods to a real-life dataset in the next section.
 							</p>
 
 						</div>
