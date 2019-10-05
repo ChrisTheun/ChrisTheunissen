@@ -65,7 +65,7 @@
 								<h2 class="alt"><strong>Movie Mate Recommendation Engine</strong></h2>
 
 								<p>
-								A personal project in which I attempt to build a recommendation engine that can match users of movie networking sites based on how similar their move taste is.
+								A personal Python project in which I attempt to build a recommendation engine that can match users of movie networking sites based on how similar their move taste is.
 								Various options such as collaborative filtering and matrix factorization are explored to determine which method provides the best recommendations.
 								The recommender system uses movie ratings from MovieLens users as input data and I also import my own movie ratings to assess the quality of the recommendations.
 								</p>
@@ -195,7 +195,7 @@
 							<p>
 							Of course there are more distance metrics than only the absolute distance that our taste similarity score is based on, such as the Euclidean distance.
 							Different ways of computing the distance can result in different similarity scores by for example punishing large distances more heavily than short distances.
-							Alternative distance metrics will be explored in the Modeling section.
+							Alternative distance metrics will be explored in the <a href="#modeling"> Modeling section</a>.
 							</p>
 							
 							<p>
@@ -215,8 +215,123 @@
 
 							<img src="images/pic08small.jpg" alt="" />
 
-							<p></p>
-								
+							<p>
+							In order to explore the ways in which we can match movie fans based on their movie taste, we use the <a href = https://grouplens.org/datasets/movielens/> MovieLens 20M dataset</a>.
+							This is a dataset with 20 million movie ratings by users on the MovieLens website collected and made public by GroupLens Research. The dataset contains ratings for around 27.000 movies by 138.000 users.
+							After importing the appropriate packages and loading in the MovieLens datafiles as well as my own movie ratings, the data looks as follows.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>			
+# import packages
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import scipy.sparse
+import seaborn as sns
+%matplotlib inline
+
+#load in datafiles
+movies = pd.read_csv("movies.csv") # details on the movies in the movielens dataset
+ratings = pd.read_csv("ratings.csv") #the ratings the movielens community gave to movies
+chris = pd.read_csv("chris ratings.csv") # my own ratings exported from movielens
+							</code></pre>
+							
+							<font color="black"><b> movies dataframe </b></font>
+							<div style="overflow-x:auto;display: block; white-space: nowrap;">
+							<table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th></th>      <th>movieId</th>      <th>title</th>      <th>genres</th>    </tr>  </thead>  <tbody>    <tr>      <th>0</th>      <td>1</td>      <td>Toy Story (1995)</td>      <td>Adventure|Animation|Children|Comedy|Fantasy</td>    </tr>    <tr>      <th>1</th>      <td>2</td>      <td>Jumanji (1995)</td>      <td>Adventure|Children|Fantasy</td>    </tr>    <tr>      <th>...</th>      <td>...</td>      <td>...</td>      <td>...</td>    </tr>    <tr>      <th>27276</th>      <td>131260</td>      <td>Rentun Ruusu (2001)</td>      <td>(no genres listed)</td>    </tr>    <tr>      <th>27277</th>      <td>131262</td>      <td>Innocence (2014)</td>      <td>Adventure|Fantasy|Horror</td>    </tr>  </tbody></table>				
+							</div>
+							</br>
+							
+							<font color="black"><b> ratings dataframe </b></font>
+							<div style="overflow-x:auto;display: block; white-space: nowrap;">							
+							<table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th></th>      <th>userId</th>      <th>movieId</th>      <th>rating</th>      <th>timestamp</th>    </tr>  </thead>  <tbody>    <tr>      <th>0</th>      <td>1</td>      <td>2</td>      <td>3.5</td>      <td>1112486027</td>    </tr>    <tr>      <th>1</th>      <td>1</td>      <td>29</td>      <td>3.5</td>      <td>1112484676</td>    </tr>    <tr>      <th>...</th>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>    </tr>    <tr>      <th>20000261</th>      <td>138493</td>      <td>70286</td>      <td>5.0</td>      <td>1258126944</td>    </tr>    <tr>      <th>20000262</th>      <td>138493</td>      <td>71619</td>      <td>2.5</td>      <td>1255811136</td>    </tr>  </tbody></table>
+							</div>
+							</br>
+							
+							<font color="black"><b> chris dataframe </b></font>
+							<div style="overflow-x:auto;display: block; white-space: nowrap;">							
+							<table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th></th>      <th>movie_id</th>      <th>imdb_id</th>      <th>tmdb_id</th>      <th>rating</th>      <th>average_rating</th>      <th>title</th>    </tr>  </thead>  <tbody>    <tr>      <th>0</th>      <td>6</td>      <td>113277</td>      <td>949</td>      <td>4.0</td>      <td>3.84775</td>      <td>Heat (1995)</td>    </tr>    <tr>      <th>1</th>      <td>10</td>      <td>113189</td>      <td>710</td>      <td>3.5</td>      <td>3.43236</td>      <td>GoldenEye (1995)</td>    </tr>    <tr>      <th>...</th>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>    </tr>    <tr>      <th>682</th>      <td>196997</td>      <td>9495224</td>      <td>569547</td>      <td>3.5</td>      <td>3.52147</td>      <td>Black Mirror: Bandersnatch (2018)</td>    </tr>    <tr>      <th>683</th>      <td>198971</td>      <td>5843056</td>      <td>413745</td>      <td>3.0</td>      <td>3.25000</td>      <td>One Night Only (2016)</td>    </tr>  </tbody></table>
+							</div>
+							</br>
+						
+							
+							
+							<p>
+							The goal for the data preparation is to end up with a dataframe with the userId, movieId and the ratings of the MovieLens users as features and append my own ratings to that dataframe.
+							However, before proceed with the data preparation, it is good practice to get a better understanding of the data by creating some visualizations.
+							</p>
+							
+							<p>
+							In order to get an idea of the rating distributions of the users, I made a countplot for both the MovieLens users' ratings and my own ratings.
+							From the figures below it becomes apparent that in both cases the mean lies between a rating of 3.5 and 4.0.
+							However, the half-point ratings appear to be less popular than the rounded ratings for a significant number of MovieLens users.
+							In other words, there seems to be a substantial amount of users that prefers to hand out 1.0, 2.0, 3.0, 4.0 and 5.0 ratings rather than 0.5, 1.5, 2.5, 3.5 and 4.5 ratings.
+							Additionally, users appear to hand out high ratings more often than low ratings.
+							</p>
+							
+							</br>
+							
+							<pre class="prettyprint lang-python"><code>		
+# Set style options
+plt.rcParams["axes.edgecolor"] = "black"
+plt.rcParams["axes.linewidth"] = 1
+sns.set(rc={'figure.figsize':(10,6)})
+sns.set(font_scale=1.3)
+sns.set_style("darkgrid", {'axes.facecolor': '#d9d9d9', 'figure.facecolor': 'None'})
+
+# Create countplot with counts of ratings for the MovieLens users
+gMLR = sns.countplot(ratings.rating, color = '#A3B9AA', edgecolor = 'k') 
+gMLR.set_title('MovieLens Rating Distribution')                          
+gMLR.set_xlabel('Rating')                                                
+gMLR.set_ylabel('Count')
+gMLR.figure.set_facecolor('None')
+
+# Create countplot with counts of my own ratings
+gCR = sns.countplot(chris.rating, color = '#A3B9AA', edgecolor = 'k')
+gCR.set_title('Chris Rating Distribution')
+gCR.set_xlabel('Rating')
+gCR.set_ylabel('Count')
+gCR.figure.set_facecolor('None')
+							</code></pre>							
+							
+							<img src="images/Project2/gMLR.png" alt="" />
+							
+							<img src="images/Project2/gCR.png" alt="" />
+							
+							<p>
+							Next, it might be interesting to look at the distribution of the number of movies rated per user and the average rating for each user.
+							To accomplish that, I used seaborn to make a jointplot with the number of movies rated and the average rating per MovieLens user including both distributions and a scatterplot.
+							The figure below reveals that a big majority of users rated less than 500 movies, while a small minority rated more than that with even outliers exceeding more than 8000 movies rated.
+							There also appears to be a negative correlation between the number of movies rated and the average rating of the user.
+							A reasonable explanation could be that people who watched fewer movies generally tend to stick to high-profile, acclaimed movies that the user already has an interest in.
+							On the other hand, the movie buff that watched thousands of movies has probably strayed away from the path of watching only the movies that are in his wheelhouse.
+							Additionally, the movie buff will likely become more critical and harder to surprise the larger the amount of films he ticked off.
+							Finally, the distribution of the average ratings reveals that most users have an average rating that lies between 3.5 and 4.0, which corresponds to what we saw in the charts above.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>			
+# Aggregate the amount of movies watched and the mean rating for each user
+ratings_agg = ratings[["userId","movieId","rating"]].groupby("userId").agg(['count','mean']).iloc[:,[0,3]]
+ratings_agg.columns = ["movie_count", "mean_rating"]
+
+# Create a jointplot with the number of movies rated and average rating per MovieLens user inluding distributions and scatterplot
+sns.set_style("darkgrid", {'axes.facecolor': '#d9d9d9', 'figure.facecolor': 'None'})
+g = sns.jointplot(x='movie_count', y='mean_rating',
+                  data = ratings_agg ,
+                  kind='reg', 
+                  color = '#E68A99',
+                  scatter_kws={"s": 5, 'alpha':1})
+g.fig.suptitle('Movies Rated & Average Rating Per User')
+g.set_axis_labels('Movies Rated', 'Average Rating')
+g.fig.set_size_inches(10,10)
+							</code></pre>
+							
+							<img src="images/Project2/g.png" alt="" />
+							
+							<p>
+							With the available data, more data visualizations could be drawn. For example by using the movie genres.
+							However, for this project the genres of the movies are not particularly relevant.
+							</p>
 
 
 						</div>
@@ -230,11 +345,88 @@
 							<header>
 								<h2>Data Preparation</h2>
 							</header>
-
+							
 							<img src="images/pic08small.jpg" alt="" />
-
+							
 							<p>
+							To be able to perform computations on the data, it would be the most convenient to transform the dataframe into a user-movie matrix in which each row represents a user and each column a movie while the cells correspond with the ratings the user gave to the movie.
+							First, we convert every variable to the appropriate data type. Second, I make the dataframe with my own ratings consistent with the MovieLens user rating dataframe.
+							Finally, we make a dataframe called movieratings in which the movie information is added to the ratings dataframe for future reference. These steps are broken down in the section of code below.
+							
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>	
+# Convert the rating column from float64 to float32 to save space and convert movieId and userId from float64 to objects (str)
+ratings["rating"] = ratings["rating"].astype("float32")
+ratings["userId"] = ratings["userId"].astype("object")
+ratings["movieId"] = ratings["movieId"].astype("object")
+movies["movieId"] = movies["movieId"].astype("object")
+chris["movie_id"] = chris["movie_id"].astype("object")
 
+chris["userId"] = "Chris" # Add userId to identify my own ratings when I add them to the ratings df later
+chris = chris[["userId", "movie_id", "rating"]] # Only keep the userId, movie_id and rating columns
+chris.columns = ['userId', 'movieId', 'rating'] # Rename movie_id to movieId so it is consistent with the ratings df
+
+# Remove movies in rated that are not rated by anyone else (e.g. because they weren't yet released)
+chris = chris[chris["movieId"].isin(list(ratings["movieId"]))]
+
+# Drop the timestamp column in the ratings dataframe, because we do not use it
+ratings = ratings.drop("timestamp", axis = 1)
+
+# Merge movie information (especially title) with the ratings for each movie
+movieratings = pd.merge(ratings, movies, on = "movieId")							
+							</code></pre>
+							
+							<p>
+							Because the dataset is too large to perform operations on with my current computing power, I instead work with the data of the 999 users with the most movies rated and append my own ratings to make it a dataset of 1000 users.
+							After that, the dataframe is transformed into the user-item matrix that was initially desired.
+							The figure below shows that the matrix is extremely sparse as each user only rated a small fraction of all the movies in the dataset.
+							</p>
+
+							<pre class="prettyprint lang-python"><code>		
+# From the ratings df grab the 999 users (user IDs) with the most ratings (I will add myself later to make it 1000)
+top1k = ratings.set_index(["userId", "movieId"]).count(level="userId").sort_values(by = ['rating'], ascending = False)[:999]
+
+#Grab the movie ratings of those 999 users and cast them into a dataframe
+filtered = ratings[ratings['userId'].isin(list(top1k.index))].reset_index().drop('index', axis = 1)
+
+# Add my own movieratings to this dataframe
+filtered = filtered.append(chris)
+
+# Transform the dataframe into a user-item matrix with the row index representing the userId and the columns representing the movieIds
+ratings_table = pd.pivot_table(filtered, values = ['rating'], index = ['userId'], columns=['movieId'])
+ratings_table.columns = ratings_table.columns.droplevel(0)							
+							</code></pre>
+							
+							<font color="black"><b> user-item matrix </b></font>
+							<div style="overflow-x:auto;display: block; white-space: nowrap;">	
+							<table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>movieId</th>      <th>1</th>      <th>2</th>      <th>3</th>      <th>4</th>      <th>5</th>      <th>...</th>      <th>131172</th>      <th>131174</th>      <th>131176</th>      <th>131180</th>      <th>131231</th>    </tr>    <tr>      <th>userId</th>      <th></th>      <th></th>      <th></th>      <th></th>      <th></th>      <th></th>      <th></th>      <th></th>      <th></th>      <th></th>      <th></th>    </tr>  </thead>  <tbody>    <tr>      <th>156</th>      <td>5.0</td>      <td>5.0</td>      <td>2.0</td>      <td>3.0</td>      <td>3.0</td>      <td>...</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>    </tr>    <tr>      <th>208</th>      <td>4.0</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>...</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>    </tr>    <tr>      <th>359</th>      <td>5.0</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>...</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>    </tr>    <tr>      <th>572</th>      <td>5.0</td>      <td>3.5</td>      <td>3.5</td>      <td>NaN</td>      <td>3.5</td>      <td>...</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>    </tr>    <tr>      <th>586</th>      <td>2.5</td>      <td>3.0</td>      <td>2.0</td>      <td>NaN</td>      <td>3.0</td>      <td>...</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>    </tr>    <tr>      <th>...</th>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>    </tr>    <tr>      <th>137686</th>      <td>5.0</td>      <td>3.0</td>      <td>3.0</td>      <td>NaN</td>      <td>NaN</td>      <td>...</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>    </tr>    <tr>      <th>137885</th>      <td>5.0</td>      <td>3.0</td>      <td>4.0</td>      <td>2.0</td>      <td>3.0</td>      <td>...</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>    </tr>    <tr>      <th>138208</th>      <td>3.0</td>      <td>2.0</td>      <td>2.0</td>      <td>2.0</td>      <td>2.0</td>      <td>...</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>    </tr>    <tr>      <th>138325</th>      <td>5.0</td>      <td>3.0</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>...</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>    </tr>    <tr>      <th>Chris</th>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>...</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>      <td>NaN</td>    </tr>  </tbody></table>							
+							</div>
+							</br>
+							
+							<p>
+							From this user-item matrix we also create a co-occurrence matrix in which is indicated how many of the movies both users watched.
+							This can be used in the distance computations but also to create a threshold for the amount of movies both users need to have watched before they can be matched.
+							For example, the taste similarity computation could show that your taste aligns perfectly with another user, but that could potentially be the case due to there only being a single movie both of you rated.
+							Therefore, it would be sensible to include a threshold for the amount of movies both users need to have rated.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>		
+# Create a new matrix in which we transformed each value in our user-item matrix to 1 and each NaN to 0
+watched_mat = ratings_table.notnull().astype('int')
+
+# Create the co-occurrence matrix by computing the dot product of the matrix with the transposed version of the matrix
+coocc = watched_mat.dot(watched_mat.T)							
+							</code></pre>							
+
+							<font color="black"><b> co-occurrence matrix </b></font>
+							<div style="overflow-x:auto;display: block; white-space: nowrap;">	
+							<table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th>userId</th>      <th>156</th>      <th>208</th>      <th>359</th>      <th>572</th>      <th>586</th>      <th>...</th>      <th>137686</th>      <th>137885</th>      <th>138208</th>      <th>138325</th>      <th>Chris</th>    </tr>    <tr>      <th>userId</th>      <th></th>      <th></th>      <th></th>      <th></th>      <th></th>      <th></th>      <th></th>      <th></th>      <th></th>      <th></th>      <th></th>    </tr>  </thead>  <tbody>    <tr>      <th>156</th>      <td>2179</td>      <td>477</td>      <td>449</td>      <td>455</td>      <td>541</td>      <td>...</td>      <td>1002</td>      <td>994</td>      <td>921</td>      <td>404</td>      <td>106</td>    </tr>    <tr>      <th>208</th>      <td>477</td>      <td>1288</td>      <td>379</td>      <td>342</td>      <td>402</td>      <td>...</td>      <td>693</td>      <td>502</td>      <td>714</td>      <td>578</td>      <td>183</td>    </tr>    <tr>      <th>359</th>      <td>449</td>      <td>379</td>      <td>1300</td>      <td>471</td>      <td>546</td>      <td>...</td>      <td>759</td>      <td>390</td>      <td>694</td>      <td>460</td>      <td>167</td>    </tr>    <tr>      <th>572</th>      <td>455</td>      <td>342</td>      <td>471</td>      <td>1326</td>      <td>584</td>      <td>...</td>      <td>723</td>      <td>382</td>      <td>718</td>      <td>325</td>      <td>123</td>    </tr>    <tr>      <th>586</th>      <td>541</td>      <td>402</td>      <td>546</td>      <td>584</td>      <td>1431</td>      <td>...</td>      <td>827</td>      <td>484</td>      <td>765</td>      <td>460</td>      <td>188</td>    </tr>    <tr>      <th>...</th>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>    </tr>    <tr>      <th>137686</th>      <td>1002</td>      <td>693</td>      <td>759</td>      <td>723</td>      <td>827</td>      <td>...</td>      <td>2168</td>      <td>998</td>      <td>1257</td>      <td>696</td>      <td>215</td>    </tr>    <tr>      <th>137885</th>      <td>994</td>      <td>502</td>      <td>390</td>      <td>382</td>      <td>484</td>      <td>...</td>      <td>998</td>      <td>1689</td>      <td>786</td>      <td>447</td>      <td>115</td>    </tr>    <tr>      <th>138208</th>      <td>921</td>      <td>714</td>      <td>694</td>      <td>718</td>      <td>765</td>      <td>...</td>      <td>1257</td>      <td>786</td>      <td>2228</td>      <td>643</td>      <td>217</td>    </tr>    <tr>      <th>138325</th>      <td>404</td>      <td>578</td>      <td>460</td>      <td>325</td>      <td>460</td>      <td>...</td>      <td>696</td>      <td>447</td>      <td>643</td>      <td>1700</td>      <td>254</td>    </tr>    <tr>      <th>Chris</th>      <td>106</td>      <td>183</td>      <td>167</td>      <td>123</td>      <td>188</td>      <td>...</td>      <td>215</td>      <td>115</td>      <td>217</td>      <td>254</td>      <td>483</td>    </tr>  </tbody></table>
+							</div>
+							</br>							
+							
+							<p>
+							Now that both the user-item matrix and the co-occurrence are created, the user taste similarity can be computed in the next section.
 							</p>
 							
 						</div>
@@ -248,7 +440,51 @@
 								<h2>Modeling</h2>
 							</header>
 							
-							<img src="images/pic08small.jpg" alt="" />							
+							<img src="images/pic08small.jpg" alt="" />			
+							
+							<p>
+							In order to streamline the process of computing the user's taste similarity and matching the most similar users, I developed a function called MostSimilarUsers that can be applied to any user-item and co-occurrence matrix pair.
+							Besides these two matrices, the function takes a few other parameters including the distance metric, the id of the user for whom the matches need the computed, the minimum threshold of the same movies rated between users, the number of matches the model outputs, and a boolean indicating whether the distance should be weighted by the number of co-occurrences.
+							
+							</p>
+
+							<pre class="prettyprint lang-python"><code>		
+def MostSimilarUsers(user_item_mat, coocc_mat, dist_metric, main_user_id, min_cooccurrences = 100 , n_most_similar_users = 10, weighted = False):
+
+    # Compute distance matrix by using either the absolute, eucildean or cosine distance metric
+    if dist_metric == "absolute":
+        dist_mat = cdist(user_item_mat, user_item_mat, lambda u, v: np.nansum(abs((u-v))))
+    elif dist_metric == "euclidean":
+        dist_mat = cdist(user_item_mat, user_item_mat, lambda u, v: np.sqrt(np.nansum((u-v)**2)))
+    elif dist_metric == "cosine":
+        dist_mat = cdist(user_item_mat.fillna(0), user_item_mat.fillna(0), "cosine")
+        
+    # Cast distance matrix into dataframe
+    dist = pd.DataFrame(dist_mat, index = list(user_item_mat.index), columns = list(user_item_mat.index))
+    
+    # If specified, divide the total distance by total amount of cooccurrences in other to get a distance per movie metric
+    if weighted == True:
+        dist = dist / coocc
+    
+    main_distances = list(dist.loc[str(main_user_id)]) # Cast the distances between the main user and the other users in a list
+    ratings_shared = list(coocc.loc[str(main_user_id)]) # Cast the counts of movies both rated by the main user and the other user (cooccurrences) in a list
+
+    # Create a dataframe with these two lists as columns
+    main_dist = pd.DataFrame(data = [main_distances, ratings_shared]).transpose()
+    main_dist.index = user_item_mat.index
+    main_dist.columns = ["dist", "cooccurrences"]
+    main_dist = main_dist.drop(str(main_user_id)) # Drop the distance of the main user to itself
+    
+    # Filter out the users that have not seen enough of the same movies as the main user
+    main_dist = main_dist[main_dist["cooccurrences"] >= min_cooccurrences] 
+
+    # Return the 10 users with the smallest distance to the main user
+    return(main_dist.nsmallest(n_most_similar_users, "dist"))						
+							</code></pre>	
+
+							<pre class="prettyprint lang-python"><code>		
+						
+							</code></pre>								
 							
 							<p>
 							</p>
