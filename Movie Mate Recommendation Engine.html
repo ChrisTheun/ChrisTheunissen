@@ -160,7 +160,7 @@
 							</p>
 							
 							<p>
-							$$ Sim_{i,j} = 1 - \frac{\sum_{k \in A} |Rating_{i,k}-Rating_{j,k}|}{c|A|} $$
+							$$ AbsSim_{i,j} = 1 - \frac{\sum_{k \in A} |Rating_{i,k}-Rating_{j,k}|}{c|A|} $$
 							</p>
 							
 							<p>
@@ -445,19 +445,30 @@ coocc = watched_mat.dot(watched_mat.T)
 							<p>
 							In order to streamline the process of computing the user's taste similarity and matching the most similar users, I developed a function called MostSimilarUsers that can be applied to any user-item and co-occurrence matrix pair.
 							Besides these two matrices, the function takes a few other parameters including the distance metric, the id of the user for whom the matches need the computed, the minimum threshold of the same movies rated between users, the number of matches the model outputs, and a boolean indicating whether the distance should be weighted by the number of co-occurrences.
+							</p>
 							
+							<p>
+							Besides the absolute distance covered in the introduction, I also experimented with the use of another common distance metric, namely the Euclidean distance.
+							The Euclidean distance originates from the Pythagorean Theorem and resembles the straight-line distance between two points in a metric space.
+							For this application it looks as follows:
+							
+														
+							$$ EucSim_{i,j} = 1 - \frac{\sqrt{\sum_{k \in A} (Rating_{i,k}-Rating_{j,k})^2}}{c|A|} $$
+							
+							
+							The Euclidean distance metric punishes bigger distances between ratings disproportionately more than smaller ratings compared to the absolute distance metric.
+							Therefore, it would be interesting to see if and how the two different metrics lead to varying results.
+							While I chose to make use of these two distance metrics, there still exist an abundance of other distance metrics one could experiment with.
 							</p>
 
 							<pre class="prettyprint lang-python"><code>		
-def MostSimilarUsers(user_item_mat, coocc_mat, dist_metric, main_user_id, min_cooccurrences = 100 , n_most_similar_users = 10, weighted = False):
+def MostSimilarUsers(user_item_mat, coocc_mat, dist_metric, main_user_id, min_cooccurrences = 100 , n_most_similar_users = 10, normalization_factor = 4, weighted = False):
 
     # Compute distance matrix by using either the absolute, eucildean or cosine distance metric
     if dist_metric == "absolute":
-        dist_mat = cdist(user_item_mat, user_item_mat, lambda u, v: np.nansum(abs((u-v))))
+        dist_mat = cdist(user_item_mat, user_item_mat, lambda u, v: (np.nansum(abs((u-v))))/(normalization_factor))
     elif dist_metric == "euclidean":
-        dist_mat = cdist(user_item_mat, user_item_mat, lambda u, v: np.sqrt(np.nansum((u-v)**2)))
-    elif dist_metric == "cosine":
-        dist_mat = cdist(user_item_mat.fillna(0), user_item_mat.fillna(0), "cosine")
+        dist_mat = cdist(user_item_mat, user_item_mat, lambda u, v: (np.sqrt(np.nansum((u-v)**2)))/(normalization_factor))
         
     # Cast distance matrix into dataframe
     dist = pd.DataFrame(dist_mat, index = list(user_item_mat.index), columns = list(user_item_mat.index))
@@ -466,20 +477,23 @@ def MostSimilarUsers(user_item_mat, coocc_mat, dist_metric, main_user_id, min_co
     if weighted == True:
         dist = dist / coocc
     
-    main_distances = list(dist.loc[str(main_user_id)]) # Cast the distances between the main user and the other users in a list
+    # Transform distance into similarity scores by subtracting the distance from 1
+    sim = 1 - dist
+    
+    main_sim = list(sim.loc[str(main_user_id)]) # Cast the distances between the main user and the other users in a list
     ratings_shared = list(coocc.loc[str(main_user_id)]) # Cast the counts of movies both rated by the main user and the other user (cooccurrences) in a list
 
     # Create a dataframe with these two lists as columns
-    main_dist = pd.DataFrame(data = [main_distances, ratings_shared]).transpose()
-    main_dist.index = user_item_mat.index
-    main_dist.columns = ["dist", "cooccurrences"]
-    main_dist = main_dist.drop(str(main_user_id)) # Drop the distance of the main user to itself
+    main_sim = pd.DataFrame(data = [main_sim, ratings_shared]).transpose()
+    main_sim.index = user_item_mat.index
+    main_sim.columns = ["sim", "cooccurrences"]
+    main_sim = main_sim.drop(str(main_user_id)) # Drop the distance of the main user to itself
     
     # Filter out the users that have not seen enough of the same movies as the main user
-    main_dist = main_dist[main_dist["cooccurrences"] >= min_cooccurrences] 
+    main_sim = main_sim[main_sim["cooccurrences"] >= min_cooccurrences] 
 
     # Return the 10 users with the smallest distance to the main user
-    return(main_dist.nsmallest(n_most_similar_users, "dist"))						
+    return(main_sim.nlargest(n_most_similar_users, "sim"))					
 							</code></pre>	
 
 							<pre class="prettyprint lang-python"><code>		
