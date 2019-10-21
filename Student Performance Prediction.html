@@ -1527,6 +1527,10 @@ print(accuracy_score(y_test, predictions))
 print(confusion_matrix(y_test, predictions))						
 							</code></pre>
 							
+							<p>
+							The next section shows the results after all models have been trained and tested on the test data.
+							</p>
+							
 						</div>
 					</section>					
 								
@@ -1541,7 +1545,103 @@ print(confusion_matrix(y_test, predictions))
 
 							<img src="images/pic08small.jpg" alt="" />
 
-							<p>This is the results phase.</p>
+							<p>
+							In order to assess which model performs the best, accuracy seems like the most obvious performance metric to consider.
+							However, if we take into account that more students pass a course than fail, it becomes apparent that results based on accuracy could be misleading due to the imbalanced target classes.
+							For example, if a model would predict every student to pass in course BBB where 76% of the test set students actually passed the course, the accuracy score would end up being 76% which would imply that the model performs well, while it is essentially useless.
+							Therefore, we will take the recall score of the models into account in addition to the accuracy.
+							In this application, the recall score represents the fraction of students that are correctly predicted to fail the course relative to the students that actually failed the course.
+							In other words, the recall score indicates how well the model identifies failing students.
+							Consequently, the recall score will be 0 if the model predicts every student to pass and functions as a validity check on the accuracy metric.
+							A model with both a high accuracy and recall score can be considered as a good model with satisfactory performance.
+							</p>
+							
+							<p>
+							I extracted the accuracy and recall scores for each model and stored them in Excel sheets.
+							Afterwards, I loaded the Excel sheets into R in order to generate graphs illustrating the performance of each model in the respective courses.
+							The code block below shows this process in which I make use of loops to create multiple charts.
+							</p>
+
+
+							
+							<pre class="prettyprint lang-r"><code>
+library("readxl")
+library("reshape2")
+library("cowplot")
+
+# Import excel sheets
+Performance_lst <- lapply(1:6, function(i) read_excel("Model Performance Sheets.xlsx", sheet = i))
+
+# Make a list of dataframes, each dataframe corresponding to the accuracy or recall results for one of the three courses
+Performance_dfs <- list()
+
+for (i in 1:length(Performance_lst)){
+  Performance_dfs[[i]] <- data.frame(Performance_lst[i])                                      # Turn tibbles into dataframes
+  
+  names(Performance_dfs[[i]])[1] <- "Decile"                                                  # Rename first column to "Decile"
+  Performance_dfs[[i]]$Decile <- c(0:10)                                                      # Make "Decile" variable numerical
+  
+  Performance_dfs[[i]] <- melt(Performance_dfs[[i]], id.var = "Decile")                       # Melt variables together for ggplot convenience
+  Performance_dfs[[i]]$variable<-factor(Performance_dfs[[i]]$variable,
+                                        levels=c("DT","RF","LR","SVM","NB", "MLP", "LSTM"))   # Reorder variables for plotting purposes later on
+}
+
+# Give a name to each dataframe in the list
+names(Performance_dfs) <- c("Course BBB Accuracy","Course BBB Recall",
+                            "Course DDD Accuracy","Course DDD Recall",
+                            "Course FFF Accuracy","Course FFF Recall")
+
+
+# Make a plot showing the performance of each model in terms of accuracy / recall for each course
+perf_plots <- list()
+
+for (i in 1:length(Performance_dfs)){
+  perf_plots[[i]] <- ggplot(data=Performance_dfs[[i]], aes(x=Decile, y = value, colour = variable)) +                      # Specify dataframe and variables for line chart
+    geom_point(size = 2) +                                                                                                 # Size of markers in plot
+    geom_line(size = 1.5) +                                                                                                # Size of lines in plot
+    scale_colour_manual("",                                                                                                # Set Colors for each line
+                        breaks = c("DT", "RF", "LR","SVM","NB","MLP", "LSTM"),
+                        values = c("#00798c", "#d1495b", "#edae49", "#66a182", "#706072", "#cc8664", "black")) +
+    ggtitle(names(Performance_dfs)[i]) +                                                                                   # Plot title
+    xlab("Decile") +                                                                                                       # X-label
+    ylab(tail(strsplit(names(Performance_dfs)[i], split=" ")[[1]],1)) +                                                    # Y-label: grab last word from the list element name which is either accuracy or recall
+    theme(plot.title = element_text(hjust = 0.5),                                                                          # Style of plot
+          panel.background = element_rect(fill = "grey85"),
+          plot.background = element_rect(fill = "transparent", color = NA),
+          legend.background = element_rect(fill = "transparent", color = NA),
+          text = element_text(size=8),
+          plot.margin = unit(c(6,4,6,1), "pt")) +
+    scale_x_continuous(breaks = seq(0, 10, by = 1)) +                                                                     # Scale and intervals x-label
+    scale_y_continuous(breaks = seq(0, 1, by = 0.1))                                                                      # Scale and intervals y-label
+}
+
+# Create a grid with the accuracy and recall plots for the specific courses side-by-side and export them
+file_names <- c("BBB_Performance.png",0, "DDD_Performance.png",0, "FFF_Performance.png")
+
+for (i in c(1,3,5)){
+  duo_plot <- plot_grid( perf_plots[[i]] + theme(legend.position="none"),
+                         perf_plots[[i+1]] + theme(legend.position="none"),
+                         align = 'vh',
+                         nrow = 1,
+                         ncol = 2)
+  
+  # Extract the legend of the accuracy plot and make it horizontal
+  legend <- get_legend(perf_plots[[i]] +
+                         guides(colour=guide_legend(nrow=1, byrow=TRUE), shape=guide_legend(nrow=1, byrow=TRUE)) +
+                         theme(legend.direction = "horizontal",legend.justification="center" ,legend.box.just = "bottom"))
+  
+  # Add the shared legend to the grid
+  p <- plot_grid(duo_plot, legend, align = "h", axis = "t", rel_heights = c(4,.3), nrow = 2)
+  
+  save_plot(file_names[i],plot = p, bg = "transparent")
+}
+							</code></pre>
+							
+							<p>
+							The first two graphs below illustrate the accuracy and recall score of each model applied to course BBB.
+							
+							</p>
+							
 							
 							<img src="images/Project1/BBB_Performance.png" width = "1200", heigth = "600" alt="" />
 							
@@ -1580,4 +1680,4 @@ print(confusion_matrix(y_test, predictions))
 			<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
 
 	</body>
-</html>
+</html
