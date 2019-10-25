@@ -1583,7 +1583,7 @@ for (i in 1:length(Performance_lst)){
   
   Performance_dfs[[i]] <- melt(Performance_dfs[[i]], id.var = "Decile")                       # Melt variables together for ggplot convenience
   Performance_dfs[[i]]$variable<-factor(Performance_dfs[[i]]$variable,
-                                        levels=c("DT","RF","LR","SVM","NB", "MLP", "LSTM"))   # Reorder variables for plotting purposes later on
+                                        levels=c("DT","RF","LR","SVM","NB", "MLP", "LSTM", "Baseline"))   # Reorder variables for plotting purposes later on
 }
 
 # Give a name to each dataframe in the list
@@ -1594,14 +1594,16 @@ names(Performance_dfs) <- c("Course BBB Accuracy","Course BBB Recall",
 
 # Make a plot showing the performance of each model in terms of accuracy / recall for each course
 perf_plots <- list()
+Performance_dfs[[1]]$variable[Performance_dfs[[1]]$variable != "Baseline"]
 
 for (i in 1:length(Performance_dfs)){
-  perf_plots[[i]] <- ggplot(data=Performance_dfs[[i]], aes(x=Decile, y = value, colour = variable)) +                      # Specify dataframe and variables for line chart
+  perf_plots[[i]] <- ggplot(data=Performance_dfs[[i]], aes(x=Decile, y = value, colour = variable, linetype =variable)) +  # Specify dataframe and variables for line chart
     geom_point(size = 2) +                                                                                                 # Size of markers in plot
     geom_line(size = 1.5) +                                                                                                # Size of lines in plot
     scale_colour_manual("",                                                                                                # Set Colors for each line
-                        breaks = c("DT", "RF", "LR","SVM","NB","MLP", "LSTM"),
-                        values = c("#00798c", "#d1495b", "#edae49", "#66a182", "#706072", "#cc8664", "black")) +
+                        breaks = c("DT", "RF", "LR","SVM","NB","MLP", "LSTM", "Baseline"),
+                        values = c("#00798c", "#d1495b", "#edae49", "#66a182", "#706072", "#cc8664", "black", "#625F63")) +
+    scale_linetype_manual(values=c("solid","solid","solid","solid","solid","solid","solid", "dashed"), guide = FALSE)+     # Make sure baseline is of dashed linetype
     ggtitle(names(Performance_dfs)[i]) +                                                                                   # Plot title
     xlab("Decile") +                                                                                                       # X-label
     ylab(tail(strsplit(names(Performance_dfs)[i], split=" ")[[1]],1)) +                                                    # Y-label: grab last word from the list element name which is either accuracy or recall
@@ -1614,7 +1616,7 @@ for (i in 1:length(Performance_dfs)){
     scale_x_continuous(breaks = seq(0, 10, by = 1)) +                                                                     # Scale and intervals x-label
     scale_y_continuous(breaks = seq(0, 1, by = 0.1))                                                                      # Scale and intervals y-label
 }
-
+perf_plots[[1]]
 # Create a grid with the accuracy and recall plots for the specific courses side-by-side and export them
 file_names <- c("BBB_Performance.png",0, "DDD_Performance.png",0, "FFF_Performance.png")
 
@@ -1624,7 +1626,7 @@ for (i in c(1,3,5)){
                          align = 'vh',
                          nrow = 1,
                          ncol = 2)
-  
+?scale_linetype_manual  
   # Extract the legend of the accuracy plot and make it horizontal
   legend <- get_legend(perf_plots[[i]] +
                          guides(colour=guide_legend(nrow=1, byrow=TRUE), shape=guide_legend(nrow=1, byrow=TRUE)) +
@@ -1635,22 +1637,55 @@ for (i in c(1,3,5)){
   
   save_plot(file_names[i],plot = p, bg = "transparent")
 }
+}
 							</code></pre>
 							
 							<p>
 							The first two graphs below illustrate the accuracy and recall score of each model applied to course BBB.
-							
+							It is clear that as time moves on, the predictions become more and more accurate because later in the course more valuable information is available about the students.
+							The predictions at decile 0, which is the predictions made using the student data available before the start of the course, show that not enough information was available at that point to make a reasonable prediction.
+							Therefore, most models simply predicted every student to pass and achieved baseline accuracy and a recall score of 0. In this case, the horizontal basline respresents the accuracy score if the model predicts all students to pass.
+							Only after the halfway points of the course some of the models start to exceed the baseline accuracy. Most notably, the LSTM and the logistic regression classifier.
+							Towards the end of the course these models even reach accuracy scores of 90%. However, these two models do have among the lowest recall scores, which means that most of their success comes from accurately predicting which students pass the course.
+							The LSTM seems to perform significantly better than the LR in terms of recall score towards the end of the course with lead of about 10 percentage points, while the gap in terms of accuracy score is not as substantial.
+							It is also interesting to see that the Naive Bayes classifier performs the worst and actually predicts every student to fail at the start of the course, which could be an indication that the Naive Bayes' strong independence assumption does not hold in this scenario.
 							</p>
 							
 							
 							<img src="images/Project1/BBB_Performance.png" width = "1200", heigth = "600" alt="" />
 							
+							<p>
+							In course DDD, most models immediately exceed the baseline accuracy of 69% and perform better over time. The top models reach around 80% accuracy halfway through the course and more than 85% at the end.
+							The models include the LSTM, the multi-layered perceptron and the random forest model. However, in terms of recall the models do not appear to perform nearly as well.
+							The LSTM never exceeds a recall score of 0.65, while the MLP and RF perform slightly better but still not extraordinarily well.
+							One possible reason could be the effect of structural course changes in course DDD between the course periods where the first course period had a different exam structure than the remaining three.
+							</p>
+							
 							<img src="images/Project1/DDD_Performance.png" width = "1200", heigth = "600" alt="" />
+							
+							<p>
+							Similar to the models in course DDD, the classifiers in course FFF immediately surpass the baseline accuracy of 74%. Their performance also gradually increases but is overall better than in the previous two courses.
+							By the halfway point of the course most models reached an accuracy score between 85 and 90% and at the end of the course some models such as the LSTM, the random forest and the MLP exceeded the 90% mark. 
+							This high accuracy could be likely result of the lack of structural changes within course FFF over the different course presentations.
+							Again, even though the LSTM seems to perform among the best in terms of accuracy, its recall score is slightly lower than is the case for most other models. 
+							</p>
 							
 							<img src="images/Project1/FFF_Performance.png" width = "1200", heigth = "600" alt="" />
 							
+							<p>
+							Overall, the LSTM has shown to exhibit competitive performance when it comes to predicting student performance. However, we cannot say the LSTM is unequivocally superior due to the shortcomings in terms of recall score.
+							Therefore, it is important that educational institutions that consider employing a student performance prediction system look into the trade-off between accuracy and recall between these models.
+							Naturally, other model properties such as the required computational resources and training duration should also be taken into consideration.
+							While the LSTM does not appear to be the clear superior model in this specific context, the LSTM does appear to be the most balanced as it has a competitive performance in all three courses.
+							The other well-performing models such as the MLP, RF and LR classifiers only perform well in one or two of the three courses.
+							This could imply that the LSTM is better capable of dealing with structural changes in courses relative to the other models that were tested.
+							The results also show that it is possible to make accurate predictions on student performance with only 3 variables (assessment scores, number of assessments submitted and daily clicks in the VLE).
+							
+							In the future, I would still like to extend this project by adding student background information as auxiliary inputs to the LSTM and analyze the effect on its performance.
+							Additionally, once I possess more computing power, it would be interesting to look into conducting a more extensive grid search during the hyperparameter optimization process. 
 							
 							
+							</p>
 							
 							
 
