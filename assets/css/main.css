@@ -282,6 +282,15 @@ input, select, textarea {
 			}
 
 		}
+		
+		
+/* imageContainer */
+
+	 .imageContainer {
+			width: 1400px ;
+			height:85px; 
+			background-image: url("images/pic08small.jpg");
+	 }
 
 /* Row */
 
