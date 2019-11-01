@@ -79,11 +79,9 @@
 					<section id="introduction" class="three">
 						<div class="container">
 
-							<header>
-								<h2>Introduction</h2>
-							</header>
-
-							<img src="images/pic08small.jpg" alt="" />
+							<div class="imageContainer"><h2>Introduction</h2>
+							</div>
+							</br>
 
 							<p>
 							As a movie fan, I am always looking for new films that will tickle my fancy.
@@ -210,11 +208,9 @@
 					<section id="data_understanding" class="three">
 						<div class="container">
 
-							<header>
-								<h2>Data Understanding</h2>
-							</header>
-
-							<img src="images/pic08small.jpg" alt="" />
+							<div class="imageContainer"><h2>Data Understanding</h2>
+							</div>
+							</br>
 
 							<p>
 							In order to explore the ways in which we can match movie fans based on their movie taste, we use the <a href = https://grouplens.org/datasets/movielens/> MovieLens 20M dataset</a>.
@@ -345,11 +341,9 @@ g.fig.set_size_inches(10,10)
 					<section id="data_preparation" class="three">
 						<div class="container">
 
-							<header>
-								<h2>Data Preparation</h2>
-							</header>
-							
-							<img src="images/pic08small.jpg" alt="" />
+							<div class="imageContainer"><h2>Data Preparation</h2>
+							</div>
+							</br>
 							
 							<p>
 							To be able to perform computations on the data, it would be the most convenient to transform the dataframe into a user-movie matrix in which each row represents a user and each column a movie while the cells correspond with the ratings the user gave to the movie.
@@ -439,11 +433,9 @@ coocc = watched_mat.dot(watched_mat.T)
 					<section id="collaborative_filtering" class="three">
 						<div class="container">							
 
-							<header>
-								<h2>Collaborative Filtering</h2>
-							</header>
-							
-							<img src="images/pic08small.jpg" alt="" />			
+							<div class="imageContainer"><h2>Collaborative Filtering</h2>
+							</div>
+							</br>		
 							
 							<p>
 							In order to streamline the process of computing the user's taste similarity and matching the most similar users, I developed a function called MostSimilarUsers that can be applied to any user-item and co-occurrence matrix pair.
@@ -625,11 +617,9 @@ EucSimilarUsers_N = MostSimilarUsers(user_item_mat = scaled_ratings, coocc_mat =
 					<section id="svd" class="three">
 						<div class="container">
 
-							<header>
-								<h2>Singular Value Decomposition</h2>
-							</header>
-
-							<img src="images/pic08small.jpg" alt="" />
+							<div class="imageContainer"><h2>Singular Value Decomposition</h2>
+							</div>
+							</br>
 
 							<p>
 							Singular value decomposition is a matrix factorization technique in which a matrix (the user-item matrix in this case) is broken down into three other matrices of which two orthogonal and one diagonal matrix.
@@ -776,11 +766,9 @@ def SimilarUsersSVD(user_item_mat, n_features, coocc_mat, dist_metric, main_user
 					<section id="conclusion" class="three">
 						<div class="container">
 
-							<header>
-								<h2>Conclusion</h2>
-							</header>
-
-							<img src="images/pic08small.jpg" alt="" />
+							<div class="imageContainer"><h2>Conclusion</h2>
+							</div>
+							</br>
 
 							<p>The core idea of this project was to find out if it is possible to quantify an individual's personal movie taste and by doing so try to find other people with a similar taste.
 							It is fascinating to see that it is in fact possible to express such an elusive concept in a mathematical fashion, as we showed by using both SVD and distance calculations based on users' movie ratings.

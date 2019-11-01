@@ -77,11 +77,9 @@
 					<section id="introduction" class="three">
 						<div class="container">
 
-							<header>
-								<h2>Introduction</h2>
-							</header>
-
-							<img src="images/pic08small.jpg" alt="" />
+							<div class="imageContainer"><h2>Introduction</h2>
+							</div>
+							</br>
 
 							<p>In January 2019, I obtained my master's degree after defending my master's thesis in which I showed that LSTMs can be of value when used to predict student performance compared to more commonly used machine learning models.
 								In this project I replicate the research done in said thesis, be it with some modifications. The biggest change being the ability of this project's models to account for students joining the university's courses at different points in time due to changes in the data normalization methods.
@@ -104,11 +102,9 @@
 					<section id="data_understanding" class="three">
 						<div class="container">
 
-							<header>
-								<h2>Data Understanding</h2>
-							</header>
-
-							<img src="images/pic08small.jpg" alt="" />
+							<div class="imageContainer"><h2>Data Understanding</h2>
+							</div>
+							</br>
 
 							<p>The OULAD is a public dataset which contains anonymized data on roughly 30.000 students over seven distinct courses. The data covers a timespan of two years divided into a maximum of 4 periods (or <i>presentations</i>).
 								The four distinct course presentations in this dataset include courses started in February 2013 <i>(2013B)</i> and February 2014 <i>(2014B)</i> as well as courses that started in October 2013 <i>(2013J)</i> and October 2014 <i>(2014J)</i>.
@@ -445,11 +441,9 @@ studentAssessment_fr[!is.na(studentAssessment_fr$score),-c(4,5,6,8)] %>%
 					<section id="data_preparation" class="three">
 						<div class="container">
 
-							<header>
-								<h2>Data Preparation</h2>
-							</header>
-
-							<img src="images/pic08small.jpg" alt="" />
+							<div class="imageContainer"><h2>Data Preparation</h2>
+							</div>
+							</br>
 
 							<p>
 							In this data preparation phase I will demonstrate how I cleaned, formatted and normalized the data so that it can be used as input for the models.
@@ -1218,11 +1212,9 @@ pd.to_pickle(BBB_Test_Dec10, "BBB_Test_Dec10_ML.pkl")
 					<section id="modeling" class="three">
 						<div class="container">
 
-							<header>
-								<h2>Modeling</h2>
-							</header>
-
-							<img src="images/pic08small.jpg" alt="" />
+							<div class="imageContainer"><h2>Modeling</h2>
+							</div>
+							</br>
 
 							<p>
 							In this phase, the goal is to develop models that are able to predict whether students pass or fail a course in an accurate manner.
@@ -1539,11 +1531,9 @@ print(confusion_matrix(y_test, predictions))
 					<section id="results" class="three">
 						<div class="container">
 
-							<header>
-								<h2>Results</h2>
-							</header>
-
-							<img src="images/pic08small.jpg" alt="" />
+							<div class="imageContainer"><h2>Results</h2>
+							</div>
+							</br>
 
 							<p>
 							In order to assess which model performs the best, accuracy seems like the most obvious performance metric to consider.

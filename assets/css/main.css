@@ -288,9 +288,16 @@ input, select, textarea {
 
 	 .imageContainer {
 			width: 1400px ;
-			height:85px; 
-			background-image: url("images/pic08small.jpg");
+			height:100px; 
+			background-image: url("D:/ChrisT/Data Science Projects/Online Portfolio/ChrisTheunissen/images/pic08medium.jpg")
 	 }
+		.imageContainer h2 {
+
+		color: #fff;
+		line-height: 100px;
+		}
+			
+
 
 /* Row */
 
