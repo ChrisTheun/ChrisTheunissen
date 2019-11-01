@@ -289,7 +289,7 @@ input, select, textarea {
 	 .imageContainer {
 			width: 1400px ;
 			height:100px; 
-			background-image: url("/images/pic08medium.jpg")
+			background-image: url('../../images/pic08medium.jpg')
 	 }
 		.imageContainer h2 {
 
