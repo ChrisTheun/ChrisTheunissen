@@ -110,7 +110,7 @@
 		// Header.
 			$('#header')
 				.panel({
-					delay: 500,
+					delay: 2000,
 					hideOnClick: true,
 					hideOnSwipe: true,
 					resetScroll: true,
