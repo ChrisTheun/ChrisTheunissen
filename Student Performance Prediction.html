@@ -154,7 +154,7 @@ ggplot(data = studentInfo, aes(x = code_presentation,                       # Cr
 								
 								
 							
-							<img src="images/Project1/Student Distribution.png" width = "800", heigth = "600" alt="" />
+							<img src="images/Project1/Student Distribution.png" width = "60%", heigth = "33%" alt="" />
 							
 							<p>Because of the anonymized nature of the dataset, the specific titles of the courses have not been revealed.
 								The only information available on these courses is that course BBB is a social science course, while courses DDD and FFF belong to the science, technology, engineering and mathemetics (STEM) field.
@@ -165,15 +165,15 @@ ggplot(data = studentInfo, aes(x = code_presentation,                       # Cr
 								
 							
 							<p><font color="black"><b> Course BBB Assessments </b></font><br>
-							<img src="images/Project1/StructureBBB.jpg" width = "530", heigth = "500" alt="" />
+							<img src="images/Project1/StructureBBB.jpg" width = "40%", heigth = "40%" alt="" />
 							</p>
 							
 							<p><font color="black"><b> Course DDD Assessments </b></font><br>
-							<img src="images/Project1/StructureDDD.jpg" width = "529", heigth = "561" alt="" />
+							<img src="images/Project1/StructureDDD.jpg" width = "40%", heigth = "40%" alt="" />
 							</p>
 							
 							<p><font color="black"><b> Course FFF Assessments </b></font><br>
-							<img src="images/Project1/StructureFFF.jpg" width = "529", heigth = "500" alt="" />
+							<img src="images/Project1/StructureFFF.jpg" width = "42.9%", heigth = "40.0%" alt="" />
 							</p>
 							
 							<p> As can be seen in the figures above, the final exam date is not always available. If that is the case, I assumed that the final exam took place on the final day of the course based on the following quote in the official <a href="https://analyse.kmi.open.ac.uk/open_dataset" target="_blank">OULAD documentation</a>:
@@ -234,36 +234,36 @@ studentInfo %>%
 							   Moreover, the courses taught in the final period, October 2014, appear to have a slightly higher passing rate than the three preceding periods for these three courses.
 							   This difference is more pronounced in course BBB and FFF than in DDD however. On average, the passing rates do not appear to be vastly different between courses.</p>
 							
-							<img src="images/Project1/PR_plot.png" width = "800", heigth = "600" alt="" />		
+							<img src="images/Project1/PR_plot.png" width = "60%", heigth = "33%" alt="" />		
 							
 							<p>The next graph shows the passing rate by gender. The code in the following bar charts is virtually the same as in the code block above. The only differences are the replacement of the categorical variable on the x-axis and some changes in the visual polish such as font size.
 								Each of the three courses appears to have a significantly different gender distribution. In course BBB, a social science course, there are disproportionately more female students than male students.
 								In contrast, there are significantly more male students than female students in course FFF, which is a STEM course. Course DDD, another STEM course, also has more male than female students, but the discrepancy is not as big.
 								The one thing the three courses have in common is that female students appear to do slightly better than male students judging from their superior pass rate.</p>
 
-							<img src="images/Project1/PR_Gender_plot.png" width = "800", heigth = "600" alt="" />		
+							<img src="images/Project1/PR_Gender_plot.png" width = "60%", heigth = "33%" alt="" />		
 							
 							<p>The following bar chart illustrates the pass rate by age band. The student either belongs in age category 0-35, 35-55 or 55+. The figure shows that there are very little students that are 55 years or older.
 							   By far the most of the students belong in the 0-35 age category. It is interesting to note that students between 35 and 55 years old appear to perform slightly better than the younger students.
 							   The sample size of older students is too small to base conclusions off of. </p>
 							
-							<img src="images/Project1/PR_Age_plot.png" width = "800", heigth = "600" alt="" />
+							<img src="images/Project1/PR_Age_plot.png" width = "60%", heigth = "33%" alt="" />
 							
 							<p>The relationship between the students' former education level and pass rate is depicted in the graph below. On average, it appears to be the case that the higher the education level, the higher the pass rate is.
 								This indicates that highest education level might be an interesting predictor for student performance.
 							    The distributions are also widely similar among courses with the bulk of the students having either a A-level or lower qualification, while only a select few students have no formal qualifications or a post graduate degree.  </p>
 							
-							<img src="images/Project1/PR_HE_plot.png" width = "800", heigth = "600" alt="" />
+							<img src="images/Project1/PR_HE_plot.png" width = "60%", heigth = "33%" alt="" />
 							
 							<p>The OULAD also contains information on the amount of times the students attempted the course. The next plot shows that students that do not have any previous attempts, have a higher pass rate than students students that do have one or two previous attempts.
 								The number of students that attempt a course more than three times is so small that it becomes difficult to draw any conclusions from those groups.</p>
 							
-							<img src="images/Project1/PR_PrevAttempts_plot.png" width = "800", heigth = "600" alt="" />
+							<img src="images/Project1/PR_PrevAttempts_plot.png" width = "60%", heigth = "33%" alt="" />
 							
 							<p>The following graph shows that a small fraction of the students has a disability. These students seem to perform slightly worse than students that do not have a disability.
 								The particular type of disability could provide more insight into the effect of certain disabilities on student performance, but this data is not available and due to ethical concerns it might not be appropriate to use in performance predictions.</p>
 							
-							<img src="images/Project1/PR_Disability_plot.png" width = "800", heigth = "600" alt="" />
+							<img src="images/Project1/PR_Disability_plot.png" width = "60%", heigth = "33%" alt="" />
 							
 							<<p>The relationship between pass rate and IMD band is showcased in the next plot. IMD stand for Index of Multiple Deprivation and it's England's official measure of relative deprivation for small areas or neighborhoods.
 							   This measure says something about how deprived the student's neighborhood is relative to other neighborhoods ranging from the least deprived (90-100% band) to the most deprived (0-10% band).
@@ -271,7 +271,7 @@ studentInfo %>%
 							   This might indicate that having a missing value for IMD band has some predictive power when it comes to predicting student performance. Therefore, it might be worth it to look into why these values are missing.
 							   In general, it seems to be the case that the less deprived the student's neighborhood, the higher the passing rate. In other words, students living in well-off areas tend to perform better. </p>
 							
-							<img src="images/Project1/PR_IMD_plot.png" width = "1000", heigth = "750" alt="" />
+							<img src="images/Project1/PR_IMD_plot.png" width = "60%", heigth = "33%" alt="" />
 							
 							<p>Due to the many categories involved in the studied credits variable, I chose to plot the relationship between the number of credits for the modules the student is currently studying and the pass rate by means of a box plot.
 							   The very similar box plots below show that there is hardly any connection to be drawn between the number of credits a student is studying and his or her likelihood to pass the course.</p> 
@@ -297,7 +297,7 @@ ggplot(data = studentInfo,aes(x = final_result,
          bg = "transparent", dpi = 600) 
 							</code></pre>
 							
-							<img src="images/Project1/PR_credits_plot.png" width = "800", heigth = "600" alt="" />
+							<img src="images/Project1/PR_credits_plot.png" width = "60%", heigth = "33%" alt="" />
 							
 							<p>Due to the fact that the number of times students click in the VLE each day gets recorded, it is possible to plot the average number of clicks over time for those students that passed as well as those that failed the course, which is exactly what is shown in the graph below.
 							   The graphs illustrate that there are some clear patterns when it comes to the number of clicks in the VLE for the different courses. For example, in course FFF the average number of clicks substantially increase as the course nears the end.
@@ -337,7 +337,7 @@ studentVle_fr[,-c(4)] %>%                                                       
 							</code></pre>
 							
 							
-							<img src="images/Project1/Clicks_Time_plot.png" width = "800", heigth = "600" alt="" />
+							<img src="images/Project1/Clicks_Time_plot.png" width = "60%", heigth = "33%" alt="" />
 							
 							<p>The scatterplot below shows the relationship between the sum of clicks and the number of days the student was active in the VLE. In this case, active means that the student clicked at least one time in the VLE that specific day.
 							   Instead of showing the progression over time, this plot utilizes the measures computed by the end of the course. It is apparent that students that did not click in the VLE often and were not active on the platform for many days are more likely to fail the course than active students with a lot of clicks.
@@ -375,7 +375,7 @@ studentVle_fr[,-c(4)] %>%
          bg = "transparent", dpi = 600) 
 							</code></pre>
 							
-							<img src="images/Project1/Days_Clicks_plot.png" width = "800", heigth = "600" alt="" />
+							<img src="images/Project1/Days_Clicks_plot.png" width = "60%", heigth = "33%" alt="" />
 							
 							<p>There are a number of assessments students have to complete during the courses. The following line charts show the average assessment scores over time for both students that failed and students that passed the course.
 								There appears to be a clear distinction in average assessment scores between failing and passing students. Not surprisingly, assessment scores could therefore be a valuable predictor for student performance.
@@ -415,7 +415,7 @@ studentAssessment_fr[!is.na(studentAssessment_fr$score),-c(4,5,6,8)] %>%
          bg = "transparent", dpi = 600)  
 							</code></pre>
 							
-							<img src="images/Project1/Score_Date_plot.png" width = "800", heigth = "600" alt="" />
+							<img src="images/Project1/Score_Date_plot.png" width = "60%", heigth = "33%" alt="" />
 							
 							<p>
 							Now that we have gotten a better understanding of our data and an idea of which variables could be useful to predict student performance, we can conclude the data understanding phase.
@@ -1255,7 +1255,7 @@ pd.to_pickle(BBB_Test_Dec10, "BBB_Test_Dec10_ML.pkl")
 							More detailed information on the functioning of the LSTM can be found in <a href="https://www.researchgate.net/publication/13853244_Long_Short-term_Memory" target="_blank"> Hochreiter and Schmidhuber's influential paper </a> or <a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs" target="_blank">Christopher Olah's blog post </a> for a more accessible reading.
 							</p>
 							
-							<img src="images/Project1/LSTM4.png" width = "1014", heigth = "359.25">
+							<img src="images/Project1/LSTM4.png" width = "40%", heigth = "10%">
 							</br>
 							</br>
 							
