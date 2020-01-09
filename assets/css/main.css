@@ -301,14 +301,14 @@ input, select, textarea {
 /* AboutMeContainer */
 
 	 .AboutMeContainer {
-			width: 100% ;
-			height:100%; 
+			max-width: 100% ;
+			max-height:100%; 
 			background-image: url('../../images/AboutMeBanner.png')
 	 }
 		.AboutMeContainer h2 {
 
 		color: #fff;
-		font-size: 60px;
+		font-size: 50pt;
 		line-height: 180px;
 		}
 				
