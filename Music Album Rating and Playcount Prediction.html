@@ -1,0 +1,1658 @@
+<!DOCTYPE HTML>
+<!--
+	Prologue by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Chris Theunissen Online Portfolio - Music Album Rating and Playcount Prediction</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<link rel="stylesheet" type="text/css" href="prettify.css">
+		<script type="text/javascript" src="prettify.js"></script>
+
+	</head>
+	<body class="is-preload">
+
+		<!-- Header -->
+			<div id="header">
+
+				<div class="top">
+
+					<!-- Logo -->
+						<div id="logo">
+							<span class="image avatar48"><img src="images/PortfolioPFP.png" alt="" /></span>
+							<h1 id="title">Chris Theunissen</h1>
+							<p>Album Rating and Playcount Prediction</p>
+						</div>
+
+					<!-- Nav -->
+						<nav id="nav">
+							<ul>
+								<li><a href="#top" id="top-link"><span class="icon solid fa-newspaper">Title</span></a></li>
+								<li><a href="#introduction" id="introduction-link"><span class="icon solid fa-info-circle">Introduction</span></a></li>
+								<li><a href="#data_preparation" id="data_formatting-link"><span class="icon solid fa-puzzle-piece">Data Preparation</span></a></li>				
+								<li><a href="#modeling" id="modeling-link"><span class="icon solid fa-cogs">Modeling</span></a></li>
+								<li><a href="#conclusion" id="results-link"><span class="icon solid fa-flag">Conclusion</span></a></li>
+							</ul>
+						</nav>
+
+				</div>
+
+				<div class="bottom">
+
+					<!-- Social Icons -->
+						<ul class="icons">
+							<li><a href="https://christheunissen.github.io/ChrisTheunissen/" target="_self" class="icon solid fa-home"><span class="label">Home</span></a></li>							
+							<li><a href="https://www.linkedin.com/in/chris-theunissen" target="_blank" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
+							<li><a href="https://github.com/ChrisTheunissen" target="_blank" class="icon brands fa-github"><span class="label">Github</span></a></li>
+							<li><a href="mailto:christheunissen95@gmail.com" target="_blank" class="icon solid fa-envelope"><span class="label">Email</span></a></li>
+						</ul>
+
+				</div>
+
+			</div>
+
+		<!-- Main -->
+			<div id="main">
+
+				<!-- Top -->
+					<section id="top" class="one dark cover">
+						<div class="container">
+
+							<header>
+								<h2 class="alt"><strong>Music Album Rating and Playcount Prediction</strong></h2>
+
+								<p>In this project, I attempt to predict Pitchfork music album ratings and Last.fm album playcount based solely on music genre, Last.fm user-generated tags, record labels, album duration, the number of tracks and the year of release.
+								Furthermore, I conduct linear regression analysis to assess the influence of these variables on album ratings and playcount. 
+								I use SQL to convert the initial Pitchfork review dataset into csv format, after which R is used to retrieve the appropriate data from the Last.fm API, merge the two datasets and perform the analysis itself.
+								</p>
+							</header>
+
+						</div>
+					</section>
+					
+				<!-- Introduction -->
+					<section id="introduction" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Introduction</h2>
+							</div>
+							</br>
+
+							<p>
+							Whenever I am looking for a new project to work on.
+							I tend to gravitate towards projects in which I can explore and quantify seemingly intangible matters such as student performance or movie taste as demonstrated in my two previous projects.
+							Music is another prime example of such a theme. 
+							Not surprisingly, I was immediately excited to explore <a href = "https://www.kaggle.com/nolanbconaway/pitchfork-data">the Pitchfork music review dataset</a> when I stumbled on it while browsing through public datasets on Kaggle.com.
+							The dataset was stored in sqlite format, which was perfect because I was looking for an opportunity to refresh my SQL skills as well.
+							My first idea was to perform sentiment analysis on the reviews in the dataset using natural language processing techniques and assess the performance of said techniques by comparing the sentiment score with the corresponding album rating.
+							This proved more difficult than expected, due to the sophisticated manner in which reviewers expressed their opinions in their reviews.
+							Instead of using words with a clear underlying sentiment, they tend to make use of metaphors or sarcasm, which is challenging to detect using traditional sentiment analysis techniques.
+							Therefore, I decided to put that project on the backburner and instead focus on predicting the album review scores with the help of machine learning algorithms.
+							Because the dataset only contained information limited to the reviews, release year, record labels and music genre, I decided to retrieve additional data from the Last.fm database such as playcount, popular user-generated tags, album duration and the number of tracks on the album.
+							Because these variables say very little about the actual quality of the music itself, their predictive power is limited.
+							However, it would be very interesting to see how far we can get and in which way they influence both playcount and review score.
+							The R code used for this particular project can be found on <a href = "https://github.com/ChrisTheunissen/Music-Album-and-Playcount-Prediction">my Github page</a>.
+							</p>
+							
+							<p>
+							The next section focuses on the retrieval and exploration of the data itself.
+							</p>
+								
+
+						</div>
+					</section>			
+					
+				<!-- Data Preparation -->
+					<section id="data_preparation" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Data Preparation</h2>
+							</div>
+							</br>
+
+							<p>The <a href = "https://www.kaggle.com/nolanbconaway/pitchfork-data">Pitchfork music review dataset</a> is a public dataset available at kaggle.com and contains data on more than 18.000 Pitchfork reviews.
+							Pitchfork is a popular online music magazine launched in 1995 that publishes music album reviews.
+							The dataset contains various variables such as reviews, record labels, artists, release year and genres of each reviewed album.
+							</p>
+							
+							<p>
+							Because the dataset is stored in an sqlite format, I wrote a simple SQL-query to produce a csv file with the desired data.
+							</p>
+							
+
+							<pre class="prettyprint lang-SQL"><code>	
+.open ../Projects/Pitchfork/database.sqlite
+.headers on
+.schema
+
+CREATE TABLE `pitchfork` (`reviewid` , `title` , `artist` , `url` , `score` , `best_new_music` , `author` , `author_type` , `pub_date` , `pub_weekday` , `pub_day` , `pub_month` , `pub_year` , `genre` , `year`, `content`, `label`);
+
+
+INSERT INTO pitchfork
+SELECT reviews.*, genres.genre, years.year, content.content, labels.label
+FROM reviews 
+LEFT JOIN genres
+	ON reviews.reviewid=genres.reviewid
+LEFT JOIN years
+	ON reviews.reviewid=years.reviewid
+LEFT JOIN content
+	ON reviews.reviewid=content.reviewid
+LEFT JOIN labels
+	ON reviews.reviewid=labels.reviewid;
+
+.mode csv
+.output pitchfork.csv
+select * from pitchfork;
+.output stdout							
+							</code></pre>	
+							
+							<p>
+							This makes it easy to load the dataset into R for further exploration and analysis.
+							After loading the dataset and required packages into my R environment, I converted data types in a more applicable format, removed duplicate entries and displayed a preview of what the dataset looks like.
+							</p>
+
+							
+							<pre class="prettyprint lang-R"><code>
+# Load packages & data
+library("reshape2")
+library("ggplot2")
+library("dplyr")
+library("tidyr")
+
+pitchfork <- read.csv("pitchfork.csv", header = TRUE,  encoding = "UTF-8")
+
+
+# Convert to appropriate data types
+pitchfork$reviewid <- as.character(pitchfork$reviewid)
+pitchfork$title <- as.character(pitchfork$title)
+pitchfork$artist <- as.character(pitchfork$artist)
+pitchfork$url <- as.character(pitchfork$url)
+pitchfork$pub_date <- as.Date(pitchfork$pub_date, format = "%Y-%m-%d")
+pitchfork$content <- as.character(pitchfork$content)
+pitchfork$label <- as.character(pitchfork$label)
+
+pitchfork$genre <- as.character(pitchfork$genre)
+pitchfork$genre[pitchfork$genre == ""] <- "NA"                        # If there is no specified genre, impute NA
+pitchfork$genre <- as.factor(pitchfork$genre)
+
+# Remove duplicate entries
+pitchfork <- pitchfork %>% distinct()							
+							</code></pre>
+
+							<font color="black"><b> pitchfork dataframe </b></font>
+							<div style="overflow:auto;display: block; white-space: nowrap;">							
+							<table>
+							<tr> <th>  </th> <th> reviewid </th> <th> title </th> <th> artist </th> <th> url </th> <th> score </th> <th> best_new_music </th> <th> author </th> <th> author_type </th> <th> pub_date </th> <th> pub_weekday </th> <th> pub_day </th> <th> pub_month </th> <th> pub_year </th> <th> genre </th> <th> year </th> <th> content </th> <th> label </th>  </tr>
+							  <tr> <td align="right"> 1 </td> <td> 22703 </td> <td> mezzanine </td> <td> massive attack </td> <td> http://pitchfork.com/reviews/albums/22703-mezzanine/ </td> <td align="right"> 9.30 </td> <td align="right">   0 </td> <td> nate patrin </td> <td> contributor </td> <td align="right"> 17174.00 </td> <td align="right">   6 </td> <td align="right">   8 </td> <td align="right">   1 </td> <td align="right"> 2017 </td> <td> electronic </td> <td align="right"> 1998 </td> <td> “Trip-hop” eventually became a ’90s punchline, a m... </td> <td> virgin </td> </tr>
+							  <tr> <td align="right"> 2 </td> <td> 22721 </td> <td> prelapsarian </td> <td> krallice </td> <td> http://pitchfork.com/reviews/albums/22721-prelapsarian/ </td> <td align="right"> 7.90 </td> <td align="right">   0 </td> <td> zoe camp </td> <td> contributor </td> <td align="right"> 17173.00 </td> <td align="right">   5 </td> <td align="right">   7 </td> <td align="right">   1 </td> <td align="right"> 2017 </td> <td> metal </td> <td align="right"> 2016 </td> <td> Eight years, five albums, and two EPs in, the New ... </td> <td> hathenter </td> </tr>
+							  <tr> <td align="right"> 3 </td> <td> 22659 </td> <td> all of them naturals </td> <td> uranium club </td> <td> http://pitchfork.com/reviews/albums/22659-all-of-them-naturals/ </td> <td align="right"> 7.30 </td> <td align="right">   0 </td> <td> david glickman </td> <td> contributor </td> <td align="right"> 17173.00 </td> <td align="right">   5 </td> <td align="right">   7 </td> <td align="right">   1 </td> <td align="right"> 2017 </td> <td> rock </td> <td align="right"> 2016 </td> <td> Minneapolis’ Uranium Club seem to revel in being a... </td> <td> fashionable idiots </td> </tr>
+							  <tr> <td align="right"> 4 </td> <td> 22659 </td> <td> all of them naturals </td> <td> uranium club </td> <td> http://pitchfork.com/reviews/albums/22659-all-of-them-naturals/ </td> <td align="right"> 7.30 </td> <td align="right">   0 </td> <td> david glickman </td> <td> contributor </td> <td align="right"> 17173.00 </td> <td align="right">   5 </td> <td align="right">   7 </td> <td align="right">   1 </td> <td align="right"> 2017 </td> <td> rock </td> <td align="right"> 2016 </td> <td> Minneapolis’ Uranium Club seem to revel in being a... </td> <td> static shock </td> </tr>
+							  <tr> <td align="right"> 5 </td> <td> 22661 </td> <td> first songs </td> <td> kleenex, liliput </td> <td> http://pitchfork.com/reviews/albums/22661-first-songs/ </td> <td align="right"> 9.00 </td> <td align="right">   1 </td> <td> jenn pelly </td> <td> associate reviews editor </td> <td align="right"> 17172.00 </td> <td align="right">   4 </td> <td align="right">   6 </td> <td align="right">   1 </td> <td align="right"> 2017 </td> <td> rock </td> <td align="right"> 2016 </td> <td> Kleenex began with a crash. It transpired one nigh... </td> <td> kill rock stars </td> </tr>
+							  <tr> <td align="right"> 6 </td> <td> 22661 </td> <td> first songs </td> <td> kleenex, liliput </td> <td> http://pitchfork.com/reviews/albums/22661-first-songs/ </td> <td align="right"> 9.00 </td> <td align="right">   1 </td> <td> jenn pelly </td> <td> associate reviews editor </td> <td align="right"> 17172.00 </td> <td align="right">   4 </td> <td align="right">   6 </td> <td align="right">   1 </td> <td align="right"> 2017 </td> <td> rock </td> <td align="right"> 2016 </td> <td> Kleenex began with a crash. It transpired one nigh... </td> <td> mississippi </td> </tr>
+							  <tr> <td align="right"> 7 </td> <td> 22725 </td> <td> new start </td> <td> taso </td> <td> http://pitchfork.com/reviews/albums/22725-new-start/ </td> <td align="right"> 8.10 </td> <td align="right">   0 </td> <td> kevin lozano </td> <td> tracks coordinator </td> <td align="right"> 17172.00 </td> <td align="right">   4 </td> <td align="right">   6 </td> <td align="right">   1 </td> <td align="right"> 2017 </td> <td> electronic </td> <td align="right"> 2016 </td> <td> It is impossible to consider a given release by a ... </td> <td> teklife </td> </tr>
+							  <tr> <td align="right"> 8 </td> <td> 22722 </td> <td> insecure (music from the hbo original series) </td> <td> various artists </td> <td> http://pitchfork.com/reviews/albums/22722-insecure-music-from-the-hbo-original-series/ </td> <td align="right"> 7.40 </td> <td align="right">   0 </td> <td> vanessa okoth-obbo </td> <td> contributor </td> <td align="right"> 17171.00 </td> <td align="right">   3 </td> <td align="right">   5 </td> <td align="right">   1 </td> <td align="right"> 2017 </td> <td> NA </td> <td align="right"> 2016 </td> <td> In the pilot episode of “Insecure,” the critically... </td> <td> rca </td> </tr>
+							  <tr> <td align="right"> 9 </td> <td> 22704 </td> <td> stillness in wonderland </td> <td> little simz </td> <td> http://pitchfork.com/reviews/albums/22704-little-simz-stillness-in-wonderland/ </td> <td align="right"> 7.10 </td> <td align="right">   0 </td> <td> katherine st. asaph </td> <td> contributor </td> <td align="right"> 17171.00 </td> <td align="right">   3 </td> <td align="right">   5 </td> <td align="right">   1 </td> <td align="right"> 2017 </td> <td> rap </td> <td align="right"> 2016 </td> <td> Rapper Simbi Ajikawo, who records as Little Simz, ... </td> <td> age 101 </td> </tr>
+							  <tr> <td align="right"> 10 </td> <td> 22694 </td> <td> tehillim </td> <td> yotam avni </td> <td> http://pitchfork.com/reviews/albums/22694-tehillim/ </td> <td align="right"> 7.00 </td> <td align="right">   0 </td> <td> andy beta </td> <td> contributor </td> <td align="right"> 17171.00 </td> <td align="right">   3 </td> <td align="right">   5 </td> <td align="right">   1 </td> <td align="right"> 2017 </td> <td> electronic </td> <td align="right"> 2016 </td> <td> For the last thirty years, Israel’s electronic mus... </td> <td> stroboscopic artefacts </td> </tr>
+							</table>
+							</div>
+							</br>
+							
+							<p>
+							The table above depicts the first 10 rows of the Pitchfork dataset, which includes 17 features and more than 25.000 entries in total.
+							Albums can have multiple entries when they possess multiple genres or record labels. Therefore, the next step is to one-hot encode the genre and label features.
+							There are a total of 9 unique genres (not including the missing values), which means they can be trivially one-hot encoded by using the dcast method from the reshape2 package.
+							The label feature however has more than 3000 unique values. Therefore, I grouped the labels with less than 50 occurrences in four different groups.
+							Labels that occur less than 3 times get grouped into the "xsmall label" category. Record labels occurring between 3 and 9 times are part of the "small label" group.
+							If the label shows up between 10 and 24 times it gets tagged as "medium label", while labels with more than 24 but less than 50 occurrences are considered a "large label".
+							The record labels that occur 50 times do not belong to any category and serve as their own feature after one-hot encoding.
+							</p>
+
+							<pre class="prettyprint lang-R"><code>							
+# Flatten dateframe by one-hot encoding genres (albums can have multiple genres)
+df_ohe <- dcast(pitchfork, reviewid + title + artist + url + score + best_new_music + author + author_type +
+              pub_date + pub_weekday + pub_day + pub_month + pub_year + year + content + label ~ genre, value.var = "genre", fun = length)
+# Name the one-hot encoded genres
+names(df_ohe)[17:26] <- c("g_na", "g_electronic", "g_experimental", "g_folk.country", "g_global", "g_jazz", "g_metal", "g_pop.r.b",
+                      "g_rap", "g_rock")
+
+#We want to do the same thing wrt record labels but since there are more than 3000 unique values, group the smaller labels together
+
+# If the record label occurs less than 3 times transform the label name into "xsmall label"
+df_ohe$label[df_ohe$label %in% names(which(table(df_ohe$label) < 3))] <- "xsmall label"
+# If the record label occurs between 3 and 9 times transform the label name into "small label"
+df_ohe$label[df_ohe$label %in% names(which(table(df_ohe$label) > 2 & table(df_ohe$label) < 10))] <- "small label"
+# If the record label occurs between 10 and 24 times transform the label name into "medium label"
+df_ohe$label[df_ohe$label %in% names(which(table(df_ohe$label) > 9 & table(df_ohe$label) < 25))] <- "medium label"
+# If the record label occurs between 25 and 49 times transform the label name into "large label"
+df_ohe$label[df_ohe$label %in% names(which(table(df_ohe$label) > 24 & table(df_ohe$label) < 50))] <- "large label"
+
+# Flatten dateframe by one-hot encoding record labels (albums can have multiple record labels)
+df_ohe <- dcast(df_ohe, reviewid + title + artist + url + score + best_new_music + author + author_type +
+                  pub_date + pub_weekday + pub_day + pub_month + pub_year + year + content  + 
+                  g_na + g_electronic + g_experimental + g_folk.country + g_global + g_jazz + g_metal +
+                  g_pop.r.b + g_rap + g_rock ~ label, value.var = "label", fun = length)			
+					</code></pre>		
+
+					<p>
+					Next, in remove the albums that were reviewed multiple times due to re-releases and only retaine the first review of the record.
+					In addition, I removed a single album review instance which occurred twice under a different review ID. 
+					</p>
+					
+					<pre class="prettyprint lang-R"><code>	
+# Some albums have multiple reviews because they have been re-released for example. 
+# We only keep the first release of the record or in case the release year is the same, the first review published.
+# This also removes albums without a specified year.
+df_ohe <- df_ohe %>%
+  group_by(artist, title) %>%
+  filter(year == min(year),
+         pub_date == min(pub_date))
+
+
+# Remove last duplicate manually because it is the same review with different review id's
+df_ohe <- df_ohe[df_ohe$reviewid != "4175",]					
+					</code></pre>			
+
+					<p>
+					Furthermore, I created some figures for data exploration purposes.
+					The scatterplot below depicts the Pitchfork score for each album per year while the color indicates the year in which the review was published.
+					</p>
+					
+					<pre class="prettyprint lang-R"><code>	
+ggplot(df_ohe, aes(x = year, y = score, color = pub_year)) +
+  geom_point(size = 2) +
+  scale_colour_gradient(low = "#E68A99", high = "#A3B9AA") +
+  theme(plot.title = element_text(hjust = 0.5),
+        panel.background = element_rect(fill = "grey85"),
+        plot.background = element_rect(fill = "transparent", color = NA),
+        strip.background = element_rect(fill = "grey75", colour = NA),
+        legend.background = element_rect(fill = "transparent", color = NA)) +
+  ggtitle("Album Score per Year") +                     
+  xlab("Album Release Year") +                                  
+  ylab("Average Score") +    
+  labs(fill = "Year Published") +
+  ggsave(filename = "Album_Score_per_Year.png",                      
+         bg = "transparent", dpi = 600)
+					</code></pre>		 
+					
+					<img src="images/Project3/Album_Score_per_Year.png" width = "50%", heigth = "40.0%" alt="" />	
+
+					<p>
+					This scatterplot shows at least two important issues present in our dataset.
+					The first is that the data only contains reviews from the year 1999 and later.
+					The second issue is that albums released before 1999 clearly have a higher average rating than the albums that came out after 1999.
+					Both intuitive logical as well as the comparatively small number of reviews for older albums suggests that older albums are not simply of higher quality according to Pitchfork.
+					Instead, my assumption is that the dataset suffers from a selection bias. 
+					The reason being that there is a strong tendency to forget about bad or mediocre albums from the past and only the critically acclaimed or popular older albums tend to be revisited for a retrospective review.
+					Therefore, reviews for albums released before 1999 are dropped and not taken into account for analysis.
+					</p>
+					
+					<p>
+					Each panel below shows a histogram displaying the amount of records reviewed each year for a certain genre.
+					</p>
+					
+					
+					<pre class="prettyprint lang-R"><code>						
+df_ohe_long <- gather(df_ohe, key="genre", value="value", c("g_rock", "g_electronic", "g_experimental", "g_folk.country", "g_global",
+                                                            "g_jazz", "g_metal", "g_pop.r.b", "g_rap", "g_na"))
+df_ohe_long <- df_ohe_long[df_ohe_long$value == 1,]
+
+ggplot(df_ohe_long, aes(x = year, fill = genre)) +
+  geom_bar(stat = "count") +
+  scale_color_gradient2(low = "#E68A99", high = "#A3B9AA") +
+  facet_wrap(~genre) +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5),
+        panel.background = element_rect(fill = "grey85"),
+        plot.background = element_rect(fill = "transparent", color = NA),
+        strip.background = element_rect(fill = "grey75", colour = NA),
+        legend.background = element_rect(fill = "transparent", color = NA),
+        panel.spacing = unit(1.0, "lines")) +
+  ggtitle("Albums Reviewed per Year by Genre") +                     
+  xlab("Album Release Year") +                                  
+  ylab("Album Count") +    
+  labs(fill = "Genre") +
+  ggsave(filename = "Albums_Released_per_Genre.png",                      
+         bg = "transparent", dpi = 600)				
+					</code></pre>
+					
+					<img src="images/Project3/Albums_Released_per_Genre.png" width = "50%", heigth = "40.0%" alt="" />	
+					
+					<p>
+					The histograms make clear that most of the reviewed albums were classified as rock albums, while folk/country albums were reviewed the least amount of times by Pitchfork.
+					</p>
+					
+					<p>
+					The next graph show the distribution of albums reviewed for the top 20 record labels (including the composite features created earlier).
+					</p>
+
+					<pre class="prettyprint lang-R"><code>	
+df_ohe_long_label <- gather(df_ohe, key="label", value="value", names(df_ohe[,26:104]))
+df_ohe_long_label <- df_ohe_long_label[df_ohe_long_label$value == 1,]
+
+df_ohe_long_label %>%
+  select(reviewid,score, label) %>%
+  group_by(label) %>%
+  summarise(
+    album_count = n(),
+    avg_score = mean(score, na.rm = FALSE)) %>%
+  top_n(20, wt = album_count) %>%
+  arrange_(~ desc(album_count)) %>%
+  ggplot(., aes(x = reorder(label,-album_count), y=album_count)) +
+  geom_bar(stat = "identity", fill = "#E68A99") +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5),
+        panel.background = element_rect(fill = "grey85"),
+        plot.background = element_rect(fill = "transparent", color = NA),
+        strip.background = element_rect(fill = "grey75", colour = NA),
+        legend.background = element_rect(fill = "transparent", color = NA)) +
+  ggtitle("Record Label Distribution") +                     
+  xlab("Record Label") +                                  
+  ylab("Album Count") + 
+  geom_text(stat='identity', aes(label=album_count), vjust=-0.5) +
+  ggsave(filename = "Record_Label_Distribution.png",                      
+         bg = "transparent", dpi = 600)					
+					</code></pre>
+					
+					<img src="images/Project3/Record_Label_Distribution.png" width = "50%", height = "40.0%" alt="" />			
+
+					<p>
+					A large majority of the records were released under labels with less than 50 releases in the dataset and therefore belong to a composite category.
+					Naturally, the number of alternative categories could be adjusted for optimal model performance.
+					There are over 400 self-released albums in the final dataset and the largest record labels include Drag City, Sub Pop, Thrill Jockey, Merge, Warp and Domino with all over 200 reviewed records in the final dataset.
+					</p>
+					
+					<p>
+					I saved and exported this final dataset as csv file and also created a csv file containing nothing but the album title and artist names of the album reviews to use as reference while requesting data from the Last.fm API.
+					</p>
+					
+					<pre class="prettyprint lang-R"><code>	
+write.csv(df_ohe, "pitchfork_ohe.csv", row.names = FALSE)	
+					
+albums <- df_ohe[,c(1,2)]										
+write.csv(albums, "albums.csv", row.names = FALSE)
+					</code></pre>					
+
+					<p>
+					In a new R file, I imported the necessary packages and loaded the albums.csv file in order to obtain additional album data from the Last.fm database.
+					In order to access this database, a personal API key is required which can be obtained through the <a href = "https://www.last.fm/api/account/create">Last.fm website</a>.
+					</p>
+
+					<pre class="prettyprint lang-R"><code>	
+# Import jsonlite package to connect to the API
+# Import stringr for text manipulation after collecting the data
+library("jsonlite")
+library("stringr")
+
+# Read the .csv files containing titles and artists of nearly 18000 music albums from our Pitchfork dataset
+albums <- read.csv("albums.csv", header = TRUE,  encoding = "UTF-8")
+
+# Define API key obtained from Last FM
+api_key = "INSERT API KEY HERE"
+					</code></pre>	
+					
+					<p>
+					With this personal API key it becomes possible to request Last.fm data through their API.
+					Before initiating the API call, I transformed the data into a more appropriate format, initialized a new dataframe to store the soon-to-be obtained information in and removed hashtags from album titles because they interfere with the API call.
+					The Last.fm data requested and stored includes the album name, artist, number of listeners, playcount, duration, number of tracks and most popular user-generated tags.
+					</p>
+
+					<pre class="prettyprint lang-R"><code>	
+# Change the type of the title and artist features to be character strings
+albums$title <- as.character(albums$title)
+albums$artist <- as.character(albums$artist)
+
+# Initialize new dataframe by copying the original albums dataframe and defining new features of data we will request from the Last FM API
+album_info$LFM_title <- 0     # Album title according to Last FM
+album_info$LFM_artist <- 0    # Artist according to Last FM
+album_info$listeners <- 0     # Number of album listeners on Last FM
+album_info$playcount <- 0     # Playcount of album on Last FM
+album_info$duration <- 0      # Duration of all the tracks on the album combined
+album_info$tracks <- 0        # Number of tracks on the album
+album_info$tags <- 0          # Most popular tags for each album 
+
+
+# Find index of album titles that include hashtags
+hashtags_titles <- grep("#", album_info[,1])
+# Remove hashtags from album titles
+for(i in hashtags_titles){
+  album_info[i,1] <- gsub("#","",album_info[i,1],fixed = TRUE)
+}
+
+# Find index of artist names that include hashtags
+hashtags_artists <- grep("#", album_info[,2])
+# Remove hashtags from artist names
+album_info[hashtags_artists,2] <- gsub("#","",album_info[hashtags_artists,2],fixed = TRUE)					
+					</code></pre>	
+					
+					<p>
+					Now in order to request the data through the API, I initialized a variable called 'url' to which the API request url will be assigned.
+					Next, all the API calls are made through a for-loop that iterates over every album in the dataframe.
+					Every album gets its own url by including both album title and artist in the url.
+					The data retrieved from each API call is converted from a JSON format into an R dataframe by using the fromJSON function.
+					In case of an error, "NA" is assigned to every feature of that specific row.
+					NAs are also assigned for the tracks, duration or tags variables when no info on those specific features can be retrieved.
+					Otherwise, the values for each feature are stored in the album_info dataframe initialized earlier.
+					In addition, a random 5-10 second delay is added after every iteration to avoid exceeding the API request limit.
+					</p>
+
+					<pre class="prettyprint lang-R"><code>	
+# Initialize url variable which will contain the API request url
+url = as.character()
+
+# Iteratively request additional album data for each album from the Last FM API
+for(i in 1:nrow(album_info)){
+  
+  url[i] <- paste("http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=",api_key,"&artist=",album_info[i,2],"&album=",album_info[i,1],"&format=json&autocorrect[1]", sep = "")
+  info <- fromJSON(url[i]) # Store album information retrieved from API call
+  
+  
+  if("error" %in% names(info)){                     # In case of an error: 
+    album_info[i,3:7] <- "NA"                       # Input "NA" for all of the features and skip to the next album
+    
+  } else {                                          # In case of no error:
+    
+    album_info$LFM_title[i] <- info$album$name      # Input album name
+    album_info$LFM_artist[i] <- info$album$artist   # Input artist name(s)
+    album_info$listeners[i] <- info$album$listeners # Input album listener count
+    album_info$playcount[i] <- info$album$playcount # Input album play count
+    
+    if(length(info$album$tracks$track) == 0){       # In case there is no data on the tracks:
+      album_info$tracks[i] <- "NA"                  # Input "NA" for number of tracks
+      album_info$duration[i] <- "NA"                # Input "NA" for duration of album
+    } else{                                         # In case data on tracks is available:
+      album_info$duration[i] <- sum(as.numeric(info$album$tracks$track[,3]))  # Input duration of album
+      album_info$tracks[i] <- nrow(info$album$tracks$track)                   # Input number of tracks on album
+    }
+    
+    if(length(info$album$tags$tag) == 0){          # In case there is no data on tags:
+      album_info$tags[i] <- "NA"                   # Input "NA" for tags
+    } else{                                        # In case data on tags is available:
+      album_info$tags[i] <- toString(info$album$tags$tag[,1], sep=",")        # Input the top tags
+    }
+  }
+  Sys.sleep(sample(c(5:10),1))                     # Add 5-10 second delay before the next call
+  print(paste("iteration ",i,"/",nrow(album_info), sep = "")); flush.console() # Print progress
+}					
+					</code></pre>	
+					
+					<p>
+					After the for-loop looped through all the rows in the dataframe, I stored the new dataframe in a csv file as backup.
+					The acquired user-generated tags do require some cleaning before they are ready to be used as input for analysis.
+					First, the special characters are removed, the tags are separated by a comma and all letters are made lower case.
+					</p>
+					
+					<pre class="prettyprint lang-R"><code>	
+# Export all the retrieved data to a csv file
+write.csv(album_info, "album_info.csv", row.names = FALSE)
+
+# Load the created csv file to clean the data
+df <- read.csv("album_info.csv")
+
+# Drop rows with NAs for title, duration or tags
+df <- df[!is.na(df$LFM_title) & !is.na(df$duration) & !is.na(df$tags),]
+
+df$tags <- as.character(df$tags)
+df$tags <- sapply(df[,9], function(x) gsub( "[^,a-zA-Z0-9\\s]" , " " , x , perl = TRUE )) # Remove special characters from tags
+df$tags <- sapply(df[,9], function(x) strsplit(x, split = ", ")) # Split the tags by comma
+df$tags <- sapply(df[,9], function(x) tolower(x)) # Make all letters of the tags lower case					
+					</code></pre>
+					
+					<p>
+					Second, I only want to include tags that provide information on the characteristics of the music itself such as "progressive rock" or "minimal techno".
+					Therefore, I removed all tags that include value judgements such as "beautiful" or random tags such as "to check out" or "registret" through manual selection.
+					The reason being that if we'd like to predict a brand new album's Pitchfork rating there wouldn't be any way to make use of such tags.
+					</p>	
+					
+					<pre class="prettyprint lang-R"><code>	
+'%!in%' <- Negate('%in%') # 'is not in' operator
+df$tags <- sapply(df[,9], function(x) x[x %!in% c(1800:2100)])
+df$tags <- sapply(df[,9], function(x) x[x %!in% c("vinyl", "wishlist", "seen live", "rather good stuff", "freepurp1e", "my gang 10", "playlist", "wfmu heavily played records",
+                                                    "beautiful", "registret", "love at first listen", "to check out", "awesome", "merkliste", "my gang 11")])
+
+# Remove tags that include the words "best of", "releases", "album", "favorites" or "favourites"
+df$tags <- sapply(df[,9], function(x) x[!grepl("best of", x)])
+df$tags <- sapply(df[,9], function(x) x[!grepl("releases", x)])
+df$tags <- sapply(df[,9], function(x) x[!grepl("album", x)])
+df$tags <- sapply(df[,9], function(x) x[!grepl("favorites", x)])
+df$tags <- sapply(df[,9], function(x) x[!grepl("favourites", x)])					
+					</code></pre>	
+					
+					<p>
+					Third, I only include the tags that occur more than 20 times, because otherwise the amount of features would become too large.
+					A feature column is created for each of these popular tags.
+					</p>
+					
+					<pre class="prettyprint lang-R"><code>	
+tags <- unlist(df$tags) # Get all tags
+tagfreq <- sort(table(tags),decreasing=TRUE)[1:500] # Create table with 500 most used tags
+tagdf <- as.data.frame(tagfreq[tagfreq >= 20]) # Create dataframe of tags used more than 20 times
+df[,as.character(tagdf[,1])] <- NA # Add tags that occur more than 20 times as empty feature columns to the 'df' dataframe
+					</code></pre>		
+					<p>
+					Fourth, the empty feature columns are filled in by means of one-hot encoding.
+					Consequently, each tag has its own binary feature column that indicates whether the tag is part of the album's popular tags on Last.fm.
+					</p>
+					<pre class="prettyprint lang-R"><code>	
+# One-hot encode empty feature columns
+for(i in 1:nrow(df)){
+  
+  for(j in 1:ncol(df[,-c(1:9)])){
+    
+    if (colnames(df[j+9]) %in% df[[i,9]]){
+      df[i,j+9] <- 1
+    } else {
+        df[i,j+9] <- 0
+      }
+  }
+}
+df$tags <- NULL
+write.csv(df[,-9], "lastfm.csv", row.names = FALSE)					
+					</code></pre>							
+					
+					<font color="black"><b> last.fm dataframe </b></font>
+					<div style="overflow:auto;display: block; white-space: nowrap;">	
+					<table>
+						<tr> <th>  </th> <th> title </th> <th> artist </th> <th> LFM_title </th> <th> LFM_artist </th> <th> listeners </th> <th> playcount </th> <th> duration </th> <th> tracks </th> <th> indie </th> <th> electronic </th> <th> rock </th> <th> indie rock </th> <th> experimental </th> <th> hip hop </th> <th> alternative </th> <th> folk </th> <th> ambient </th> <th> indie pop </th> <th> alternative rock </th> <th> 00s </th> <th> electronica </th> <th> pop </th> <th> singer songwriter </th> <th> rap </th> <th> post rock </th> <th> female vocalists </th> <th> psychedelic </th> <th> post punk </th> <th> 10s </th> <th> idm </th> <th> shoegaze </th> <th> british </th> <th> instrumental </th> <th> noise </th> <th> dream pop </th> <th> punk </th> <th> soul </th> <th> metal </th> <th> noise rock </th> <th> lo fi </th> <th> jazz </th> <th> techno </th> <th> drone </th> <th> alt country </th> <th> psychedelic rock </th> <th> chillout </th> <th> downtempo </th> <th> electro </th> <th> garage rock </th> <th> trip hop </th> <th> americana </th> <th> synthpop </th> <th> dance </th> <th> black metal </th> <th> minimal </th> <th> house </th> <th> canadian </th> <th> classic rock </th> <th> dubstep </th> <th> doom metal </th> <th> funk </th> <th> experimental rock </th> <th> folk rock </th> <th> acoustic </th> <th> avant garde </th> <th> 90s </th> <th> britpop </th> <th> hardcore </th> <th> rnb </th> <th> new wave </th> <th> progressive rock </th> <th> 70s </th> <th> electropop </th> <th> post hardcore </th> <th> punk rock </th> <th> 80s </th> <th> stoner rock </th> <th> country </th> <th> industrial </th> <th> dub </th> <th> progressive metal </th> <th> emo </th> <th> sludge </th> <th> emusic </th> <th> hard rock </th> <th> underground hip hop </th> <th> death metal </th> <th> math rock </th> <th> indie folk </th> <th> swedish </th> <th> thrill jockey </th> <th> 2010s </th> <th> minimal techno </th> <th> sludge metal </th> <th> japanese </th> <th> live </th> <th> noise pop </th> <th> warp </th> <th> glitch </th> <th> indietronica </th> <th> usa </th> <th> indie electronic </th> <th> heavy metal </th> <th> american </th> <th> neo psychedelia </th> <th> ninja tune </th> <th> freak folk </th> <th> blues </th> <th> mellow </th> <th> soundtrack </th> <th> 2000s </th> <th> 60s </th> <th> art rock </th> <th> stoner metal </th> <th> gammarec </th> <th> grunge </th> <th> post metal </th> <th> anticon </th> <th> art pop </th> <th> power pop </th> <th> abstract </th> <th> disco </th> <th> piano </th> <th> slowcore </th> <th> 4ad </th> <th> electroclash </th> <th> french </th> <th> chamber pop </th> <th> grindcore </th> <th> pop punk </th> <th> psychedelic folk </th> <th> chill </th> <th> experimental hip hop </th> <th> synth pop </th> <th> psychedelic pop </th> <th> contemporary classical </th> <th> gangsta rap </th> <th> hiphop </th> <th> krautrock </th> <th> thrash metal </th> <th> trap </th> <th> atmospheric black metal </th> <th> blues rock </th> <th> grime </th> <th> r b </th> <th> cover </th> <th> mathcore </th> <th> alternative hip hop </th> <th> dark ambient </th> <th> guitar </th> <th> modern classical </th> <th> reggae </th> <th> female </th> <th> metalcore </th> <th> pop rock </th> <th> space rock </th> <th> world </th> <th> ethereal </th> <th> future garage </th> <th> hardcore punk </th> <th> stones throw </th> <th> emd </th> <th> seattle </th> <th> twee </th> <th> chillwave </th> <th> kranky </th> <th> neo soul </th> <th> twee pop </th> <th> domino </th> <th> female vocalist </th> <th> free jazz </th> <th> german </th> <th> kompakt </th> <th> brooklyn </th> <th> darkwave </th> <th> deep house </th> <th> doom </th>  </tr>
+						<tr> <td align="right"> 1 </td> <td> mezzanine </td> <td> massive attack </td> <td> Mezzanine </td> <td> Massive Attack </td> <td align="right"> 1532300 </td> <td align="right"> 32886032 </td> <td align="right"> 3813 </td> <td align="right">  11 </td> <td align="right"> 0.00 </td> <td align="right"> 1.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 1.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 1.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 1.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> </tr>
+						<tr> <td align="right"> 2 </td> <td> prelapsarian </td> <td> krallice </td> <td> Prelapsarian </td> <td> Krallice </td> <td align="right"> 2509 </td> <td align="right"> 19260 </td> <td align="right"> 2087 </td> <td align="right">   4 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 1.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 1.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> </tr>
+						<tr> <td align="right"> 7 </td> <td> stillness in wonderland </td> <td> little simz </td> <td> Stillness In Wonderland </td> <td> Little Simz </td> <td align="right"> 24713 </td> <td align="right"> 203305 </td> <td align="right"> 2664 </td> <td align="right">  15 </td> <td align="right"> 0.00 </td> <td align="right"> 1.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 1.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 1.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 1.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 1.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> </tr>
+						<tr> <td align="right"> 9 </td> <td> reflection </td> <td> brian eno </td> <td> Reflection </td> <td> Brian Eno </td> <td align="right"> 13078 </td> <td align="right"> 51604 </td> <td align="right"> 3297 </td> <td align="right">   4 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 1.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> </tr>
+						<tr> <td align="right"> 12 </td> <td> run the jewels 3 </td> <td> run the jewels </td> <td> Run the Jewels 3 </td> <td> Run the Jewels </td> <td align="right"> 144398 </td> <td align="right"> 4634286 </td> <td align="right"> 3087 </td> <td align="right">  14 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 1.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 1.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 1.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> <td align="right"> 0.00 </td> </tr>
+					</table>
+					</div>
+					<br>
+					
+					
+					<p>
+					Finally, the new dataframe is saved as a csv file and is loaded into a new R file specific to the analysis and modeling.
+					In this new file the required packages are loaded and the Pitchfork and Last.fm datasets are merged into a single dataframe after removing the tags that already exist as a record label feature.
+					</p>
+					
+					<pre class="prettyprint lang-R"><code>					
+library("caret")
+library("ggplot2")
+library("dplyr")
+library("tidyr")
+library("MASS")
+
+set.seed(123)
+
+pf <- read.csv("pitchfork_ohe.csv", header = TRUE)
+lfm <- read.csv("lastfm.csv", header = TRUE)
+
+# Remove rownames and user-generated tags that already exist as record labels
+rownames(pf) <- NULL
+rownames(lfm) <- NULL
+lfm$stones.throw <- NULL
+lfm$X4ad <- NULL
+lfm$kranky <- NULL
+lfm$kompakt <- NULL
+lfm$domino <- NULL
+lfm$warp <- NULL
+lfm$anticon <- NULL
+lfm$ninja.tune <- NULL
+lfm$thrill.jockey <- NULL
+
+# Merge pitchfork and last.fm datasets
+mrg_df <- merge(x = pf, y = lfm, by = c("title", "artist"), all.x = FALSE, all.y = TRUE)					
+					</code></pre>					
+					
+					<p>
+					Furthermore, to be able to differentiate between the record labels and tags, I added the prefix "l_" to labels and "t_" to tags.
+					There were also three cases in which albums had slightly different names between the two datasets. In those cases the names have been made consistent between the two dataframes.
+					Because of the fact that the dataset only contains reviews published in 1999 or later as identified earlier, only reviews for albums after 1998 are retained.
+					Most features are binary which does not leave much room for feature engineering. Although, the average track length could easily be computed from the duration and tracks features.
+					I expect that relatively long or short songs could have a specific effect on Pitchfork album rating and Last.fm playcount. Therefore, I added this extra feature to the dataset.
+					</p>
+					
+					<pre class="prettyprint lang-R"><code>					
+# Create prefixes for labels (l_) and tags (t_)
+colnames(mrg_df)[26:104] <- paste("l", colnames(mrg_df[,c(26:104)]), sep = "_")
+colnames(mrg_df)[111:270] <- paste("t", colnames(mrg_df[,c(111:270)]), sep = "_")
+
+# Fix inconsistent names across the two datasets
+mrg_df[is.na(mrg_df$score),][1:3]
+mrg_df[mrg_df$title == "rockabyebaby" & mrg_df$artist == "cassie",][3:104] <- pf[pf$title == "#rockabyebaby" & pf$artist == "cassie",][3:104]
+mrg_df[mrg_df$title == "duet for guitars 2" & mrg_df$artist == "m. ward",][3:104] <- pf[pf$title == "duet for guitars #2" & pf$artist == "m. ward",][3:104]
+mrg_df[mrg_df$title == "suite 420" & mrg_df$artist == "devin the dude",][3:104] <- pf[pf$title == "suite #420" & pf$artist == "devin the dude",][3:104]
+
+# Only retain albums that were released after 1998
+mrg_df <- mrg_df[mrg_df$year>=1999,]
+
+
+# Retain the features used for analysis in new dataframe
+df <- mrg_df[,c(1:2,5,14,17:104,107:270)] 	
+
+# Compute average track length in seconds for each album
+df$avg_track_length <- df$duration/df$tracks				
+					</code></pre>				
+
+					<p>
+					As the goal is to predict both Pitchfork album rating and Last.fm playcount, looking at the respective distributions of both target variables will prove helpful for assessing the quality of the predictions made.
+					Below are the histograms of both the review score and the playcount respectively.
+					</p>
+					
+					<img src="images/Project3/Album_Score_Histogram.png" width = "40%" height = "30.0%" alt="" />
+					
+					<img src="images/Project3/Album_Playcount_Histogram.png" width = "40%" height = "50.0%" alt="" />					
+					
+					<p>
+					The Pitchfork album score histogram above shows that its distribution is slightly skewed to the left.
+					However, the majority of the ratings lie in between a score of 7 and 8. The mean score is 6.96 while the median score is 7.20.
+					It is apparent that extreme scores such as 0 or 10 are rarely given, which is something that would most likely be different if these ratings would be compared with user ratings.
+					In contrast, the album playcount histogram has an extremely right-skewed distribution with a mean playcount of 1.526.813 and a median of 272.300.
+					This implies that half of the albums have less than 272.300 plays, which is in stark contrast to albums like XX by The XX and In Rainbows by Radiohead which have close to 80 million plays.
+					It is important to note that this numeric discrepancy will make it remarkably challenging to predict an album's playcount with a high accuracy.
+					</p>
+					
+					<p>
+					Before jumping into linear regression analysis, it is important to examine whether there is multicollinearity between the features.
+					The code below identifies the ten feature pairs with the highest correlation.
+					</p>					
+					
+					
+					<pre class="prettyprint lang-R"><code>					
+# Examine the features with the highest collinearity
+cor(df[,-c(1,2)]) %>%
+  as.data.frame() %>%
+  mutate(var1 = rownames(.)) %>%
+  gather(var2, value, -var1) %>%
+  arrange(desc(value)) %>%
+  group_by(value) %>%
+  filter(row_number()==1 & value != 1) %>%
+  top_n(10)					
+					</code></pre>					
+					
+					<font color="black"><b> most correlated feature pairs </b></font>
+					<div style="overflow:auto;display: block; white-space: nowrap;">	
+					<table >
+						<tr> <th>  </th> <th> var1 </th> <th> var2 </th> <th> value </th>  </tr>
+						<tr> <td align="right"> 1 </td> <td> playcount </td> <td> listeners </td> <td align="right"> 0.91 </td> </tr>
+						<tr> <td align="right"> 2 </td> <td> tracks </td> <td> duration </td> <td align="right"> 0.75 </td> </tr>
+						<tr> <td align="right"> 3 </td> <td> t_hip.hop </td> <td> g_rap </td> <td align="right"> 0.68 </td> </tr>
+						<tr> <td align="right"> 4 </td> <td> t_modern.classical </td> <td> t_contemporary.classical </td> <td align="right"> 0.60 </td> </tr>
+						<tr> <td align="right"> 5 </td> <td> t_rap </td> <td> g_rap </td> <td align="right"> 0.57 </td> </tr>
+						<tr> <td align="right"> 6 </td> <td> t_rap </td> <td> t_hip.hop </td> <td align="right"> 0.57 </td> </tr>
+						<tr> <td align="right"> 7 </td> <td> t_americana </td> <td> t_alt.country </td> <td align="right"> 0.55 </td> </tr>
+						<tr> <td align="right"> 8 </td> <td> t_metalcore </td> <td> t_mathcore </td> <td align="right"> 0.48 </td> </tr>
+						<tr> <td align="right"> 9 </td> <td> t_atmospheric.black.metal </td> <td> t_black.metal </td> <td align="right"> 0.46 </td> </tr>
+						<tr> <td align="right"> 10 </td> <td> t_stoner.metal </td> <td> t_doom.metal </td> <td align="right"> 0.36 </td> </tr>
+					</table>
+					</div>
+					<br>
+					
+					<p>
+					The table above shows that there are no extremely high correlations apart from the one between the number of listeners and the playcount, which makes intuitive sense.
+					The number of listeners will not be used to predict Pitchfork review score or playcount anyway. Therefore, it cannot harm the results in any way.
+					There is another sizeable correlation between the duration of the album and the number of tracks, which is also logical.
+					Since the new average track length feature probably captures most of the interaction effect between the two features, removing one of them is most likely not going to make a huge difference.
+					However, because the correlation is not extremely high, I decided to include both features and simply keep an eye on them during the modeling process.
+					The high correlations between the hiphop tags and rap tags or genre also make sense. 
+					I investigated a solution in which tags and genres of the same name are merged into a single feature with a "1" value if either of the features holds a "1" value.
+					Interestingly, the model performance decreased after implementation. 
+					This could indicate that the differences in the data between genres assigned by Pitchfork and popular user-generated labels of the same name are informative.
+					The collinearity of the remaining pairs is not high enough to warrant further action.
+					</p>					
+					
+					<p>
+					The final step in the data preparation process consists of rescaling the numeric features in the dataset, so that all the features in the dataset are on the same scale.
+					In this case between 0 and 1. This is particularly helpful for models such as k-nearest neighbour classifiers that are usually based on the Euclidean distance metric.
+					</p>
+					
+					<pre class="prettyprint lang-R"><code>					
+# Rescale the numeric features so all features are on the same scale
+df$year <- (df$year -min(df$year))/(max(df$year)-min(df$year))
+df$duration <- (df$duration -min(df$duration))/(max(df$duration)-min(df$duration))
+df$tracks <- (df$tracks -min(df$tracks))/(max(df$tracks)-min(df$tracks))
+df$listeners <- (df$listeners -min(df$listeners))/(max(df$listeners)-min(df$listeners))
+df$avg_track_length <- (df$avg_track_length -min(df$avg_track_length))/(max(df$avg_track_length)-min(df$avg_track_length))			
+					</code></pre>		
+
+					
+					<font color="black"><b>final dataframe</b></font>
+					<div style="overflow:auto;display: block; white-space: nowrap;">
+					<table >
+						<tr> <th>  </th> <th> title </th> <th> artist </th> <th> score </th> <th> year </th> <th> g_electronic </th> <th> g_experimental </th> <th> g_folk.country </th> <th> g_global </th> <th> g_jazz </th> <th> g_metal </th> <th> g_pop.r.b </th> <th> g_rap </th> <th> g_rock </th> <th> l_X.k7 </th> <th> l_X4ad </th> <th> l_anti. </th> <th> l_anticon </th> <th> l_arts...crafts </th> <th> l_asthmatic.kitty </th> <th> l_astralwerks </th> <th> l_atlantic </th> <th> l_ato </th> <th> l_barsuk </th> <th> l_capitol </th> <th> l_captured.tracks </th> <th> l_carpark </th> <th> l_columbia </th> <th> l_constellation </th> <th> l_dead.oceans </th> <th> l_def.jam </th> <th> l_dfa </th> <th> l_domino </th> <th> l_drag.city </th> <th> l_emi </th> <th> l_epic </th> <th> l_fat.cat </th> <th> l_fat.possum </th> <th> l_frenchkiss </th> <th> l_geffen </th> <th> l_ghostly </th> <th> l_hydra.head </th> <th> l_in.the.red </th> <th> l_interscope </th> <th> l_ipecac </th> <th> l_island </th> <th> l_jagjaguwar </th> <th> l_k </th> <th> l_kill.rock.stars </th> <th> l_kompakt </th> <th> l_kranky </th> <th> l_large.label </th> <th> l_legacy </th> <th> l_light.in.the.attic </th> <th> l_matador </th> <th> l_medium.label </th> <th> l_merge </th> <th> l_mexican.summer </th> <th> l_mute </th> <th> l_ninja.tune </th> <th> l_nonesuch </th> <th> l_numero.group </th> <th> l_paper.bag </th> <th> l_parlophone </th> <th> l_polyvinyl </th> <th> l_profound.lore </th> <th> l_rca </th> <th> l_relapse </th> <th> l_reprise </th> <th> l_rhino </th> <th> l_rough.trade </th> <th> l_sacred.bones </th> <th> l_saddle.creek </th> <th> l_secretly.canadian </th> <th> l_self.released </th> <th> l_small.label </th> <th> l_smalltown.supersound </th> <th> l_sony </th> <th> l_southern.lord </th> <th> l_stones.throw </th> <th> l_sub.pop </th> <th> l_temporary.residence </th> <th> l_thrill.jockey </th> <th> l_touch.and.go </th> <th> l_universal </th> <th> l_v2 </th> <th> l_vagrant </th> <th> l_virgin </th> <th> l_warner.bros. </th> <th> l_warp </th> <th> l_xl </th> <th> l_xsmall.label </th> <th> l_yep.roc </th> <th> listeners </th> <th> playcount </th> <th> duration </th> <th> tracks </th> <th> t_indie </th> <th> t_electronic </th> <th> t_rock </th> <th> t_indie.rock </th> <th> t_experimental </th> <th> t_hip.hop </th> <th> t_alternative </th> <th> t_folk </th> <th> t_ambient </th> <th> t_indie.pop </th> <th> t_alternative.rock </th> <th> t_X00s </th> <th> t_electronica </th> <th> t_pop </th> <th> t_singer.songwriter </th> <th> t_rap </th> <th> t_post.rock </th> <th> t_female.vocalists </th> <th> t_psychedelic </th> <th> t_post.punk </th> <th> t_X10s </th> <th> t_idm </th> <th> t_shoegaze </th> <th> t_british </th> <th> t_instrumental </th> <th> t_noise </th> <th> t_dream.pop </th> <th> t_punk </th> <th> t_soul </th> <th> t_metal </th> <th> t_noise.rock </th> <th> t_lo.fi </th> <th> t_jazz </th> <th> t_techno </th> <th> t_drone </th> <th> t_alt.country </th> <th> t_psychedelic.rock </th> <th> t_chillout </th> <th> t_downtempo </th> <th> t_electro </th> <th> t_garage.rock </th> <th> t_trip.hop </th> <th> t_americana </th> <th> t_synthpop </th> <th> t_dance </th> <th> t_black.metal </th> <th> t_minimal </th> <th> t_house </th> <th> t_canadian </th> <th> t_classic.rock </th> <th> t_dubstep </th> <th> t_doom.metal </th> <th> t_funk </th> <th> t_experimental.rock </th> <th> t_folk.rock </th> <th> t_acoustic </th> <th> t_avant.garde </th> <th> t_X90s </th> <th> t_britpop </th> <th> t_hardcore </th> <th> t_rnb </th> <th> t_new.wave </th> <th> t_progressive.rock </th> <th> t_X70s </th> <th> t_electropop </th> <th> t_post.hardcore </th> <th> t_punk.rock </th> <th> t_X80s </th> <th> t_stoner.rock </th> <th> t_country </th> <th> t_industrial </th> <th> t_dub </th> <th> t_progressive.metal </th> <th> t_emo </th> <th> t_sludge </th> <th> t_emusic </th> <th> t_hard.rock </th> <th> t_underground.hip.hop </th> <th> t_death.metal </th> <th> t_math.rock </th> <th> t_indie.folk </th> <th> t_swedish </th> <th> t_X2010s </th> <th> t_minimal.techno </th> <th> t_sludge.metal </th> <th> t_japanese </th> <th> t_live </th> <th> t_noise.pop </th> <th> t_glitch </th> <th> t_indietronica </th> <th> t_usa </th> <th> t_indie.electronic </th> <th> t_heavy.metal </th> <th> t_american </th> <th> t_neo.psychedelia </th> <th> t_freak.folk </th> <th> t_blues </th> <th> t_mellow </th> <th> t_soundtrack </th> <th> t_X2000s </th> <th> t_X60s </th> <th> t_art.rock </th> <th> t_stoner.metal </th> <th> t_gammarec </th> <th> t_grunge </th> <th> t_post.metal </th> <th> t_art.pop </th> <th> t_power.pop </th> <th> t_abstract </th> <th> t_disco </th> <th> t_piano </th> <th> t_slowcore </th> <th> t_electroclash </th> <th> t_french </th> <th> t_chamber.pop </th> <th> t_grindcore </th> <th> t_pop.punk </th> <th> t_psychedelic.folk </th> <th> t_chill </th> <th> t_experimental.hip.hop </th> <th> t_synth.pop </th> <th> t_psychedelic.pop </th> <th> t_contemporary.classical </th> <th> t_gangsta.rap </th> <th> t_hiphop </th> <th> t_krautrock </th> <th> t_thrash.metal </th> <th> t_trap </th> <th> t_atmospheric.black.metal </th> <th> t_blues.rock </th> <th> t_grime </th> <th> t_r.b </th> <th> t_cover </th> <th> t_mathcore </th> <th> t_alternative.hip.hop </th> <th> t_dark.ambient </th> <th> t_guitar </th> <th> t_modern.classical </th> <th> t_reggae </th> <th> t_female </th> <th> t_metalcore </th> <th> t_pop.rock </th> <th> t_space.rock </th> <th> t_world </th> <th> t_ethereal </th> <th> t_future.garage </th> <th> t_hardcore.punk </th> <th> t_emd </th> <th> t_seattle </th> <th> t_twee </th> <th> t_chillwave </th> <th> t_neo.soul </th> <th> t_twee.pop </th> <th> t_female.vocalist </th> <th> t_free.jazz </th> <th> t_german </th> <th> t_brooklyn </th> <th> t_darkwave </th> <th> t_deep.house </th> <th> t_doom </th> <th> avg_track_length </th>  </tr>
+						<tr> <td align="right"> 1 </td> <td> 'sno angel like you </td> <td> howe gelb </td> <td align="right"> 8.30 </td> <td align="right"> 0.39 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   1 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   1 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right"> 0.01 </td> <td align="right"> 278700 </td> <td align="right"> 0.07 </td> <td align="right"> 0.07 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   1 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   1 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right"> 0.04 </td> </tr>
+						<tr> <td align="right"> 3 </td> <td> "couples" </td> <td> the long blondes </td> <td align="right"> 5.80 </td> <td align="right"> 0.50 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   1 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   1 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right"> 0.00 </td> <td align="right"> 132491 </td> <td align="right"> 0.06 </td> <td align="right"> 0.05 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right"> 0.05 </td> </tr>
+						<tr> <td align="right"> 5 </td> <td> "what is this heart?" </td> <td> how to dress well </td> <td align="right"> 8.80 </td> <td align="right"> 0.83 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   1 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   1 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   1 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right"> 0.02 </td> <td align="right"> 787339 </td> <td align="right"> 0.08 </td> <td align="right"> 0.06 </td> <td align="right">   0 </td> <td align="right">   1 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   1 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   1 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right"> 0.05 </td> </tr>
+						<tr> <td align="right"> 6 </td> <td> $ </td> <td> mark sultan </td> <td align="right"> 6.80 </td> <td align="right"> 0.61 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   1 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   1 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right"> 0.00 </td> <td align="right"> 69350 </td> <td align="right"> 0.07 </td> <td align="right"> 0.07 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right"> 0.05 </td> </tr>
+						<tr> <td align="right"> 7 </td> <td> $ingle$ 2 </td> <td> ty segall </td> <td align="right"> 7.90 </td> <td align="right"> 0.83 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   1 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   1 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right"> 0.00 </td> <td align="right"> 35247 </td> <td align="right"> 0.05 </td> <td align="right"> 0.06 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right">   0 </td> <td align="right"> 0.04 </td> </tr>
+					</table>	
+					</div>
+					<br>
+					
+					<p>
+					The final dataset contains 10.369 album reviews and 257 features.
+					In the next section the modeling stage is discussed.
+					</p>					
+					
+						</div>
+					</section>
+											
+					
+
+				<!-- Modeling -->
+					<section id="modeling" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Modeling</h2>
+							</div>
+							</br>
+
+							<p>
+							The first half of this section is dedicated to predicting the Pitchfork album score while the second half does the same thing but for the Last.fm playcount.
+							First, I create linear regression model and examine how well it fits to the data as well as determine which features have a significant positive or negative impact on the Pitchfork review score (and playcount).
+							In addition, I use the linear model to determine which features to include in the regression models meant for prediction.
+							Second, I use the caret package to train a linear regression model, a decision tree and a k-nn regression model for review score (and playcount) prediction.
+							Each model's performance is assessed through 10-fold cross validation.
+							I decided to stick with these fairly standard models as opposed to more demanding models like neural networks or random forests because the majority of features are binary.
+							Consequently, it is very unlikely to witness complex nonlinear patterns in this particular dataset.
+							</p>
+							
+							<p>
+							To achieve the best performing linear model, I first created a linear regression model with all the available variables except for title, artist, listeners and playcount.
+							Afterwards, I kept removing the least significant variable until the adjusted R-squared would stop increasing.
+							I use the adjusted R-squared instead of the traditional R-squared to account for the fact that the R-squared keeps increasing with additional variables even if the variables are not informative.
+							The code for the two models below indicates which features have been dropped.
+							After the exclusion of said features, the adjusted R-squared increased from 0.0971 to 0.1027 in our final linear model.
+							This implies that our final model can explain over 10% of the variation in the Pitchfork review score.
+							In the grand scheme of things this percentage might not seem that substantial.
+							However, considering the fact that we do not use any features that are indicative of an album's quality or popularity, it surprised me that 10% of the variation could be explained by features like album duration, release year, genres and record labels.
+							The final model's coefficients and their significance are displayed below.
+							</p>
+							
+							<pre class="prettyprint lang-R"><code>
+# LINEAR REGRESSION ANALYSIS
+
+
+# Full linear model including all features in the dataset except for title, artist, listeners and playcount
+lm_full <- lm(
+  score ~ . - title - artist - listeners - playcount,
+  data = df
+)
+summary(lm_full)
+# Adj R^2: 0.0971
+
+
+# Incrimentally take out insignificant variables until the adjusted R^2 stops increasing
+lm_final <- lm(
+  score ~ . - title - artist - listeners - playcount - t_X00s - t_electronica - t_female.vocalist - t_abstract
+  - t_chillwave - t_minimal.techno - t_rap - t_country - t_jazz - t_gangsta.rap - l_kompakt - t_punk - t_female - t_blues.rock
+  - t_X70s - t_thrash.metal - l_anticon - l_anti. - t_japanese - t_acoustic - t_shoegaze - l_legacy - l_carpark - t_hardcore
+  - tracks - t_folk.rock - g_experimental - l_def.jam - t_experimental.hip.hop - t_seattle - t_doom - t_new.wave
+  - t_britpop - l_arts...crafts - l_parlophone - t_twee - t_dark.ambient - l_hydra.head - t_contemporary.classical - year
+  - t_freak.folk - t_heavy.metal - t_glitch - t_funk - t_metalcore - t_synth.pop - t_neo.psychedelia - t_dub - t_progressive.metal
+  - t_electropop - l_xsmall.label - l_ninja.tune - t_french - t_stoner.metal - t_disco - t_atmospheric.black.metal - t_indie.electronic
+  - t_X2010s - t_chill - t_twee.pop - t_psychedelic.folk - t_guitar - t_alternative.hip.hop - t_neo.soul - t_dubstep - t_emusic
+  - l_barsuk - t_dance - t_instrumental - t_live - t_math.rock - t_female.vocalists - t_darkwave - t_world - t_ethereal - l_X.k7
+  - t_X2000s - l_fat.possum - t_indietronica - t_mathcore - t_brooklyn - t_idm - t_german - t_grindcore - l_yep.roc - l_emi,
+  data = df
+)
+summary(lm_final)
+# Adj R2 increased from 0.0971 to 0.1027					
+							</code></pre>			
+							
+							<font color="black"><b>final ratings linear regression model coefficients</b></font>
+							<div style="height:600px; width: 50%; margin:0 auto;  overflow-y: scroll;">
+							<table class="dataframe" style = "width: 100%" >
+								<tr> <th>  </th> <th> Variable </th> <th> Coefficient </th>  </tr>
+								<tr> <td align="right"> 1 </td> <td> (Intercept) </td> <td> 6.695 *** </td> </tr>
+								<tr> <td align="right"> 2 </td> <td> duration </td> <td> 2.367 *** </td> </tr>
+								<tr> <td align="right"> 3 </td> <td> t_X60s </td> <td> 1.611 *** </td> </tr>
+								<tr> <td align="right"> 4 </td> <td> l_numero.group </td> <td> 1.255 *** </td> </tr>
+								<tr> <td align="right"> 5 </td> <td> avg_track_length </td> <td> 0.94 ** </td> </tr>
+								<tr> <td align="right"> 6 </td> <td> l_in.the.red </td> <td> 0.778 ** </td> </tr>
+								<tr> <td align="right"> 7 </td> <td> t_deep.house </td> <td> 0.768 ** </td> </tr>
+								<tr> <td align="right"> 8 </td> <td> l_dfa </td> <td> 0.691 ** </td> </tr>
+								<tr> <td align="right"> 9 </td> <td> l_domino </td> <td> 0.638 *** </td> </tr>
+								  <tr> <td align="right"> 10 </td> <td> l_profound.lore </td> <td> 0.612 ** </td> </tr>
+								  <tr> <td align="right"> 11 </td> <td> l_drag.city </td> <td> 0.576 *** </td> </tr>
+								  <tr> <td align="right"> 12 </td> <td> t_X90s </td> <td> 0.571 ** </td> </tr>
+								  <tr> <td align="right"> 13 </td> <td> l_merge </td> <td> 0.57 *** </td> </tr>
+								  <tr> <td align="right"> 14 </td> <td> t_emd </td> <td> 0.555 * </td> </tr>
+								  <tr> <td align="right"> 15 </td> <td> l_light.in.the.attic </td> <td> 0.549 </td> </tr>
+								  <tr> <td align="right"> 16 </td> <td> t_X80s </td> <td> 0.544 * </td> </tr>
+								  <tr> <td align="right"> 17 </td> <td> l_frenchkiss </td> <td> 0.53 ** </td> </tr>
+								  <tr> <td align="right"> 18 </td> <td> t_art.pop </td> <td> 0.518 * </td> </tr>
+								  <tr> <td align="right"> 19 </td> <td> l_jagjaguwar </td> <td> 0.511 *** </td> </tr>
+								  <tr> <td align="right"> 20 </td> <td> t_r.b </td> <td> 0.504 * </td> </tr>
+								  <tr> <td align="right"> 21 </td> <td> l_matador </td> <td> 0.484 *** </td> </tr>
+								  <tr> <td align="right"> 22 </td> <td> l_X4ad </td> <td> 0.483 *** </td> </tr>
+								  <tr> <td align="right"> 23 </td> <td> t_post.hardcore </td> <td> 0.447 ** </td> </tr>
+								  <tr> <td align="right"> 24 </td> <td> t_space.rock </td> <td> 0.446 . </td> </tr>
+								  <tr> <td align="right"> 25 </td> <td> t_americana </td> <td> 0.438 ** </td> </tr>
+								  <tr> <td align="right"> 26 </td> <td> l_constellation </td> <td> 0.417 . </td> </tr>
+								  <tr> <td align="right"> 27 </td> <td> t_sludge.metal </td> <td> 0.41 * </td> </tr>
+								  <tr> <td align="right"> 28 </td> <td> l_paper.bag </td> <td> 0.408 . </td> </tr>
+								  <tr> <td align="right"> 29 </td> <td> l_sub.pop </td> <td> 0.401 *** </td> </tr>
+								  <tr> <td align="right"> 30 </td> <td> l_secretly.canadian </td> <td> 0.395 ** </td> </tr>
+								  <tr> <td align="right"> 31 </td> <td> l_kranky </td> <td> 0.391 ** </td> </tr>
+								  <tr> <td align="right"> 32 </td> <td> t_experimental.rock </td> <td> 0.374 * </td> </tr>
+								  <tr> <td align="right"> 33 </td> <td> g_folk.country </td> <td> 0.373 ** </td> </tr>
+								  <tr> <td align="right"> 34 </td> <td> t_minimal </td> <td> 0.37 ** </td> </tr>
+								  <tr> <td align="right"> 35 </td> <td> t_pop.punk </td> <td> 0.37 </td> </tr>
+								  <tr> <td align="right"> 36 </td> <td> l_rhino </td> <td> 0.368 </td> </tr>
+								  <tr> <td align="right"> 37 </td> <td> t_garage.rock </td> <td> 0.366 ** </td> </tr>
+								  <tr> <td align="right"> 38 </td> <td> t_death.metal </td> <td> 0.359 * </td> </tr>
+								  <tr> <td align="right"> 39 </td> <td> t_free.jazz </td> <td> 0.356 </td> </tr>
+								  <tr> <td align="right"> 40 </td> <td> l_mexican.summer </td> <td> 0.352 </td> </tr>
+								  <tr> <td align="right"> 41 </td> <td> t_sludge </td> <td> 0.352 . </td> </tr>
+								  <tr> <td align="right"> 42 </td> <td> t_swedish </td> <td> 0.35 * </td> </tr>
+								  <tr> <td align="right"> 43 </td> <td> l_smalltown.supersound </td> <td> 0.349 </td> </tr>
+								  <tr> <td align="right"> 44 </td> <td> l_relapse </td> <td> 0.34 * </td> </tr>
+								  <tr> <td align="right"> 45 </td> <td> l_kill.rock.stars </td> <td> 0.336 . </td> </tr>
+								  <tr> <td align="right"> 46 </td> <td> t_dream.pop </td> <td> 0.336 ** </td> </tr>
+								  <tr> <td align="right"> 47 </td> <td> l_xl </td> <td> 0.329 * </td> </tr>
+								  <tr> <td align="right"> 48 </td> <td> t_hardcore.punk </td> <td> 0.323 </td> </tr>
+								  <tr> <td align="right"> 49 </td> <td> t_future.garage </td> <td> 0.319 </td> </tr>
+								  <tr> <td align="right"> 50 </td> <td> l_southern.lord </td> <td> 0.315 </td> </tr>
+								  <tr> <td align="right"> 51 </td> <td> t_noise.rock </td> <td> 0.314 ** </td> </tr>
+								  <tr> <td align="right"> 52 </td> <td> t_rnb </td> <td> 0.313 * </td> </tr>
+								  <tr> <td align="right"> 53 </td> <td> t_psychedelic.pop </td> <td> 0.313 </td> </tr>
+								  <tr> <td align="right"> 54 </td> <td> l_asthmatic.kitty </td> <td> 0.309 </td> </tr>
+								  <tr> <td align="right"> 55 </td> <td> t_trap </td> <td> 0.298 </td> </tr>
+								  <tr> <td align="right"> 56 </td> <td> t_soul </td> <td> 0.293 ** </td> </tr>
+								  <tr> <td align="right"> 57 </td> <td> t_grime </td> <td> 0.293 </td> </tr>
+								  <tr> <td align="right"> 58 </td> <td> l_fat.cat </td> <td> 0.289 . </td> </tr>
+								  <tr> <td align="right"> 59 </td> <td> t_techno </td> <td> 0.287 * </td> </tr>
+								  <tr> <td align="right"> 60 </td> <td> t_american </td> <td> 0.286 </td> </tr>
+								  <tr> <td align="right"> 61 </td> <td> l_touch.and.go </td> <td> 0.285 </td> </tr>
+								  <tr> <td align="right"> 62 </td> <td> t_gammarec </td> <td> 0.284 </td> </tr>
+								  <tr> <td align="right"> 63 </td> <td> t_blues </td> <td> 0.283 </td> </tr>
+								  <tr> <td align="right"> 64 </td> <td> l_sacred.bones </td> <td> 0.27 </td> </tr>
+								  <tr> <td align="right"> 65 </td> <td> t_krautrock </td> <td> 0.269 </td> </tr>
+								  <tr> <td align="right"> 66 </td> <td> l_dead.oceans </td> <td> 0.267 </td> </tr>
+								  <tr> <td align="right"> 67 </td> <td> l_k </td> <td> 0.265 </td> </tr>
+								  <tr> <td align="right"> 68 </td> <td> t_drone </td> <td> 0.265 * </td> </tr>
+								  <tr> <td align="right"> 69 </td> <td> l_captured.tracks </td> <td> 0.26 </td> </tr>
+								  <tr> <td align="right"> 70 </td> <td> l_self.released </td> <td> 0.258 * </td> </tr>
+								  <tr> <td align="right"> 71 </td> <td> t_modern.classical </td> <td> 0.258 </td> </tr>
+								  <tr> <td align="right"> 72 </td> <td> t_black.metal </td> <td> 0.257 . </td> </tr>
+								  <tr> <td align="right"> 73 </td> <td> t_chamber.pop </td> <td> 0.257 </td> </tr>
+								  <tr> <td align="right"> 74 </td> <td> t_art.rock </td> <td> 0.254 </td> </tr>
+								  <tr> <td align="right"> 75 </td> <td> t_indie.folk </td> <td> 0.251 </td> </tr>
+								  <tr> <td align="right"> 76 </td> <td> t_doom.metal </td> <td> 0.25 . </td> </tr>
+								  <tr> <td align="right"> 77 </td> <td> t_classic.rock </td> <td> 0.246 </td> </tr>
+								  <tr> <td align="right"> 78 </td> <td> t_slowcore </td> <td> 0.244 </td> </tr>
+								  <tr> <td align="right"> 79 </td> <td> t_noise.pop </td> <td> 0.237 </td> </tr>
+								  <tr> <td align="right"> 80 </td> <td> t_post.metal </td> <td> 0.226 </td> </tr>
+								  <tr> <td align="right"> 81 </td> <td> l_nonesuch </td> <td> 0.222 </td> </tr>
+								  <tr> <td align="right"> 82 </td> <td> t_lo.fi </td> <td> 0.222 * </td> </tr>
+								  <tr> <td align="right"> 83 </td> <td> t_stoner.rock </td> <td> 0.208 </td> </tr>
+								  <tr> <td align="right"> 84 </td> <td> l_rough.trade </td> <td> 0.199 </td> </tr>
+								  <tr> <td align="right"> 85 </td> <td> t_noise </td> <td> 0.192 * </td> </tr>
+								  <tr> <td align="right"> 86 </td> <td> t_post.punk </td> <td> 0.191 * </td> </tr>
+								  <tr> <td align="right"> 87 </td> <td> l_warp </td> <td> 0.19 . </td> </tr>
+								  <tr> <td align="right"> 88 </td> <td> l_ghostly </td> <td> 0.187 </td> </tr>
+								  <tr> <td align="right"> 89 </td> <td> g_electronic </td> <td> 0.186 *** </td> </tr>
+								  <tr> <td align="right"> 90 </td> <td> t_underground.hip.hop </td> <td> 0.178 </td> </tr>
+								  <tr> <td align="right"> 91 </td> <td> l_stones.throw </td> <td> 0.172 </td> </tr>
+								  <tr> <td align="right"> 92 </td> <td> t_avant.garde </td> <td> 0.166 </td> </tr>
+								  <tr> <td align="right"> 93 </td> <td> l_temporary.residence </td> <td> 0.164 </td> </tr>
+								  <tr> <td align="right"> 94 </td> <td> l_medium.label </td> <td> 0.16 *** </td> </tr>
+								  <tr> <td align="right"> 95 </td> <td> l_thrill.jockey </td> <td> 0.151 </td> </tr>
+								  <tr> <td align="right"> 96 </td> <td> t_canadian </td> <td> 0.147 </td> </tr>
+								  <tr> <td align="right"> 97 </td> <td> t_folk </td> <td> 0.133 * </td> </tr>
+								  <tr> <td align="right"> 98 </td> <td> t_synthpop </td> <td> 0.133 </td> </tr>
+								  <tr> <td align="right"> 99 </td> <td> g_global </td> <td> 0.13 </td> </tr>
+								  <tr> <td align="right"> 100 </td> <td> l_large.label </td> <td> 0.129 ** </td> </tr>
+								  <tr> <td align="right"> 101 </td> <td> t_experimental </td> <td> 0.119 * </td> </tr>
+								  <tr> <td align="right"> 102 </td> <td> t_indie.rock </td> <td> 0.103 * </td> </tr>
+								  <tr> <td align="right"> 103 </td> <td> t_hip.hop </td> <td> 0.102 </td> </tr>
+								  <tr> <td align="right"> 104 </td> <td> t_ambient </td> <td> 0.102 </td> </tr>
+								  <tr> <td align="right"> 105 </td> <td> t_indie.pop </td> <td> 0.097 </td> </tr>
+								  <tr> <td align="right"> 106 </td> <td> t_psychedelic </td> <td> 0.094 </td> </tr>
+								  <tr> <td align="right"> 107 </td> <td> l_small.label </td> <td> 0.093 * </td> </tr>
+								  <tr> <td align="right"> 108 </td> <td> t_singer.songwriter </td> <td> 0.09 </td> </tr>
+								  <tr> <td align="right"> 109 </td> <td> t_X10s </td> <td> 0.071 </td> </tr>
+								  <tr> <td align="right"> 110 </td> <td> t_electronic </td> <td> 0.063 </td> </tr>
+								  <tr> <td align="right"> 111 </td> <td> t_indie </td> <td> 0.05 </td> </tr>
+								  <tr> <td align="right"> 112 </td> <td> t_alternative </td> <td> -0.071 </td> </tr>
+								  <tr> <td align="right"> 113 </td> <td> g_rap </td> <td> -0.09 </td> </tr>
+								  <tr> <td align="right"> 114 </td> <td> t_post.rock </td> <td> -0.097 </td> </tr>
+								  <tr> <td align="right"> 115 </td> <td> g_jazz </td> <td> -0.107 . </td> </tr>
+								  <tr> <td align="right"> 116 </td> <td> l_mute </td> <td> -0.127 </td> </tr>
+								  <tr> <td align="right"> 117 </td> <td> t_metal </td> <td> -0.128 </td> </tr>
+								  <tr> <td align="right"> 118 </td> <td> t_british </td> <td> -0.14 </td> </tr>
+								  <tr> <td align="right"> 119 </td> <td> l_polyvinyl </td> <td> -0.155 </td> </tr>
+								  <tr> <td align="right"> 120 </td> <td> t_pop </td> <td> -0.162 * </td> </tr>
+								  <tr> <td align="right"> 121 </td> <td> t_alt.country </td> <td> -0.162 </td> </tr>
+								  <tr> <td align="right"> 122 </td> <td> t_downtempo </td> <td> -0.163 </td> </tr>
+								  <tr> <td align="right"> 123 </td> <td> g_metal </td> <td> -0.164 ** </td> </tr>
+								  <tr> <td align="right"> 124 </td> <td> l_saddle.creek </td> <td> -0.178 </td> </tr>
+								  <tr> <td align="right"> 125 </td> <td> g_pop.r.b </td> <td> -0.193 *** </td> </tr>
+								  <tr> <td align="right"> 126 </td> <td> t_progressive.rock </td> <td> -0.205 </td> </tr>
+								  <tr> <td align="right"> 127 </td> <td> t_psychedelic.rock </td> <td> -0.206 . </td> </tr>
+								  <tr> <td align="right"> 128 </td> <td> g_rock </td> <td> -0.208 *** </td> </tr>
+								  <tr> <td align="right"> 129 </td> <td> t_rock </td> <td> -0.214 *** </td> </tr>
+								  <tr> <td align="right"> 130 </td> <td> l_sony </td> <td> -0.216 </td> </tr>
+								  <tr> <td align="right"> 131 </td> <td> t_electro </td> <td> -0.22 . </td> </tr>
+								  <tr> <td align="right"> 132 </td> <td> l_ipecac </td> <td> -0.228 </td> </tr>
+								  <tr> <td align="right"> 133 </td> <td> l_ato </td> <td> -0.231 </td> </tr>
+								  <tr> <td align="right"> 134 </td> <td> l_columbia </td> <td> -0.234 * </td> </tr>
+								  <tr> <td align="right"> 135 </td> <td> t_emo </td> <td> -0.26 </td> </tr>
+								  <tr> <td align="right"> 136 </td> <td> t_alternative.rock </td> <td> -0.264 *** </td> </tr>
+								  <tr> <td align="right"> 137 </td> <td> t_usa </td> <td> -0.267 </td> </tr>
+								  <tr> <td align="right"> 138 </td> <td> t_mellow </td> <td> -0.278 </td> </tr>
+								  <tr> <td align="right"> 139 </td> <td> t_punk.rock </td> <td> -0.292 . </td> </tr>
+								  <tr> <td align="right"> 140 </td> <td> t_power.pop </td> <td> -0.3 </td> </tr>
+								  <tr> <td align="right"> 141 </td> <td> t_house </td> <td> -0.302 * </td> </tr>
+								  <tr> <td align="right"> 142 </td> <td> t_grunge </td> <td> -0.309 </td> </tr>
+								  <tr> <td align="right"> 143 </td> <td> t_hiphop </td> <td> -0.338 </td> </tr>
+								  <tr> <td align="right"> 144 </td> <td> t_chillout </td> <td> -0.34 ** </td> </tr>
+								  <tr> <td align="right"> 145 </td> <td> t_pop.rock </td> <td> -0.34 </td> </tr>
+								  <tr> <td align="right"> 146 </td> <td> l_rca </td> <td> -0.344 * </td> </tr>
+								  <tr> <td align="right"> 147 </td> <td> l_warner.bros. </td> <td> -0.361 ** </td> </tr>
+								  <tr> <td align="right"> 148 </td> <td> t_piano </td> <td> -0.362 . </td> </tr>
+								  <tr> <td align="right"> 149 </td> <td> l_interscope </td> <td> -0.395 ** </td> </tr>
+								  <tr> <td align="right"> 150 </td> <td> t_electroclash </td> <td> -0.404 . </td> </tr>
+								  <tr> <td align="right"> 151 </td> <td> l_reprise </td> <td> -0.414 . </td> </tr>
+								  <tr> <td align="right"> 152 </td> <td> t_reggae </td> <td> -0.421 </td> </tr>
+								  <tr> <td align="right"> 153 </td> <td> t_industrial </td> <td> -0.426 ** </td> </tr>
+								  <tr> <td align="right"> 154 </td> <td> l_epic </td> <td> -0.464 * </td> </tr>
+								  <tr> <td align="right"> 155 </td> <td> l_geffen </td> <td> -0.483 * </td> </tr>
+								  <tr> <td align="right"> 156 </td> <td> l_astralwerks </td> <td> -0.513 *** </td> </tr>
+								  <tr> <td align="right"> 157 </td> <td> l_atlantic </td> <td> -0.521 *** </td> </tr>
+								  <tr> <td align="right"> 158 </td> <td> t_hard.rock </td> <td> -0.53 ** </td> </tr>
+								  <tr> <td align="right"> 159 </td> <td> t_soundtrack </td> <td> -0.588 ** </td> </tr>
+								  <tr> <td align="right"> 160 </td> <td> l_v2 </td> <td> -0.612 *** </td> </tr>
+								  <tr> <td align="right"> 161 </td> <td> t_cover </td> <td> -0.631 ** </td> </tr>
+								  <tr> <td align="right"> 162 </td> <td> t_trip.hop </td> <td> -0.639 *** </td> </tr>
+								  <tr> <td align="right"> 163 </td> <td> l_vagrant </td> <td> -0.664 ** </td> </tr>
+								  <tr> <td align="right"> 164 </td> <td> l_capitol </td> <td> -0.714 *** </td> </tr>
+								  <tr> <td align="right"> 165 </td> <td> l_virgin </td> <td> -0.718 *** </td> </tr>
+								  <tr> <td align="right"> 166 </td> <td> l_universal </td> <td> -0.771 *** </td> </tr>
+								  <tr> <td align="right"> 167 </td> <td> l_island </td> <td> -0.838 *** </td> </tr>
+								</table>
+							</div>
+							<font color="black" size = "4">
+							"." = p < 0.1 &nbsp;&nbsp;&nbsp; "*" = p < 0.05 &nbsp;&nbsp;&nbsp; "**" = p < 0.01 &nbsp;&nbsp;&nbsp; "***" = p < 0.001
+							</font>							
+							<br>
+							<br>
+
+							<p>
+							The table above shows that the duration and average song length both have a substantial positive impact on the Pitchfork review score.
+							Longer albums and songs could potentially indicate more complex music compared to your simple 3-minute pop songs, which is something that might appeal to Pitchfork reviewers.
+							The user-generated tags with a strong positive impact on the review score include '60s, deep house, EMD, '80s, art pop and R&B.
+							It's interesting that decade classifiers have such a significant positive impact. Those results could potentially be influenced by the re-release of beloved albums from those decades.
+							Moreover, it seems like there are subgenres such as deep house and art pop that are well received by Pitchfork reviewers.
+							This effect could have many causes. The reviewers could have a bias towards these subgenres, the reviewers allocated to these genres might give higher scores in general,
+							the music quality in these genres could be relatively high, albums in these genres might be cherrypicked by Pitchfork, it could even be the case that only the acclaimed albums in these subgenres are popular enough to receive these user-generated tags.
+							It would be difficult to pinpoint the root cause.
+							In addition, there are several record labels that receive relatively high Pitchfork review scores including Numero Group, In the Red, DFA, Domino, Profound Lore and Drag City.
+							The extra small label category had no significant impact and was removed from the model. The small, medium and large label categories on the other hand do have a modest but significant positive effect.
+							On the flip side, there are also labels with a strong negative impact on the Pitchfork review score. 
+							These include labels such as Island, Universal, Virgin, Capitol and Vagrant.
+							The tags with a significant negative effect on score include trip hop, covers, soundtracks, hard rock and industrial.
+							Again, it is difficult to pinpoint why these tags seem to go hand in hand with a worse Pitchfork review score.
+							</p>
+							
+							<p>
+							Next, both the datasets corresponding to the full and final models are used to train linear regression models, decision trees and k-nn algorithms respectively.
+							The models are optimized with respect to their root mean squared error (RMSE), which is also used to compare the performance of the different models.
+							The RMSE is a commonly used metric for regression tasks that can be interpreted as the standard deviation of the model's unexplained variance, which makes it an absolute measure of fit whereas the R-squared is a relative measure of fit.
+							The lower the RMSE, the better the model is capable of accurately predicting the target variable.
+							It is important to note that the RMSE is expressed is the same units as the target variable. Therefore, the metric does not tell you whether your model is good or bad, but it does allow for easy comparison between models.
+							The models' performance is assessed by means of 10-fold cross validation to avoid the potential risk of overfitting.
+							</p>
+							
+							<pre class="prettyprint lang-R"><code>
+# PREDICTIONS
+
+
+train_control <- trainControl(method="cv", number=10, savePredictions = TRUE)
+
+
+# LINEAR REGRESSION MODEL
+
+# Full model
+lm_full_rating_fit <- train(
+  score ~ . - title - artist - listeners - playcount,
+  data = df,
+  method = "lm",
+  metric = "RMSE",
+  trControl = train_control
+  
+)
+lm_full_rating_fit
+# 1.2536 RMSE
+
+
+# Final model after deleting redundant variables
+lm_final_rating_fit <- train(
+  score ~ . - title - artist - listeners - playcount - t_X00s - t_electronica - t_female.vocalist - t_abstract
+  - t_chillwave - t_minimal.techno - t_rap - t_country - t_jazz - t_gangsta.rap - l_kompakt - t_punk - t_female - t_blues.rock
+  - t_X70s - t_thrash.metal - l_anticon - l_anti. - t_japanese - t_acoustic - t_shoegaze - l_legacy - l_carpark - t_hardcore
+  - tracks - t_folk.rock - g_experimental - l_def.jam - t_experimental.hip.hop - t_seattle - t_doom - t_new.wave
+  - t_britpop - l_arts...crafts - l_parlophone - t_twee - t_dark.ambient - l_hydra.head - t_contemporary.classical - year
+  - t_freak.folk - t_heavy.metal - t_glitch - t_funk - t_metalcore - t_synth.pop - t_neo.psychedelia - t_dub - t_progressive.metal
+  - t_electropop - l_xsmall.label - l_ninja.tune - t_french - t_stoner.metal - t_disco - t_atmospheric.black.metal - t_indie.electronic
+  - t_X2010s - t_chill - t_twee.pop - t_psychedelic.folk - t_guitar - t_alternative.hip.hop - t_neo.soul - t_dubstep - t_emusic
+  - l_barsuk - t_dance - t_instrumental - t_live - t_math.rock - t_female.vocalists - t_darkwave - t_world - t_ethereal - l_X.k7
+  - t_X2000s - l_fat.possum - t_indietronica - t_mathcore - t_brooklyn - t_idm - t_german - t_grindcore - l_yep.roc - l_emi,
+  data = df,
+  method = "lm",
+  metric = "RMSE",
+  trControl = train_control
+)
+lm_final_rating_fit
+# 1.2431 RMSE
+							
+							</code></pre>	
+
+							<p>
+							The linear regression model using the full dataset has a RMSE of 1.254, which slightly decreases to 1.243 when the smaller dataset of the final model is used.
+							Not much can be said about the performance of this model before we compare it to the performance of the decision trees and k-nn regression models.
+							The regression trees below are created through the 'rpart' method in caret's train function.
+							I set up a gridsearch with 5 different complexity parameters (cp) for the trees. The best performing cp will be determined by means of 10-fold cross validation.
+							</p>
+							
+							<pre class="prettyprint lang-R"><code>
+# DECISION TREE PREDICTIONS
+
+grid = expand.grid(cp = c(0.001, 0.0025, 0.005, 0.0075, 0.01))
+
+# Full model
+dt_rating_fit <- train(
+  score ~ . - title - artist - listeners - playcount,
+  data = df,
+  method = "rpart",
+  metric = "RMSE",
+  trControl = train_control,
+  tuneGrid = grid
+)
+dt_rating_fit
+plot(dt_rating_fit$finalModel)
+text(dt_rating_fit$finalModel)
+# 1.2827 RMSE with cp = 0.0025
+
+# Final model after deleting redundant variables
+dt_final_rating_fit <- train(
+  score ~ . - title - artist - listeners - playcount - t_X00s - t_electronica - t_female.vocalist - t_abstract
+  - t_chillwave - t_minimal.techno - t_rap - t_country - t_jazz - t_gangsta.rap - l_kompakt - t_punk - t_female - t_blues.rock
+  - t_X70s - t_thrash.metal - l_anticon - l_anti. - t_japanese - t_acoustic - t_shoegaze - l_legacy - l_carpark - t_hardcore
+  - tracks - t_folk.rock - g_experimental - l_def.jam - t_experimental.hip.hop - t_seattle - t_doom - t_new.wave
+  - t_britpop - l_arts...crafts - l_parlophone - t_twee - t_dark.ambient - l_hydra.head - t_contemporary.classical - year
+  - t_freak.folk - t_heavy.metal - t_glitch - t_funk - t_metalcore - t_synth.pop - t_neo.psychedelia - t_dub - t_progressive.metal
+  - t_electropop - l_xsmall.label - l_ninja.tune - t_french - t_stoner.metal - t_disco - t_atmospheric.black.metal - t_indie.electronic
+  - t_X2010s - t_chill - t_twee.pop - t_psychedelic.folk - t_guitar - t_alternative.hip.hop - t_neo.soul - t_dubstep - t_emusic
+  - l_barsuk - t_dance - t_instrumental - t_live - t_math.rock - t_female.vocalists - t_darkwave - t_world - t_ethereal - l_X.k7
+  - t_X2000s - l_fat.possum - t_indietronica - t_mathcore - t_brooklyn - t_idm - t_german - t_grindcore - l_yep.roc - l_emi,
+  data = df,
+  method = "rpart",
+  metric = "RMSE",
+  trControl = train_control,
+  tuneGrid = grid
+)
+dt_final_rating_fit
+plot(dt_final_rating_fit$finalModel)
+text(dt_final_rating_fit$finalModel)
+# 1.2831 RMSE with cp = 0.0025				
+							</code></pre>	
+							
+
+							<figure class="left" style = "display: inline-block">
+							<figcaption>Full Rating Prediction Regression Tree</figcaption>
+							<img src="images/Project3/Rating_Full_Tree.png" width = "100%", heigth = "50.0%" alt="" title = "Final Regression Tree" style = "border:1px solid black" />	
+							</figure>
+							<figure class="right" style = "display: inline-block">
+							<figcaption>Final Rating Prediction Regression Tree</figcaption>
+							<img src="images/Project3/Rating_Final_Tree.png" width = "100%", heigth = "50.0%" alt="" title = "Full Regression Tree" style = "border:1px solid black" />						
+							</figure>
+							<br>
+							
+							<p>
+							Both the full and final version of the regression tree have an RMSE of 1.283 with a cp of 0.0025.
+							This indicates that for regression trees the exclusion of variables without a clear linear relationship with the target variable did not improve performance.
+							When observing the figures above it becomes clear that both trees are remarkably simple and very similar.
+							The root nodes of both trees make a split based on the average track length.
+							Albums with a higher average track length are assigned a 7.341 review score in both trees, while the ones with lower track lengths are subsequently split based on whether they have a "rock" tag.
+							The trees deviate at the split which takes place afterwards for the albums that have the "rock" tag.
+							The regression tree with all the features makes additional splits based on number of tracks, electronic genre, and release year.
+							However, number of tracks and release year are not part of the final dataset established earlier.
+							Therefore, the final tree model makes one additional split based on duration instead of tracks, which is logical considering the high correlation between tracks and duration as well as a split based on the electronic genre.
+							As mentioned before, the final model does not seem to outclass the full model as was the case for the linear regression models.
+							Instead, the RMSE scores are almost identical, which is reasonable considering the very similar looking regression trees.
+							Overall, both the linear regression models appear to outperform the decision trees for this task.
+							</p>
+							
+							<p>
+							The code below does the exact same thing but for k-nn regression models instead of linear regression models or regression trees.
+							In this case, the "k" parameter, which is the number of closest neighbours each prediction is based on, is optimized through 10-fold cross validation.
+							For a "k" of 10, the k-nn algorithm computes which 10 albums are the most similar in terms of their features to the album whose review score is being predicted.
+							After which, the algorithm makes its prediction by computing the mean album review score of these 10 nearest neighbours.
+							With respect to this application, "k" can take the value of 10, 20, 30, 40 or 50.
+							</p>
+							
+							<pre class="prettyprint lang-R"><code>
+# KNN MODEL
+
+grid = expand.grid(k = c(10, 20, 30, 40, 50))
+
+# Full KNN model
+knn_full_rating_fit <- train(
+  score ~ . - title - artist - listeners - playcount,
+  data = df,
+  method = "knn",
+  metric = "RMSE",
+  trControl = train_control,
+  tuneGrid = grid
+  
+)
+knn_full_rating_fit
+# 1.2667 RMSE for k = 50
+
+
+# Final KNN model
+knn_final_rating_fit <- train(
+  score ~ . - title - artist - listeners - playcount - t_X00s - t_electronica - t_female.vocalist - t_abstract
+  - t_chillwave - t_minimal.techno - t_rap - t_country - t_jazz - t_gangsta.rap - l_kompakt - t_punk - t_female - t_blues.rock
+  - t_X70s - t_thrash.metal - l_anticon - l_anti. - t_japanese - t_acoustic - t_shoegaze - l_legacy - l_carpark - t_hardcore
+  - tracks - t_folk.rock - g_experimental - l_def.jam - t_experimental.hip.hop - t_seattle - t_doom - t_new.wave
+  - t_britpop - l_arts...crafts - l_parlophone - t_twee - t_dark.ambient - l_hydra.head - t_contemporary.classical - year
+  - t_freak.folk - t_heavy.metal - t_glitch - t_funk - t_metalcore - t_synth.pop - t_neo.psychedelia - t_dub - t_progressive.metal
+  - t_electropop - l_xsmall.label - l_ninja.tune - t_french - t_stoner.metal - t_disco - t_atmospheric.black.metal - t_indie.electronic
+  - t_X2010s - t_chill - t_twee.pop - t_psychedelic.folk - t_guitar - t_alternative.hip.hop - t_neo.soul - t_dubstep - t_emusic
+  - l_barsuk - t_dance - t_instrumental - t_live - t_math.rock - t_female.vocalists - t_darkwave - t_world - t_ethereal - l_X.k7
+  - t_X2000s - l_fat.possum - t_indietronica - t_mathcore - t_brooklyn - t_idm - t_german - t_grindcore - l_yep.roc - l_emi,
+  data = df,
+  method = "knn",
+  metric = "RMSE",
+  trControl = train_control,
+  tuneGrid = grid
+  
+)
+knn_final_rating_fit
+#1.2731 RMSE with k = 40
+							
+							</code></pre>	
+							
+							
+							<font color="black"><b> RMSE rating prediction models </b></font>
+							<div style="overflow:auto;display: block; white-space: nowrap;">	
+							<table>
+							<tr>
+								<th> </th>
+								<th>Linear Regression</th>
+								<th>Regression Tree</th>
+								<th>K-NN</th>
+							</tr>	
+							<tr>
+								<th>Full Model</th>
+								<td>1.2536</td>
+								<td>1.2827</td>
+								<td>1.2667</td>
+							</tr>
+							<tr>
+								<th>Final model</th>
+								<td>1.2431</td>
+								<td>1.2831</td>
+								<td>1.2731</td>
+							</tr>
+							</table>
+							</div>
+
+							<p>
+							The final k-nn model with an RMSE of 1.273 for a "k" of 40 performs worse than the full model which has an RMSE of 1.267 for a "k" of 50.
+							Even though the k-nn models perform better than both decision trees, the linear regression models are superior to both of them in terms of prediction performance.
+							The differences are very modest however. Another question is whether an RMSE between 1.24 and 1.28 is actually respectable for predicting an album's review score.
+							Being 1.24 points off the actual score on a scale of 10 does not seem that bad on first glance.
+							However, it has to be noted that most of the review scores are highly concentrated around the 7-8 mark.
+							Nonetheless, no features related to the quality of the music have been used as predictors, which makes accurate review score prediction significantly more challenging.
+							</p>
+							
+							<p>
+							Now it's time to delve into the models' prowess when it comes to predicting Last.fm album playcount.
+							The process is identical to the Pitchfork review score prediction process.
+							Before I conducted the linear regression, I rescaled the Pitchfork review score variable to be between 0 and 1, as the score will be used as a feature in the models.
+							To arrive at the final model, I again incrementally removed the least significant variable until the adjusted R^2 stopped going up.
+							</p>
+							
+							<pre class="prettyprint lang-R"><code>
+df$score <- (df$score -min(df$score))/(max(df$score)-min(df$score))
+
+# LINEAR REGRESSION ANALYSIS PLAYS
+
+# Full linear model including all features in the dataset except for title, artist, listeners and playcount
+lm_plays_full <- lm(
+  playcount ~ . - title - artist - listeners,
+  data = df
+)
+summary(lm_plays_full)
+# Adj R^2: 0.1495
+
+
+# Incrimentally take out insignificant variables until the adjusted R^2 decreases
+lm_plays_final <- lm(
+  playcount ~ . - title - artist - listeners - t_reggae - t_ambient - t_underground.hip.hop - l_constellation
+  - t_dark.ambient - l_profound.lore - l_kompakt - t_math.rock - l_kill.rock.stars - t_swedish - t_noise.pop
+  - t_stoner.metal - t_glitch - t_art.pop - t_psychedelic.folk - t_cover - l_carpark - l_polyvinyl - t_alt.country - t_electronica
+  - l_secretly.canadian - tracks - t_free.jazz - t_contemporary.classical - l_thrill.jockey - t_sludge.metal
+  - l_relapse - l_rhino - l_paper.bag - l_southern.lord - t_experimental - l_jagjaguwar - l_sacred.bones - l_kranky - t_french
+  - t_drone - t_funk - l_light.in.the.attic - t_post.hardcore - t_hardcore - t_british - l_ipecac - t_jazz - t_pop.punk - l_numero.group
+  - t_freak.folk - l_xsmall.label - t_gammarec - t_heavy.metal - t_darkwave - l_ninja.tune - t_r.b - t_world - l_mexican.summer - t_grunge
+  - g_pop.r.b - t_sludge - t_stoner.rock - t_shoegaze - l_rough.trade - t_post.metal - l_dead.oceans - l_anticon - g_jazz
+  - t_metalcore - t_female.vocalist - l_ghostly - t_trap - t_neo.soul - t_chillwave - l_ato - t_country - t_alternative.hip.hop
+  - l_touch.and.go - l_hydra.head - t_psychedelic - t_grindcore - duration - t_doom - t_hardcore.punk - t_X2010s - t_deep.house
+  - t_avant.garde - t_pop - l_small.label - t_soundtrack - l_saddle.creek - t_noise.rock - t_dubstep - l_vagrant - t_ethereal
+  - l_X.k7 - t_grime - t_chillout - t_guitar - t_atmospheric.black.metal - t_minimal.techno - t_thrash.metal - l_dfa
+  - l_temporary.residence - l_fat.cat - t_punk - t_emd - l_yep.roc - t_post.rock - t_japanese - t_twee.pop - t_synth.pop - t_black.metal
+  - t_instrumental - t_female.vocalists - t_electroclash - t_singer.songwriter - l_smalltown.supersound - t_X60s - t_house
+  - t_brooklyn - l_anti. - t_X90s - l_drag.city - t_blues - t_X80s - t_pop.rock - t_techno - t_experimental.hip.hop - g_rock - t_idm
+  - t_female - t_krautrock - t_piano - l_k - t_emusic - t_dub - t_folk - t_slowcore - t_folk.rock,
+  data = df
+)
+summary(lm_plays_final)
+# Adj R2 increased from 0.1495 to 0.1577							
+							</code></pre>		
+
+							<font color="black"><b>final playcount linear regression model coefficients</b></font>
+							<div style="height:600px; width: 50%; margin:0 auto;  overflow-y: scroll;">
+							<table class="dataframe" style = "width: 100%" >
+								<tr> <th>  </th> <th> Variable </th> <th> Coefficient </th>  </tr>
+								<tr> <td align="right"> 1 </td> <td> l_interscope </td> <td> 6181077 *** </td> </tr>
+								 <tr> <td align="right"> 2 </td> <td> l_rca </td> <td> 6158150 *** </td> </tr>
+								 <tr> <td align="right"> 3 </td> <td> l_def.jam </td> <td> 4466269 *** </td> </tr>
+								 <tr> <td align="right"> 4 </td> <td> l_island </td> <td> 4177166 *** </td> </tr>
+								 <tr> <td align="right"> 5 </td> <td> l_virgin </td> <td> 4032247 *** </td> </tr>
+								 <tr> <td align="right"> 6 </td> <td> l_warner.bros. </td> <td> 4015159 *** </td> </tr>
+								 <tr> <td align="right"> 7 </td> <td> l_capitol </td> <td> 3803060 *** </td> </tr>
+								 <tr> <td align="right"> 8 </td> <td> l_reprise </td> <td> 3633954 *** </td> </tr>
+								 <tr> <td align="right"> 9 </td> <td> l_epic </td> <td> 3472987 *** </td> </tr>
+								 <tr> <td align="right"> 10 </td> <td> l_xl </td> <td> 3236593 *** </td> </tr>
+								 <tr> <td align="right"> 11 </td> <td> l_universal </td> <td> 3043815 *** </td> </tr>
+								 <tr> <td align="right"> 12 </td> <td> l_geffen </td> <td> 2934797 *** </td> </tr>
+								 <tr> <td align="right"> 13 </td> <td> l_columbia </td> <td> 2900917 *** </td> </tr>
+								 <tr> <td align="right"> 14 </td> <td> l_v2 </td> <td> 2795566 *** </td> </tr>
+								 <tr> <td align="right"> 15 </td> <td> t_britpop </td> <td> 2791626 *** </td> </tr>
+								 <tr> <td align="right"> 16 </td> <td> t_blues.rock </td> <td> 2789280 *** </td> </tr>
+								 <tr> <td align="right"> 17 </td> <td> score </td> <td> 2679736 *** </td> </tr>
+								 <tr> <td align="right"> 18 </td> <td> l_sony </td> <td> 2376740 *** </td> </tr>
+								 <tr> <td align="right"> 19 </td> <td> l_domino </td> <td> 2263303 *** </td> </tr>
+								 <tr> <td align="right"> 20 </td> <td> l_atlantic </td> <td> 2136914 *** </td> </tr>
+								 <tr> <td align="right"> 21 </td> <td> l_parlophone </td> <td> 2125559 ** </td> </tr>
+								 <tr> <td align="right"> 22 </td> <td> l_emi </td> <td> 2063105 *** </td> </tr>
+								 <tr> <td align="right"> 23 </td> <td> l_nonesuch </td> <td> 1951181 ** </td> </tr>
+								 <tr> <td align="right"> 24 </td> <td> t_progressive.metal </td> <td> 1626144 ** </td> </tr>
+								 <tr> <td align="right"> 25 </td> <td> l_astralwerks </td> <td> 1604615 *** </td> </tr>
+								 <tr> <td align="right"> 26 </td> <td> l_X4ad </td> <td> 1506852 *** </td> </tr>
+								 <tr> <td align="right"> 27 </td> <td> l_self.released </td> <td> 1444260 *** </td> </tr>
+								 <tr> <td align="right"> 28 </td> <td> t_punk.rock </td> <td> 1403967 ** </td> </tr>
+								 <tr> <td align="right"> 29 </td> <td> t_dance </td> <td> 1381185 *** </td> </tr>
+								 <tr> <td align="right"> 30 </td> <td> l_sub.pop </td> <td> 1325074 *** </td> </tr>
+								 <tr> <td align="right"> 31 </td> <td> t_rnb </td> <td> 1292493 ** </td> </tr>
+								 <tr> <td align="right"> 32 </td> <td> t_trip.hop </td> <td> 1284663 ** </td> </tr>
+								 <tr> <td align="right"> 33 </td> <td> t_hard.rock </td> <td> 1251656 * </td> </tr>
+								 <tr> <td align="right"> 34 </td> <td> t_indie.folk </td> <td> 1218329 * </td> </tr>
+								 <tr> <td align="right"> 35 </td> <td> t_synthpop </td> <td> 1170125 ** </td> </tr>
+								 <tr> <td align="right"> 36 </td> <td> t_emo </td> <td> 1141724 * </td> </tr>
+								 <tr> <td align="right"> 37 </td> <td> t_progressive.rock </td> <td> 1123078 * </td> </tr>
+								 <tr> <td align="right"> 38 </td> <td> t_psychedelic.pop </td> <td> 1113702 </td> </tr>
+								 <tr> <td align="right"> 39 </td> <td> l_asthmatic.kitty </td> <td> 1109728 </td> </tr>
+								 <tr> <td align="right"> 40 </td> <td> t_indie </td> <td> 1060294 *** </td> </tr>
+								 <tr> <td align="right"> 41 </td> <td> l_arts...crafts </td> <td> 1011289 </td> </tr>
+								 <tr> <td align="right"> 42 </td> <td> t_modern.classical </td> <td> 1007190 </td> </tr>
+								 <tr> <td align="right"> 43 </td> <td> l_frenchkiss </td> <td> 1003577 </td> </tr>
+								 <tr> <td align="right"> 44 </td> <td> t_acoustic </td> <td> 1001082 * </td> </tr>
+								 <tr> <td align="right"> 45 </td> <td> t_death.metal </td> <td> 999106 . </td> </tr>
+								 <tr> <td align="right"> 46 </td> <td> l_captured.tracks </td> <td> 998213 </td> </tr>
+								 <tr> <td align="right"> 47 </td> <td> l_mute </td> <td> 980800 * </td> </tr>
+								 <tr> <td align="right"> 48 </td> <td> t_future.garage </td> <td> 960655 </td> </tr>
+								 <tr> <td align="right"> 49 </td> <td> t_indie.rock </td> <td> 929680 *** </td> </tr>
+								 <tr> <td align="right"> 50 </td> <td> t_mathcore </td> <td> 911124 </td> </tr>
+								 <tr> <td align="right"> 51 </td> <td> t_alternative.rock </td> <td> 897805 *** </td> </tr>
+								 <tr> <td align="right"> 52 </td> <td> t_metal </td> <td> 848713 * </td> </tr>
+								 <tr> <td align="right"> 53 </td> <td> t_alternative </td> <td> 841683 *** </td> </tr>
+								 <tr> <td align="right"> 54 </td> <td> l_matador </td> <td> 834350 * </td> </tr>
+								 <tr> <td align="right"> 55 </td> <td> t_rap </td> <td> 833499 ** </td> </tr>
+								 <tr> <td align="right"> 56 </td> <td> l_stones.throw </td> <td> 814619 </td> </tr>
+								 <tr> <td align="right"> 57 </td> <td> t_disco </td> <td> 802809 </td> </tr>
+								 <tr> <td align="right"> 58 </td> <td> l_merge </td> <td> 801966 * </td> </tr>
+								 <tr> <td align="right"> 59 </td> <td> t_electronic </td> <td> 768075 *** </td> </tr>
+								 <tr> <td align="right"> 60 </td> <td> l_fat.possum </td> <td> 723138 </td> </tr>
+								 <tr> <td align="right"> 61 </td> <td> t_downtempo </td> <td> 718495 . </td> </tr>
+								 <tr> <td align="right"> 62 </td> <td> t_garage.rock </td> <td> 634394 </td> </tr>
+								 <tr> <td align="right"> 63 </td> <td> l_barsuk </td> <td> 577784 </td> </tr>
+								 <tr> <td align="right"> 64 </td> <td> t_dream.pop </td> <td> 569208 . </td> </tr>
+								 <tr> <td align="right"> 65 </td> <td> t_industrial </td> <td> 557879 </td> </tr>
+								 <tr> <td align="right"> 66 </td> <td> l_warp </td> <td> 543713 </td> </tr>
+								 <tr> <td align="right"> 67 </td> <td> t_electropop </td> <td> 524416 </td> </tr>
+								 <tr> <td align="right"> 68 </td> <td> t_soul </td> <td> 503865 </td> </tr>
+								 <tr> <td align="right"> 69 </td> <td> t_hip.hop </td> <td> 447556 . </td> </tr>
+								 <tr> <td align="right"> 70 </td> <td> t_psychedelic.rock </td> <td> 399368 </td> </tr>
+								 <tr> <td align="right"> 71 </td> <td> t_indie.pop </td> <td> 374590 . </td> </tr>
+								 <tr> <td align="right"> 72 </td> <td> l_medium.label </td> <td> 363895 *** </td> </tr>
+								 <tr> <td align="right"> 73 </td> <td> l_large.label </td> <td> 277190 * </td> </tr>
+								 <tr> <td align="right"> 74 </td> <td> t_rock </td> <td> 177757 </td> </tr>
+								 <tr> <td align="right"> 75 </td> <td> g_experimental </td> <td> -270000 </td> </tr>
+								 <tr> <td align="right"> 76 </td> <td> t_lo.fi </td> <td> -391436 </td> </tr>
+								 <tr> <td align="right"> 77 </td> <td> t_americana </td> <td> -408333 </td> </tr>
+								 <tr> <td align="right"> 78 </td> <td> t_noise </td> <td> -419578 </td> </tr>
+								 <tr> <td align="right"> 79 </td> <td> t_canadian </td> <td> -450088 </td> </tr>
+								 <tr> <td align="right"> 80 </td> <td> t_post.punk </td> <td> -485120 . </td> </tr>
+								 <tr> <td align="right"> 81 </td> <td> t_doom.metal </td> <td> -558159 </td> </tr>
+								 <tr> <td align="right"> 82 </td> <td> t_experimental.rock </td> <td> -570843 </td> </tr>
+								 <tr> <td align="right"> 83 </td> <td> g_electronic </td> <td> -588773 *** </td> </tr>
+								 <tr> <td align="right"> 84 </td> <td> t_indietronica </td> <td> -591517 </td> </tr>
+								 <tr> <td align="right"> 85 </td> <td> t_X10s </td> <td> -592595 * </td> </tr>
+								 <tr> <td align="right"> 86 </td> <td> t_electro </td> <td> -593534 </td> </tr>
+								 <tr> <td align="right"> 87 </td> <td> t_indie.electronic </td> <td> -629103 </td> </tr>
+								 <tr> <td align="right"> 88 </td> <td> t_neo.psychedelia </td> <td> -639964 </td> </tr>
+								 <tr> <td align="right"> 89 </td> <td> g_global </td> <td> -650742 * </td> </tr>
+								 <tr> <td align="right"> 90 </td> <td> g_folk.country </td> <td> -667135 </td> </tr>
+								 <tr> <td align="right"> 91 </td> <td> g_rap </td> <td> -675275 ** </td> </tr>
+								 <tr> <td align="right"> 92 </td> <td> t_new.wave </td> <td> -700507 </td> </tr>
+								 <tr> <td align="right"> 93 </td> <td> t_minimal </td> <td> -751906 . </td> </tr>
+								 <tr> <td align="right"> 94 </td> <td> l_in.the.red </td> <td> -757184 </td> </tr>
+								 <tr> <td align="right"> 95 </td> <td> year </td> <td> -782746 *** </td> </tr>
+								 <tr> <td align="right"> 96 </td> <td> t_chamber.pop </td> <td> -800485 </td> </tr>
+								 <tr> <td align="right"> 97 </td> <td> t_chill </td> <td> -826359 </td> </tr>
+								 <tr> <td align="right"> 98 </td> <td> g_metal </td> <td> -827417 *** </td> </tr>
+								 <tr> <td align="right"> 99 </td> <td> t_usa </td> <td> -880285 </td> </tr>
+								 <tr> <td align="right"> 100 </td> <td> t_mellow </td> <td> -895806 </td> </tr>
+								 <tr> <td align="right"> 101 </td> <td> t_twee </td> <td> -916436 </td> </tr>
+								 <tr> <td align="right"> 102 </td> <td> t_space.rock </td> <td> -941732 </td> </tr>
+								 <tr> <td align="right"> 103 </td> <td> (Intercept) </td> <td> -945962 *** </td> </tr>
+								 <tr> <td align="right"> 104 </td> <td> t_art.rock </td> <td> -963744 </td> </tr>
+								 <tr> <td align="right"> 105 </td> <td> t_power.pop </td> <td> -982428 </td> </tr>
+								 <tr> <td align="right"> 106 </td> <td> t_hiphop </td> <td> -1055796 </td> </tr>
+								 <tr> <td align="right"> 107 </td> <td> t_X00s </td> <td> -1072821 *** </td> </tr>
+								 <tr> <td align="right"> 108 </td> <td> t_abstract </td> <td> -1113335 </td> </tr>
+								 <tr> <td align="right"> 109 </td> <td> t_X2000s </td> <td> -1232205 . </td> </tr>
+								 <tr> <td align="right"> 110 </td> <td> t_X70s </td> <td> -1241741 </td> </tr>
+								 <tr> <td align="right"> 111 </td> <td> t_german </td> <td> -1281865 </td> </tr>
+								 <tr> <td align="right"> 112 </td> <td> avg_track_length </td> <td> -1350339 </td> </tr>
+								 <tr> <td align="right"> 113 </td> <td> t_american </td> <td> -1359807 * </td> </tr>
+								 <tr> <td align="right"> 114 </td> <td> t_seattle </td> <td> -1381116 </td> </tr>
+								 <tr> <td align="right"> 115 </td> <td> t_classic.rock </td> <td> -1425678 * </td> </tr>
+								 <tr> <td align="right"> 116 </td> <td> t_live </td> <td> -1701364 ** </td> </tr>
+								 <tr> <td align="right"> 117 </td> <td> t_gangsta.rap </td> <td> -1909476 * </td> </tr>
+								 <tr> <td align="right"> 118 </td> <td> l_legacy </td> <td> -2183565 * </td> </tr>
+								</table>
+							</div>
+							<font color="black" size = "4">
+							"." = p < 0.1 &nbsp;&nbsp;&nbsp; "*" = p < 0.05 &nbsp;&nbsp;&nbsp; "**" = p < 0.01 &nbsp;&nbsp;&nbsp; "***" = p < 0.001
+							</font>							
+							<br>
+							<br>							
+
+							<p>
+							The adjusted R-squared increased from 0.1495 to 0.1577 after removing the uninformative variables.
+							It is interesting to see that the adjusted R-squared is higher for both models than for the previous linear regression models modeling the Pitchfork review score.
+							The notion that variables like user-generated tags, record labels, genres, and year of release do a better job at explaning variation album playcount than in Pitchfork review score does not seem implausible.
+							However, the increase might also largely be carried by the effect of the Pitchfork review score, which I added as a variable.
+							The coefficient of the review score variable does seem to indicate that the Pitchfork review score has a strong positive effect.
+							However, the adjusted R-squared does only decrease by around 0.005 - 0.006 when removing Pitchfork score from the models. Therefore, the increase does not seem largely driven by the addition of this feature.
+							The coefficients do indicate that a lot of record labels have a strong significant effect on the playcount.
+							If the record was released by either Interscope or RCA it can already count on an increase in plays of more than 6 million.
+							When it comes to tags it seems that records with tags such as britpop, blues-rock or progressive metal see a strong positive effect on playcount, while classic rock, american, and '00s appear to have a detrimental effect. 
+							</p>
+							
+							<pre class="prettyprint lang-R"><code>
+# PREDICTION PLAYS
+
+# LINEAR REGRESSION MODEL
+
+# Full model
+lm_full_plays_fit <- train(
+  playcount ~ . - title - artist - listeners,
+  data = df,
+  method = "lm",
+  metric = "RMSE",
+  trControl = train_control
+  
+)
+lm_full_plays_fit
+#RMSE: 4.066.639
+
+
+
+# Final model after deleting redundant variables
+lm_final_plays_fit <- train(
+  playcount ~ . - title - artist - listeners - t_reggae - t_ambient - t_underground.hip.hop - l_constellation
+  - t_dark.ambient - l_profound.lore - l_kompakt - t_math.rock - l_kill.rock.stars - t_swedish - t_noise.pop
+  - t_stoner.metal - t_glitch - t_art.pop - t_psychedelic.folk - t_cover - l_carpark - l_polyvinyl - t_alt.country - t_electronica
+  - l_secretly.canadian - tracks - t_free.jazz - t_contemporary.classical - l_thrill.jockey - t_sludge.metal
+  - l_relapse - l_rhino - l_paper.bag - l_southern.lord - t_experimental - l_jagjaguwar - l_sacred.bones - l_kranky - t_french
+  - t_drone - t_funk - l_light.in.the.attic - t_post.hardcore - t_hardcore - t_british - l_ipecac - t_jazz - t_pop.punk - l_numero.group
+  - t_freak.folk - l_xsmall.label - t_gammarec - t_heavy.metal - t_darkwave - l_ninja.tune - t_r.b - t_world - l_mexican.summer - t_grunge
+  - g_pop.r.b - t_sludge - t_stoner.rock - t_shoegaze - l_rough.trade - t_post.metal - l_dead.oceans - l_anticon - g_jazz
+  - t_metalcore - t_female.vocalist - l_ghostly - t_trap - t_neo.soul - t_chillwave - l_ato - t_country - t_alternative.hip.hop
+  - l_touch.and.go - l_hydra.head - t_psychedelic - t_grindcore - duration - t_doom - t_hardcore.punk - t_X2010s - t_deep.house
+  - t_avant.garde - t_pop - l_small.label - t_soundtrack - l_saddle.creek - t_noise.rock - t_dubstep - l_vagrant - t_ethereal
+  - l_X.k7 - t_grime - t_chillout - t_guitar - t_atmospheric.black.metal - t_minimal.techno - t_thrash.metal - l_dfa
+  - l_temporary.residence - l_fat.cat - t_punk - t_emd - l_yep.roc - t_post.rock - t_japanese - t_twee.pop - t_synth.pop - t_black.metal
+  - t_instrumental - t_female.vocalists - t_electroclash - t_singer.songwriter - l_smalltown.supersound - t_X60s - t_house
+  - t_brooklyn - l_anti. - t_X90s - l_drag.city - t_blues - t_X80s - t_pop.rock - t_techno - t_experimental.hip.hop - g_rock - t_idm
+  - t_female - t_krautrock - t_piano - l_k - t_emusic - t_dub - t_folk - t_slowcore - t_folk.rock,
+  data = df,
+  method = "lm",
+  metric = "RMSE",
+  trControl = train_control
+)
+lm_final_plays_fit
+# RMSE: 4.053.860							
+							</code></pre>	
+
+							<p>
+							Not surprisingly, the final regression model reports a lower RMSE of 4.053.860 compared to the full model, which has a slightly higher RMSE of 4.066.639.
+							The relatively large RMSE can be explained by the relatively small number of albums that has a playcount magnitudes higher than the average album.
+							The model clearly struggles to distinguish the success cases from the average cases with the available data. 
+							Hence, the substantial errors produced by the models. 
+							</p>
+							
+							<pre class="prettyprint lang-R"><code>
+# DECISION TREE PREDICTIONS
+
+grid = expand.grid(cp = c(0.001, 0.0025, 0.005, 0.0075, 0.01))
+
+# Full model
+dt_plays_fit <- train(
+  playcount ~ . - title - artist - listeners,
+  data = df,
+  method = "rpart",
+  metric = "RMSE",
+  trControl = train_control,
+  tuneGrid = grid
+)
+dt_plays_fit
+# RMSE: 4.231.604 for 0.01 cp
+
+# Plot tree
+par(bg=NA)
+plot(dt_plays_fit$finalModel)
+text(dt_plays_fit$finalModel, cex = 0.6, digits = 1)
+dev.copy(png,'Plays_Full_Tree.png')
+dev.off()
+
+# Final model after deleting redundant variables
+dt_final_plays_fit <- train(
+  playcount ~ . - title - artist - listeners - t_reggae - t_ambient - t_underground.hip.hop - l_constellation
+  - t_dark.ambient - l_profound.lore - l_kompakt - t_math.rock - l_kill.rock.stars - t_swedish - t_noise.pop
+  - t_stoner.metal - t_glitch - t_art.pop - t_psychedelic.folk - t_cover - l_carpark - l_polyvinyl - t_alt.country - t_electronica
+  - l_secretly.canadian - tracks - t_free.jazz - t_contemporary.classical - l_thrill.jockey - t_sludge.metal
+  - l_relapse - l_rhino - l_paper.bag - l_southern.lord - t_experimental - l_jagjaguwar - l_sacred.bones - l_kranky - t_french
+  - t_drone - t_funk - l_light.in.the.attic - t_post.hardcore - t_hardcore - t_british - l_ipecac - t_jazz - t_pop.punk - l_numero.group
+  - t_freak.folk - l_xsmall.label - t_gammarec - t_heavy.metal - t_darkwave - l_ninja.tune - t_r.b - t_world - l_mexican.summer - t_grunge
+  - g_pop.r.b - t_sludge - t_stoner.rock - t_shoegaze - l_rough.trade - t_post.metal - l_dead.oceans - l_anticon - g_jazz
+  - t_metalcore - t_female.vocalist - l_ghostly - t_trap - t_neo.soul - t_chillwave - l_ato - t_country - t_alternative.hip.hop
+  - l_touch.and.go - l_hydra.head - t_psychedelic - t_grindcore - duration - t_doom - t_hardcore.punk - t_X2010s - t_deep.house
+  - t_avant.garde - t_pop - l_small.label - t_soundtrack - l_saddle.creek - t_noise.rock - t_dubstep - l_vagrant - t_ethereal
+  - l_X.k7 - t_grime - t_chillout - t_guitar - t_atmospheric.black.metal - t_minimal.techno - t_thrash.metal - l_dfa
+  - l_temporary.residence - l_fat.cat - t_punk - t_emd - l_yep.roc - t_post.rock - t_japanese - t_twee.pop - t_synth.pop - t_black.metal
+  - t_instrumental - t_female.vocalists - t_electroclash - t_singer.songwriter - l_smalltown.supersound - t_X60s - t_house
+  - t_brooklyn - l_anti. - t_X90s - l_drag.city - t_blues - t_X80s - t_pop.rock - t_techno - t_experimental.hip.hop - g_rock - t_idm
+  - t_female - t_krautrock - t_piano - l_k - t_emusic - t_dub - t_folk - t_slowcore - t_folk.rock,
+  data = df,
+  method = "rpart",
+  metric = "RMSE",
+  trControl = train_control,
+  tuneGrid = grid
+)
+dt_final_plays_fit
+# RMSE: 4.213.601 for cp = 0.0025	
+
+# Plot tree	
+par(bg=NA)
+plot(dt_final_plays_fit$finalModel)
+text(dt_final_plays_fit$finalModel, cex = 0.6, digits = 1)
+dev.copy(png,'Plays_Final_Tree.png')
+dev.off()					
+							</code></pre>	
+							
+							<figure class="left" style = "display: inline-block">
+							<figcaption>Full Plays Prediction Regression Tree</figcaption>
+							<img src="images/Project3/Plays_Full_Tree.png" width = "100%", heigth = "50.0%" alt="" title = "Final Regression Tree" style = "border:1px solid black" />	
+							</figure>
+							<figure class="right" style = "display: inline-block">
+							<figcaption>Final Plays Prediction Regression Tree</figcaption>
+							<img src="images/Project3/Plays_Final_Tree.png" width = "100%", heigth = "50.0%" alt="" title = "Full Regression Tree" style = "border:1px solid black" />						
+							</figure>
+							<br>
+
+							<p>
+							The figures below illustrate that regression trees predicting playcount are considerably more complex than the ones created to predict Pitchfork review score.
+							At the same time, the predictions from the trees are again worse than the ones from the linear regression models judging from the 4.231.604 and 4.213.601 RMSE scores of the full and final regression trees respectively.
+							Both trees start with the Pitchfork review score at the root node resulting in either a split contingent on the interscope label or the def jam label.
+							As they grow into complexity they start to deviate from each other based on which features are available.
+							This time, the final decision tree appears to be a bit more accurate than the full tree.
+							</p>
+							
+							<pre class="prettyprint lang-R"><code>
+# KNN MODEL PREDICTIONS
+
+grid = expand.grid(k = c(10, 20, 30, 40, 50))
+
+# Full KNN model
+knn_full_plays_fit <- train(
+  playcount ~ . - title - artist - listeners,
+  data = df,
+  method = "knn",
+  metric = "RMSE",
+  trControl = train_control,
+  tuneGrid = grid
+  
+)
+knn_full_plays_fit
+# RMSE: 4.054.056 for k = 20
+
+
+# Final KNN model
+knn_final_plays_fit <- train(
+  playcount ~ . - title - artist - listeners - t_reggae - t_ambient - t_underground.hip.hop - l_constellation
+  - t_dark.ambient - l_profound.lore - l_kompakt - t_math.rock - l_kill.rock.stars - t_swedish - t_noise.pop
+  - t_stoner.metal - t_glitch - t_art.pop - t_psychedelic.folk - t_cover - l_carpark - l_polyvinyl - t_alt.country - t_electronica
+  - l_secretly.canadian - tracks - t_free.jazz - t_contemporary.classical - l_thrill.jockey - t_sludge.metal
+  - l_relapse - l_rhino - l_paper.bag - l_southern.lord - t_experimental - l_jagjaguwar - l_sacred.bones - l_kranky - t_french
+  - t_drone - t_funk - l_light.in.the.attic - t_post.hardcore - t_hardcore - t_british - l_ipecac - t_jazz - t_pop.punk - l_numero.group
+  - t_freak.folk - l_xsmall.label - t_gammarec - t_heavy.metal - t_darkwave - l_ninja.tune - t_r.b - t_world - l_mexican.summer - t_grunge
+  - g_pop.r.b - t_sludge - t_stoner.rock - t_shoegaze - l_rough.trade - t_post.metal - l_dead.oceans - l_anticon - g_jazz
+  - t_metalcore - t_female.vocalist - l_ghostly - t_trap - t_neo.soul - t_chillwave - l_ato - t_country - t_alternative.hip.hop
+  - l_touch.and.go - l_hydra.head - t_psychedelic - t_grindcore - duration - t_doom - t_hardcore.punk - t_X2010s - t_deep.house
+  - t_avant.garde - t_pop - l_small.label - t_soundtrack - l_saddle.creek - t_noise.rock - t_dubstep - l_vagrant - t_ethereal
+  - l_X.k7 - t_grime - t_chillout - t_guitar - t_atmospheric.black.metal - t_minimal.techno - t_thrash.metal - l_dfa
+  - l_temporary.residence - l_fat.cat - t_punk - t_emd - l_yep.roc - t_post.rock - t_japanese - t_twee.pop - t_synth.pop - t_black.metal
+  - t_instrumental - t_female.vocalists - t_electroclash - t_singer.songwriter - l_smalltown.supersound - t_X60s - t_house
+  - t_brooklyn - l_anti. - t_X90s - l_drag.city - t_blues - t_X80s - t_pop.rock - t_techno - t_experimental.hip.hop - g_rock - t_idm
+  - t_female - t_krautrock - t_piano - l_k - t_emusic - t_dub - t_folk - t_slowcore - t_folk.rock,
+  data = df,
+  method = "knn",
+  metric = "RMSE",
+  trControl = train_control,
+  tuneGrid = grid
+  
+)
+knn_final_plays_fit
+# RMSE: 4.032.367 for k = 10							
+							</code></pre>	
+							
+							<font color="black"><b> RMSE playcount prediction models </b></font>
+							<div style="overflow:auto;display: block; white-space: nowrap;">	
+							<table>
+							<tr>
+								<th> </th>
+								<th>Linear Regression</th>
+								<th>Regression Tree</th>
+								<th>K-NN</th>
+							</tr>	
+							<tr>
+								<th>Full Model</th>
+								<td>4.066.639</td>
+								<td>4.231.604</td>
+								<td>4.054.056</td>
+							</tr>
+							<tr>
+								<th>Final model</th>
+								<td>4.053.860</td>
+								<td>4.213.601</td>
+								<td>4.032.367</td>
+							</tr>
+							</table>
+							</div>
+
+							<p>
+							The final k-nn model with an RMSE of 4.032.367 with a "k" of 10 does also appear to perform slightly better than the initial full k-nn model with an RMSE of 4.054.056 for k = 20.
+							When it comes to modeling playcount the k-nn algorithm seems to perform slightly better than the linear regression models and by extension the regression trees.
+							It is interesting that even with virtually the same dataset, a different target variable can demand a different model.
+							In the next section, I'll briefly summarize the results and elaborate on possible extensions for this project.
+							</p>
+						</div>
+					</section>					
+								
+			
+				<!-- Conclusion -->
+					<section id="conclusion" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Conclusion</h2>
+							</div>
+							</br>
+
+							<p>
+							With the available data, the linear regression models were able to predict the Pitchfork review rating of a music album better than regression trees and k-nn models.
+							At the same time, k-nn models exhibited slightly superior results when predicting Last.fm playcount, which shows that the most appropriate model should be considered on a case-by-case basis.
+							There is still a lot of room for improvement however.
+							One relatively simple addition to the model with big implications could be the inclusion of the rating and playcount of previous albums by the same artist.
+							The recognition previous albums by the artist received could hold substantial predictive power when it comes to predicting the rating and playcount of their new effort.
+							Another, more advanced opportunity for further research lies in the analysis of audio frequency data of each album in order to predict the rating or playcount.
+							This data could in addition be used for music genre recognition. Unfortunately, retrieving, storing and processing this data is challenging.
+							Especially because the Pitchfork ratings are album ratings and not song ratings. Nevertheless, it is an exciting research avenue that warrants further exploration.
+							</p>
+
+							
+							
+
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Footer -->
+			<div id="footer">
+
+				<!-- Copyright -->
+					<ul class="copyright">
+						<li>&copy; Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+					</ul>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+
+	</body>
+</html>
