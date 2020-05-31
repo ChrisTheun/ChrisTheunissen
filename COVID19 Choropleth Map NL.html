@@ -1,0 +1,404 @@
+<!DOCTYPE HTML>
+<!--
+	Prologue by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Chris Theunissen Online Portfolio - COVID-19 Choropleth Map of the Netherlands</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Header -->
+			<div id="header">
+
+				<div class="top">
+
+					<!-- Logo -->
+						<div id="logo">
+							<span class="image avatar48"><img src="images/PortfolioPFP.png" alt="" /></span>
+							<h1 id="title">Chris Theunissen</h1>
+							<p>COVID-19 Choropleth Map NL</p>
+						</div>
+
+					<!-- Nav -->
+						<nav id="nav">
+							<ul>
+								<li><a href="#top" id="top-link"><span class="icon solid fa-newspaper">Title</span></a></li>
+								<li><a href="#introduction" id="introduction-link"><span class="icon solid fa-info-circle">Introduction</span></a></li>
+								<li><a href="#data_understanding" id="data_understanding-link"><span class="icon solid fa-database">Data Understanding</span></a></li>
+								<li><a href="#data_preparation" id="data_formatting-link"><span class="icon solid fa-puzzle-piece">Data Preparation</span></a></li>				
+								<li><a href="#map" id="map-link"><span class="icon solid fa-map">Interactive Map</span></a></li>
+							</ul>
+						</nav>
+
+				</div>
+
+				<div class="bottom">
+
+					<!-- Social Icons -->
+						<ul class="icons">
+							<li><a href="https://christheunissen.github.io/ChrisTheunissen/" target="_self" class="icon solid fa-home"><span class="label">Home</span></a></li>							
+							<li><a href="https://www.linkedin.com/in/chris-theunissen" target="_blank" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
+							<li><a href="https://github.com/ChrisTheunissen" target="_blank" class="icon brands fa-github"><span class="label">Github</span></a></li>
+							<li><a href="mailto:christheunissen95@gmail.com" target="_blank" class="icon solid fa-envelope"><span class="label">Email</span></a></li>
+						</ul>
+
+				</div>
+
+			</div>
+
+		<!-- Main -->
+			<div id="main">
+
+				<!-- Top -->
+					<section id="top" class="one dark cover">
+						<div class="container">
+
+							<header>
+								<h2 class="alt"><strong>COVID-19 Choropleth Map of the Netherlands</strong></h2>
+
+								<p>
+								In this project, I created <a href = "https://chris95.shinyapps.io/COVID19MapsNL/">an interactive choropleth map</a> displaying the effects of the COVID-19 outbreak on the municipalities of the Netherlands over time with the R shiny and leaflet packages.
+								The maps can be used to examine the cumulative number of reported cases, hospital admissions, and deceased citizens in the Netherlands from the 13th of March, 2020 until the 26th of May.
+								In addition, the weekly growth rate of COVID-19 cases can be observed.
+								The maps are based on a <a href = "https://data.overheid.nl/dataset/11508-covid-19-aantallen-gemeente-cumulatief">public dataset published by the Dutch government</a>. 
+								</p>
+							</header>
+
+						</div>
+					</section>
+					
+				<!-- Introduction -->
+					<section id="introduction" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Introduction</h2>
+							</div>
+							</br>
+
+							<p>
+							Ever since the COVID-19 outbreak unleashed itself upon the world, massive amounts of data have been collected and made public in an attempt to get a better grasp on the phenomenon and combat it as effectively as possible.
+							One such way that helps to illustrate the effects of the phenomenon is the use of interactive maps.
+							For example, the Dutch National Institute for Public Health and the Environment (RIVM) published such a <a href = "https://www.rivm.nl/en/coronavirus-map-netherlands-per-municipality">choropleth map</a> which displays the cumulative reported COVID-19 cases per municipality in the Netherlands.
+							My aim with this project is to enhance this map with more features and information to help users get a better idea of how COVID-19 has spread over time and the impact it had per municipality.
+							Therefore, I built a similar choropleth map from scratch and added a timeslider feature, which makes it possible to study the effects of COVID-19 per day.
+							As opposed to a single map that only focuses on the reported cases per municipality, I included more maps displaying not only the reported cases, but also the number of deceased and the weekly growth of the virus per municipality.
+							Moreover, hospital admissions per municipality are also displayed on the labels accompanying each municipality.
+							</p>
+
+						</div>
+					</section>			
+					
+				<!-- Data Understanding -->
+					<section id="data_understanding" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Data Understanding</h2>
+							</div>
+							</br>
+
+							<p>
+							I used the <a href = "https://data.overheid.nl/dataset/11508-covid-19-aantallen-gemeente-cumulatief">"Covid-19 cumulatieve aantallen per gemeente" dataset</a> published by the Dutch government for the information displayed on the maps.
+							This dataset includes the cumulative totals of reported coronavirus cases, hospital admissions and deaths per Dutch municipality for each day from March 13th, 2020 until the last daily update which is May 26th at the time of writing.
+							In addition, I used the <a href = "https://opendata.cbs.nl/statline/portal.html?_la=nl&_catalog=CBS&tableId=70072ned&_theme=230"> CBS Open data StatLine</a> to retrieve population numbers per municipality necessary to compute reported cases and deaths per 10.000 inhabitants.
+							This dataset has been added to <a href = "https://github.com/ChrisTheunissen/COVID-19-Interactive-Choropleth-Map">my GitHub repository</a> together with the project's R code.
+							</p>
+							
+							<p>
+							In order to define the municipality borders on the map, I used the <a href = "https://hub.arcgis.com/datasets/e1f0dd70abcb4fceabbc43412e43ad4b_0"> 2019 municipality borders shapefile</a> from Esri NL.
+							This shapefile is required to generate the choropleth maps.
+							</p>
+						</div>
+					</section>
+					
+					
+				<!-- Data Preparation -->
+					<section id="data_preparation" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Data Preparation</h2>
+							</div>
+							</br>
+							
+							<p>
+							For data preparation purposes I used the dplyr and rgdal packages.
+							After loading those in, I read the cumilative COVID-19 cases dataset and the municipality population dataset and reformatted a few features to be in the right datatype.
+							Other trivial operations are explained in the code section below.
+							</p>
+							
+							<pre class="prettyprint lang-r"><code>	
+# # ============================ LOAD PACKAGES ============================
+
+library("dplyr")
+library("rgdal")
+
+# ============================ DATA FORMATTING ============================
+
+# Import dataset and reformat variable types
+# Data retrieved from https://data.overheid.nl/dataset/11508-covid-19-aantallen-gemeente-cumulatief
+df <- read.csv("COVID-19_aantallen_gemeente_cumulatief.csv", sep = ";")
+df$Date_of_report <- as.POSIXct(df$Date_of_report)
+df$Municipality_code <- as.character(df$Municipality_code)
+df$Municipality_name <- as.character(df$Municipality_name)
+df$Province <- as.character(df$Province)
+
+# Remove the province/country totals and only keep municipality totals
+df <- df[df$Municipality_name != "",]
+
+# Add "Municipality" feature by merging both the municipality name and province name
+df$Municipality <- paste(df$Municipality_name,", ",df$Province, sep = "")
+
+
+# Import population per municipality dataset
+# Retrieved from: https://opendata.cbs.nl/statline/portal.html?_la=nl&_catalog=CBS&tableId=70072ned&_theme=230
+pop <- read.csv("Populatie Gemeenten 2020.csv", sep = ";")
+pop <- pop[!is.na(pop$TotaleBevolking_1),]
+
+Municipalities_df <- merge(x=df, y=pop[,c(2,4)], by.x = "Municipality_code", by.y = "RegioS")
+names(Municipalities_df)[9] <- "Population"		
+							</code></pre>			
+							
+							
+							<p>
+							After merging the COVID-19 and the population datasets, I proceeded with some feature engineering.
+							I mainly used the population numbers, total reported cases, hospital admissions and deceased features to compute the cases and deceased per 10.000 inhabitants as well as daily and weekly growth rates for the three main features.
+							Finally, I created a popup_info feature whose function is to display the pop up text with additional information whenever the user clicks on a municipality on the interactive map.
+							</p>
+							
+							<pre class="prettyprint lang-r"><code>								
+# ============================ FEATURE ENGINEERING ============================
+
+# Create a date feature from the date-time feature
+Municipalities_df$Date <- as.Date(Municipalities_df$Date_of_report)
+
+# Compute weekly & daily growth rates
+Municipalities_df <- Municipalities_df %>%
+  group_by(Municipality) %>%
+  arrange(Municipality, Date) %>%
+  mutate(Weekly_casegrowth = round((Total_reported-lag(Total_reported,7))/lag(Total_reported,7)*100,1),
+         Daily_casegrowth = round((Total_reported-lag(Total_reported,1))/lag(Total_reported,1)*100,1),
+         Weekly_admissiongrowth = round((Hospital_admission-lag(Hospital_admission,7))/lag(Hospital_admission,7)*100,1),
+         Daily_admissiongrowth = round((Hospital_admission-lag(Hospital_admission,1))/lag(Hospital_admission,1)*100,1),
+         Weekly_deceasedgrowth = round((Deceased-lag(Deceased,7))/lag(Deceased,7)*100,1),
+         Daily_deceasedgrowth = round((Deceased-lag(Deceased,1))/lag(Deceased,1)*100,1),
+         CasesPer10000 = round(Total_reported/Population * 10000,2),
+         DeceasedPer10000 = round(Deceased/Population * 10000,2)
+  )
+
+# Create a popup feature consisting of information that will pop up once the user clicks on a municipality on the map
+Municipalities_df <- Municipalities_df %>%
+  mutate(popup_info=paste("&lt;strong>",Municipality,"&lt;/strong>", "&lt;br/>",
+                          "Population:", Population, "&lt;br/>",
+                          "Reported cases:", Total_reported," (+", Weekly_casegrowth,"%)", "&lt;br/>",
+                          "Cases per 10000:", CasesPer10000, "&lt;br/>",
+                          "Hospital admissions:", Hospital_admission," (+", Daily_admissiongrowth,"%)", "&lt;br/>",
+                          "Deceased:", Deceased," (+", Daily_deceasedgrowth,"%)", "&lt;br/>",
+                          "Deceased per 10000:", DeceasedPer10000))
+Municipalities_df <- as.data.frame(Municipalities_df)		
+				
+							</code></pre>				
+
+							<p>
+							In order to make sure the records in the final dataframe are matched with the municipalities in the shapefile, checked whether the municipality names are the same and I reordered to dataframe after loading in the shapefile.
+							</p>
+
+							<pre class="prettyprint lang-r"><code>								
+# Read shapemap of Dutch municipalities
+shapefile <- readOGR("Gemeentegrenzen__voorlopig____kustlijn.shp")
+shapefile$Gemeentena
+
+# Check whether the municipality names in the shapemap correspond to those in the original dataframe and order them accordingly
+is.element(shapefile$Gemeentena, Municipalities_df$Municipality_name)
+Municipalities_df <- Municipalities_df[order(match(Municipalities_df$Municipality_name,shapefile$Gemeentena)),]
+
+
+write.csv(Municipalities_df, "Municipalities_df.csv")							
+							</code></pre>	
+							
+							<p>
+							The final dataframe is saved as a csv file, so that it can be easily loaded into the shiny app, which is executed from a separate R file.
+							</p>
+							
+						</div>
+					</section>									
+					
+
+				<!-- Interactive Map -->
+					<section id="map" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Interactive Map</h2>
+							</div>
+							</br>
+
+							<p>
+							Before deploying the actual shiny app, I loaded in the necessary data including the shapefile and the municipality dataframe created previously.
+							After which, I created a named list necessary for generating appropriate color palettes within the app later on.
+							</p>
+							
+							<pre class="prettyprint lang-r"><code>								
+# ============================ SHINY APP ============================
+
+# Load packages
+library("shiny")
+library("leaflet")
+library("dplyr")
+library("rgdal")
+
+# Load in data
+Municipalities_df <- read.csv("Municipalities_df.csv")
+Municipalities_df$Date <- as.Date(Municipalities_df$Date)
+shapefile <- readOGR("Gemeentegrenzen__voorlopig____kustlijn.shp")
+
+# Create list with bins required for the map color palettes
+bins <- list("Total_reported" = c(0, 10, 20, 50, 100, 200, 500, 1000, Inf),
+             "CasesPer10000" = c(0, 2, 5, 10, 20, 50, 75, Inf),
+             "Deceased" = c(0, 2, 5, 10, 20, 50, 100, 200, 500, Inf),
+             "DeceasedPer10000" = c(0, 2, 4, 8, 10, 15, 20, 50, Inf),
+             "Weekly_casegrowth" = c(-20, 0, 20, 40, 60, 80, 100, 200, 500, Inf)
+             )
+							</code></pre>
+							
+							<p>
+							A shiny app consists of two parts, the user interface (UI) and a server function.
+							The code for the UI-object below produces a sidebar with a drop-down list in which the user can select which specific map to display as well as a slider with which the user can specify the date.
+							The slider also includes an animation feature, which makes it possible for the user to observe how the COVID-19 situation developed over time.
+							Aside from the side panel, a main panel is initialized in which the map will be shown.
+							</p>
+							
+							<pre class="prettyprint lang-r"><code>								
+ui <- fluidPage(
+  
+  titlePanel("COVID-19 Effects in The Netherlands - Interactive Choropleth Map"),
+
+  
+  sidebarLayout(
+    
+    sidebarPanel(
+      tabsetPanel(id= "tabs",
+                  
+                  tabPanel("Map", id = "Map", 
+                           br(), 
+                           
+                           p("Choose options below to interact with the Map"), 
+                           
+                           # Initialize drop-down list to select which map to show
+                           selectInput("measure", "Select the measure",
+                                       choices = list("Total confirmed cases" = "Total_reported",
+                                                      "Cases per 10000" = "CasesPer10000",
+                                                      "Total deceased" = "Deceased",
+                                                      "Deceased per 10000" = "DeceasedPer10000",
+                                                      "Weekly change" = "Weekly_casegrowth"),
+                                       selected = "Total confirmed cases"),
+                           
+                           # Initialize slider to specify the date
+                           sliderInput("date", "Select the date", min = min(Municipalities_df$Date) , max = max(Municipalities_df$Date), 
+                                       value = max(Municipalities_df$Date), step = 1, dragRange= TRUE, animate = animationOptions(interval = 1500))
+                          
+                  )
+      )
+    ),
+    
+    mainPanel(
+      
+      tabsetPanel(type= "tabs",
+                  
+                  tabPanel("Interactive Map", leafletOutput(outputId = "map_choropleth", height = "80vh"))
+
+      )
+    )
+  )
+)
+							</code></pre>			
+
+							<p>
+							The map is rendered in the server function by making use of the leaflet package.
+							After generating the color palette, the leaflet function renders a choropleth map based on the Dutch municipality shapefile and the inputs it observed through the UI object.
+							A description of the function's parameters can be found in the codeblock below.
+							</p>
+
+
+
+
+							<pre class="prettyprint lang-r"><code>	
+server <- function(input, output) {
+  
+  output$map_choropleth <- renderLeaflet({
+    
+    pal <- colorBin("YlOrRd", domain = Municipalities_df[,input$measure], bins = bins[[input$measure]])
+    
+    leaflet(shapefile) %>% 
+      addProviderTiles("CartoDB.DarkMatter") %>%                                                                                          # Initialize dark world map
+      addPolygons(data = shapefile, weight = 1, smoothFactor = 0.5, color = "grey", fillOpacity = 0.9,                                    # Add polygons corresponding to Dutch municipalities
+                  fillColor = pal(Municipalities_df[,input$measure][Municipalities_df$Date == input$date]),                               # Select appropriate measure to fill map colors with
+                  popup = Municipalities_df$popup_info[Municipalities_df$Date == input$date],                                             # Enable pop-up text that shows up whenever the user clicks on a municipality
+                  highlight = highlightOptions(weight = 2, color = "#555", fillOpacity = 1, bringToFront = TRUE)) %>%                     # Highlight borders of municipality when hovering over it
+      addLegend(values = ~Municipalities_df[,input$measure][Municipalities_df$Date == input$date], pal = pal, title = input$measure)      # Add legend
+  })
+
+}
+
+
+shinyApp(ui, server)
+							
+							</code></pre>		
+
+							<p>
+							I deployed the app for free on <a href = "chris95.shinyapps.io/COVID19MapsNL/">shinyapps.io</a>.
+							Below an embedded version of the interactive map can be found.
+							</p>
+							
+							
+							<head><title>Interactive Choropleth Map</title></head>
+							<body>
+							<iframe id="Interactive Choropleth Map" src="https://chris95.shinyapps.io/COVID19MapsNL/" style="border: none; width: 100%; height: 850px" frameborder="0"></iframe>
+							</body>
+							
+							<p>
+							Some interesting conclusions can be drawn from observing the map.
+							The map displaying the COVID-19 cases per 10.000 inhabitants shows that the southern regions of the Netherlands have been hit relatively harder than the northern regions.
+							Especially Noord-Brabant, Limburg and the eastern parts of Gelderland have been suffering from a relatively large number of cases per 10.000 inhabitants compared to regions like Groningen and Friesland.
+							The map showcasing the number of deceased per 10.000 citizens indicates that a distinct region in Noord-Brabant that includes the municipalities of Bernheze, Meierijstad and Boekel suffered from a disproportionate number of deaths.
+							The timeline shows that those regions where among the first to suffer from the COVID-19 outbreak in the Netherlands.
+							This sudden outbreak might have taken the local healthcare institutions by surprise, leading to a higher relative death count.
+							By looking at the weekly change map, we can conclude that the spread of the virus has largely been contained.
+							Almost all municipalities have experienced a drop in reported COVID-19 case growth. 
+							Except for a couple of municipalities the growth rate has been below 20% compared to the cumulative number of cases previous week.
+							These observations indicate the government's lockdown measures appear to have been effective. 
+							However, a close eye needs to be kept on ongoing growth rates, as the relaxation of measures could rapidly lead to a new spike in COVID-19 cases.
+							</p>
+							
+							
+						</div>
+					</section>					
+								
+
+			</div>
+
+		<!-- Footer -->
+			<div id="footer">
+
+				<!-- Copyright -->
+					<ul class="copyright">
+						<li>&copy; Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+					</ul>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+
+	</body>
+</html
