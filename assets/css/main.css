@@ -2659,6 +2659,19 @@ input, select, textarea {
 			body, input, textarea, select {
 				font-size: 14pt;
 			}
+			
+			.p-left {
+				font-size:12pt;
+				margin-left:1.5em;
+				color:rgb(180, 180, 180);
+				float:left;
+				}
+			.p-right {
+				font-size:12pt;
+				margin-right:1.5em;
+				color:rgb(180, 180, 180);
+				float:right;
+				line-height:1.5em} 
 
 			h2 {
 				font-size: 1.5em;
