@@ -2665,13 +2665,15 @@ input, select, textarea {
 				margin-left:1.5em;
 				color:rgb(180, 180, 180);
 				float:left;
-				}
+			}
+				
 			.p-right {
-				font-size:12pt;
+				font-size:1pt;
 				margin-right:1.5em;
 				color:rgb(180, 180, 180);
 				float:right;
-				line-height:1.5em} 
+				line-height:1.5em
+			} 
 
 			h2 {
 				font-size: 1.5em;
