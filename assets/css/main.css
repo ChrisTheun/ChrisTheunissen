@@ -2668,7 +2668,7 @@ input, select, textarea {
 			}
 				
 			.p-right {
-				font-size:1pt;
+				font-size:12pt;
 				margin-right:1.5em;
 				color:rgb(180, 180, 180);
 				float:right;
@@ -2677,7 +2677,6 @@ input, select, textarea {
 
 			h2 {
 				font-size: 1.5em;
-				letter-spacing: 0;
 				font-weight: 300;
 			}
 
