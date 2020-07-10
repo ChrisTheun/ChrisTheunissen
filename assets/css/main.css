@@ -2660,23 +2660,40 @@ input, select, textarea {
 				font-size: 14pt;
 			}
 			
-			.p-left {
-				font-size:12pt;
-				margin-left:1.5em;
-				color:rgb(180, 180, 180);
-				float:left;
+			.item {
+				box-shadow: 0 0.05em 0.15em 0 rgba(0, 0, 0, 0.05);
+				margin-bottom: 40px;
 			}
-				
-			.p-right {
-				font-size:12pt;
-				margin-right:1.5em;
-				color:rgb(180, 180, 180);
-				float:right;
-				line-height:1.5em
-			} 
+
+				.item header {
+					background: #fff;
+					margin: 0;
+					padding: 1em 0 1em 0;
+					font-size: 0.8em;
+				}
+
+					.item header h3 {
+					font-size: 1em;
+					}
+			
+						.p-left {
+							font-size:12pt;
+							margin-left:1.5em;
+							color:rgb(180, 180, 180);
+							float:left;
+						}
+							
+						.p-right {
+							font-size:12pt;
+							margin-right:1.5em;
+							color:rgb(180, 180, 180);
+							float:right;
+							line-height:1.5em
+						} 
 
 			h2 {
 				font-size: 1.5em;
+				letter-spacing: 0;
 				font-weight: 300;
 			}
 
