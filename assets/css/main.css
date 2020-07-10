@@ -2062,13 +2062,16 @@ input, select, textarea {
 				margin-left:1.5em;
 				color:rgb(180, 180, 180);
 				float:left;
-				}
+				line-height:3.8em
+			}
+			
 			.p-right {
 				font-size:12pt;
 				margin-right:1.5em;
 				color:rgb(180, 180, 180);
 				float:right;
-				line-height:1.5em}
+				line-height:1.5em
+			}
 
 /* Icons */
 
