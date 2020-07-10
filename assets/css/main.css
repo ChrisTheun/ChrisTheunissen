@@ -2659,23 +2659,28 @@ input, select, textarea {
 			body, input, textarea, select {
 				font-size: 14pt;
 			}
-			
 
 			.p-left {
-				font-size:12pt;
+				font-size:10pt;
 				margin-left:1.5em;
 				color:rgb(180, 180, 180);
 				float:left;
+				line-height:0
 			}
 				
 			.p-right {
-				font-size:12pt;
+				font-size:10pt;
 				margin-right:1.5em;
 				color:rgb(180, 180, 180);
 				float:right;
-				line-height:1.5em
+				line-height:0
 			} 
 
+			h2 {
+				font-size: 1.5em;
+				letter-spacing: 0;
+				font-weight: 300;
+			}
 
 			.container {
 				padding: 0 15px 0 15px;
