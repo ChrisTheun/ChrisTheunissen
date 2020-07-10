@@ -48,6 +48,7 @@ img {
 }
 
 
+
 article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
 	display: block;}
@@ -2055,6 +2056,19 @@ input, select, textarea {
 			.item header h3 {
 				font-size: 1em;
 			}
+			
+			.p-left {
+				font-size:12pt;
+				margin-left:1.5em;
+				color:rgb(180, 180, 180);
+				float:left;
+				}
+			.p-right {
+				font-size:12pt;
+				margin-right:1.5em;
+				color:rgb(180, 180, 180);
+				float:right;
+				line-height:1.5em}
 
 /* Icons */
 
