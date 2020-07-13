@@ -1,0 +1,600 @@
+<!DOCTYPE HTML>
+<!--
+	Prologue by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Chris Theunissen Online Portfolio - Music Album Rating and Playcount Prediction</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Header -->
+			<div id="header">
+
+				<div class="top">
+
+					<!-- Logo -->
+						<div id="logo">
+							<span class="image avatar48"><img src="images/PortfolioPFP.png" alt="" /></span>
+							<h1 id="title">Chris Theunissen</h1>
+							<p>Tweet Sentiment Analysis</p>
+						</div>
+
+					<!-- Nav -->
+						<nav id="nav">
+							<ul>
+								<li><a href="#top" id="top-link"><span class="icon solid fa-newspaper">Title</span></a></li>
+								<li><a href="#introduction" id="introduction-link"><span class="icon solid fa-info-circle">Introduction</span></a></li>
+								<li><a href="#data_understanding" id="data_understanding-link"><span class="icon solid fa-hashtag">Data Understanding</span></a></li>
+								<li><a href="#generating_target_labels" id="data_understanding-link"><span class="icon solid fa-tags">Generating Target Labels</span></a></li>
+								<li><a href="#predicting_the_sentiment" id="data_formatting-link"><span class="icon solid fa-heart">Predicting the Sentiment</span></a></li>				
+								<li><a href="#results" id="results-link"><span class="icon solid fa-flag">Results</span></a></li>
+							</ul>
+						</nav>
+
+				</div>
+
+				<div class="bottom">
+
+					<!-- Social Icons -->
+						<ul class="icons">
+							<li><a href="https://christheunissen.github.io/ChrisTheunissen/" target="_self" class="icon solid fa-home"><span class="label">Home</span></a></li>							
+							<li><a href="https://www.linkedin.com/in/chris-theunissen" target="_blank" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
+							<li><a href="https://github.com/ChrisTheunissen" target="_blank" class="icon brands fa-github"><span class="label">Github</span></a></li>
+							<li><a href="mailto:christheunissen95@gmail.com" target="_blank" class="icon solid fa-envelope"><span class="label">Email</span></a></li>
+						</ul>
+
+				</div>
+
+			</div>
+
+		<!-- Main -->
+			<div id="main">
+
+				<!-- Top -->
+					<section id="top" class="one dark cover">
+						<div class="container">
+
+							<header>
+								<h2 class="alt"><strong>Sentiment Analysis of Replies to Customer Support Tweets</strong></h2>
+
+								<p>
+								The goal of the project is to see whether it is possible to predict the sentiment of replies to customer support tweets based solely on the text of said customer support tweet.
+								The analysis is conducted using <a href = "https://twitter.com/SpotifyCares">@SpotifyCares</a> tweets extracted from the <a href = "https://www.kaggle.com/thoughtvector/customer-support-on-twitter">'Customer Support on Twitter' dataset</a> retrieved from Kaggle.
+								A naive Bayes classifier is first trained upon Python's Natural Language Toolkit's (NLTK) sample tweets to generate positive and negative sentiment labels for tweets by and replies to @SpotifyCares.
+								Afterwards, another naive Bayes classifier predicts the sentiment of the replies to the Spotify customer service tweets by using the processed text of the customer service tweet as a featureset.
+								</p>
+							</header>
+
+						</div>
+					</section>
+					
+				<!-- Introduction -->
+					<section id="introduction" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Introduction</h2>
+							</div>
+							</br>
+
+							<p>
+							Over the last few years, many companies have embraced Twitter as a new channel through which they can offer their customers direct support.
+							On Twitter, companies can jump in as soon as a customer tweets a complaint about a product or service offered by the company.
+							Because Twitter is a public platform with a far reach, a beloved customer service can be leveraged as a valuable marketing asset, while poor customer support can quickly tarnish an organization's reputation. 
+							</p>
+							
+							<p>
+							The idea behind this project was to see whether it is possible to predict the sentiment of replies to customer support tweets based solely on the text of said customer support tweet.
+							If it is possible, the potential benefits could be significant. 
+							For example, the company could easily figure out what type of customer support approach on Twitter results in positive customer feedback without having to resort to suboptimal means such as surveys.
+							Moreover, a specific look into the most informative features of the classifier could reveal impactful words or expressions that customer support employees should employ or avoid.
+							</p>
+							
+							<p>
+							It's impossible to do proper text processing and sentiment analysis without good data however.
+							In the next section, I elaborate on the data used for the analysis.
+							</p>
+								
+
+						</div>
+					</section>			
+					
+				<!-- Data Understanding -->
+					<section id="data_understanding" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Data Understanding</h2>
+							</div>
+							</br>
+
+							<p>
+							In order to be able to predict the sentiment of replies to customer support tweets, a dataset of customer support tweets are necessary.
+							Fortunately, Kaggle has a <a href = "https://www.kaggle.com/thoughtvector/customer-support-on-twitter">'Customer Support on Twitter' dataset</a> with close to 3 million tweets by and to large companies' customer support accounts.
+							The problem is that we need to know the sentiment of each tweet, which is not part of this dataset.
+							Of course it is virtually impossible to manually examine and label all tweets.
+							Therefore, I used a naive Bayes classifier trained on NLTK's Twitter positive and negative sample tweets dataset to predict the sentiment of the tweets from the customer support dataset and generate target labels that way.
+							Before we dive into this process, let's examine the Customer Support on Twitter dataset.
+							</p>
+							
+							<p>
+							But first, we need to import all the packages required for the analysis.
+							</p>
+							<pre class="prettyprint lang-python"><code>
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import nltk
+import re, string, random
+from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.corpus import twitter_samples, stopwords
+from nltk.tag import pos_tag
+from nltk.tokenize import word_tokenize, TweetTokenizer
+from nltk import FreqDist, classify, NaiveBayesClassifier
+
+%matplotlib inline
+sns.set_style("darkgrid", {'axes.facecolor': '#d9d9d9', 'figure.facecolor': 'None'})
+pd.set_option('display.max_colwidth', -1)
+sns.set(rc={'figure.figsize':(20,10)}, font_scale=1.5)							
+							</code></pre>		
+
+							<p>
+							After importing the packages, I read the dataset, which I downloaded and stored as a csv file.
+							Next, I make sure that the variables have the appropriate type.
+							I then display a few sample records of the dataset, which contains information such as the tweet ID, author ID, time of creation, text and response tweet ID for each tweet.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>
+tweets = pd.read_csv("twcs.csv")
+
+# Make sure the variables have appropriate types
+tweets["tweet_id"] = tweets["tweet_id"].astype(str) 
+tweets["in_response_to_tweet_id"] = tweets["in_response_to_tweet_id"].astype(str).str.strip(".0")
+tweets["text"] = tweets["text"].str.lower() # Make all letters in tweet text lower cased						
+							</code></pre>	
+							
+							<table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th></th>      <th>tweet_id</th>      <th>author_id</th>      <th>inbound</th>      <th>created_at</th>      <th>text</th>      <th>response_tweet_id</th>      <th>in_response_to_tweet_id</th>    </tr>  </thead>  <tbody>    <tr>      <th>0</th>      <td>1</td>      <td>sprintcare</td>      <td>False</td>      <td>Tue Oct 31 22:10:47 +0000 2017</td>      <td>@115712 i understand. i would like to assist you. we would need to get you into a private secured link to further assist.</td>      <td>2</td>      <td>3</td>    </tr>    <tr>      <th>1</th>      <td>2</td>      <td>115712</td>      <td>True</td>      <td>Tue Oct 31 22:11:45 +0000 2017</td>      <td>@sprintcare and how do you propose we do that</td>      <td>NaN</td>      <td>1</td>    </tr>    <tr>      <th>...</th>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>    </tr>    <tr>      <th>2811772</th>      <td>2987949</td>      <td>AldiUK</td>      <td>False</td>      <td>Wed Nov 22 08:31:24 +0000 2017</td>      <td>@823870 sounds delicious, sarah! 😋 https://t.co/7uqpwyh1b6</td>      <td>NaN</td>      <td>298795</td>    </tr>    <tr>      <th>2811773</th>      <td>2987950</td>      <td>823870</td>      <td>True</td>      <td>Tue Nov 21 22:01:04 +0000 2017</td>      <td>@aldiuk  warm sloe gin mince pies with ice cream - the best thing ever! #notjustxmas#allyearround</td>      <td>2987951,2987949</td>      <td>nan</td>    </tr>  </tbody></table>
+							
+							<p>
+							It would be helpful to see the the companies that published the most customer support tweets, which is exactly what the codeblock below accomplishes.
+							From the chart below it becomes clear that Amazon, Apple, Uber, Spotify and Delta form the top 5 of most prolific customer support accounts in this dataset.
+							</p>
+
+							<pre class="prettyprint lang-python"><code>
+# Visualize the 20 most prolific customer support Twitter accounts
+g = sns.barplot(x = tweets['author_id'].value_counts()[:20],
+                y = tweets['author_id'].value_counts()[:20].index,
+                orient = "h", edgecolor = 'k')
+g.set_title('20 Most Prolific Customer Support Twitter Accounts', size = 25)							
+							</code></pre>	
+							
+							<img src="images/project5top20companies.png" width = "60%", heigth = "33%" alt="" />
+							
+							<p>
+							Because it would be too intensive to use all of the 2.8 million tweets in the dataset for the analysis, I decided to only use the tweets from and to the Spotify customer support account (@SpotifyCares).
+							Mainly because there is a substantial number of SpotifyCares tweets but not to a degree that it has a significant negative effect on the computational speed.
+							In addition, the SpotifyCares tweets are in English, so it will not be necessary to address foreign language issues.
+							</p>
+
+							<pre class="prettyprint lang-python"><code>
+# Extract tweets by and send to the Spotify customer service account
+# SpotifyCares has enough tweets for analysis without making it needlessly slow + they are in English
+tweetsSpot = tweets[(tweets["author_id"] == "SpotifyCares") | (tweets["text"].str.contains("@spotifycares"))]							
+							</code></pre>							
+							
+						<p>
+						Now that we have all the tweets from and to @SpotifyCares, we can generate its sentiment labels in the next section.
+						</p>
+
+						</div>
+					</section>
+					
+					
+				<!-- Generating Target Labels -->
+					<section id="generating_target_labels" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Generating Target Labels</h2>
+							</div>
+							</br>
+
+							<p>
+							Fortunately, Python's NLTK library has a dataset with 5000 positive tweets and 5000 negative tweets available.
+							One issue is that some tweets in our customer support dataset simply do not convey any emotion and could be considered neutral.
+							This caveat can only really be solved by using a different dataset of tweets with more granular sentiment labels, such as the <a href = "https://www.kaggle.com/kazanova/sentiment140">Sentiment140 dataset</a>.
+							However, that dataset removed the emotes from the tweets, which could contain valuable information for our sentiment analysis, so for now we stick with our NLTK sample tweets.
+							</p>
+							
+							<p>
+							There are a few steps required to process the text of the Tweets in such a way that we can feed them into the naive Bayes classifier for training, namely:
+							<ul style = "margin-left:10%; text-align:left">
+									<li>Tokenizing the text</li>
+									<li>Normalizing the text through lemmatization</li>
+									<li>Cleaning the text and removing noise (hyperlinks, twitterhandles and special characters)</li>
+									<li>Formatting the data</li>
+							</ul>
+							The majority of the original code used for the text preprocessing and sentiment analysis has been written by Shaumik Daityari
+							and can be found in <a href = "https://www.digitalocean.com/community/tutorials/how-to-perform-sentiment-analysis-in-python-3-using-the-natural-language-toolkit-nltk">his excellent blog post on sentiment analysis using the NLTK library</a>.
+							</p>
+							
+							<p>
+							The function below removes noise, performs lemmatization and removes stopwords.
+							</p>
+							<pre class="prettyprint lang-python"><code>
+# A function to remove noise ("@", hyperlinks) from tweets, lemmatize the words and remove stopwords
+def remove_noise(tweet_tokens, stop_words = ()):
+
+    cleaned_tokens = []
+
+    for token, tag in pos_tag(tweet_tokens):
+        token = re.sub('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|'\
+                       '(?:%[0-9a-fA-F][0-9a-fA-F]))+','', token)
+        token = re.sub("(@[A-Za-z0-9_]+)","", token)
+
+        if tag.startswith("NN"):
+            pos = 'n'
+        elif tag.startswith('VB'):
+            pos = 'v'
+        else:
+            pos = 'a'
+
+        lemmatizer = WordNetLemmatizer()
+        token = lemmatizer.lemmatize(token, pos)
+
+        if len(token) > 0 and token not in string.punctuation and token.lower() not in stop_words:
+            cleaned_tokens.append(token.lower())
+    return cleaned_tokens							
+							</code></pre>	
+
+							<p>
+							The purpose of this function is to convert the data into the right format so it can be used as input for the classifier.
+							</p>
+							<pre class="prettyprint lang-python"><code>
+# In order to feed the tweets into the naive Bayes classifier their text needs to be in a dictionary format with the tokens as keys and "True" as values
+def get_tweets_for_model(cleaned_tokens_list):
+    for tweet_tokens in cleaned_tokens_list:
+        yield dict([token, True] for token in tweet_tokens)							
+							</code></pre>	
+
+							<p>
+							In the block below, the text of the tweets from the NLTK sample tweets is processed.
+							First, the tweets are tokenized and cast into a list.
+							Second, the remove_noise function cleans and normalize the tokens.
+							Third, the lists of tokens are converted into the appropriate format required for the classifier.
+							Fourth, the lists of processed positive and negative tokens are added together and randomized to avoid bias when training the model.
+							In addition, the randomized dataset is split according to a 70/30 ratio in which 70% is meant for training the classifier and the remaining 30% is used to test its performance.
+							Finally, the naive Bayes model is trained, tested and its results together with a list of most informative features are displayed.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>
+# Here we actually process the text of the sample tweets by using the functions above.
+
+# Retrieve positive and negative tweets from NLTK tweet samples
+positive_tweets = twitter_samples.strings('positive_tweets.json')
+negative_tweets = twitter_samples.strings('negative_tweets.json')
+
+default_stop_words = stopwords.words('english') # A dictionary with English stopwords
+keep_words = ["no", "nor", "not"] # Remove these words from the stop_words list
+stop_words = [word for word in default_stop_words if word not in keep_words]
+
+# Tokenize the tweets
+positive_tweet_tokens = twitter_samples.tokenized('positive_tweets.json')
+negative_tweet_tokens = twitter_samples.tokenized('negative_tweets.json')
+
+positive_cleaned_tokens_list = []
+negative_cleaned_tokens_list = []
+
+# Use the remove_noise function to clean the lists of tokens
+for tokens in positive_tweet_tokens:
+    positive_cleaned_tokens_list.append(remove_noise(tokens, stop_words))
+
+for tokens in negative_tweet_tokens:
+    negative_cleaned_tokens_list.append(remove_noise(tokens, stop_words))
+
+# Convert the lists of tokens into the right format required for the classifier 
+positive_tokens_for_model = get_tweets_for_model(positive_cleaned_tokens_list)
+negative_tokens_for_model = get_tweets_for_model(negative_cleaned_tokens_list)
+
+positive_dataset = [(tweet_dict, "Positive")
+                     for tweet_dict in positive_tokens_for_model]
+
+negative_dataset = [(tweet_dict, "Negative")
+                     for tweet_dict in negative_tokens_for_model]
+
+# Compile the complete dataset by adding the positive and negative datasets
+dataset = positive_dataset + negative_dataset
+
+# Randomize the order of the rows in the dataset to avoid bias
+random.seed(7)
+random.shuffle(dataset)
+
+# Split the complete dataset into a train and test set according to a 70/30 split
+train_data = dataset[:7000]
+test_data = dataset[7000:]
+
+# Train the naive Bayes classifier on the training data
+classifier = NaiveBayesClassifier.train(train_data)
+
+# Print the accuracy of the classifier after testing it on the test data
+print("Accuracy is:", classify.accuracy(classifier, test_data))
+
+# Print the most informative features of the model
+print(classifier.show_most_informative_features(10))
+
+# Assemble the predictions and reference labels of the test set to print out a confusion matrix
+predictions = []
+references = []
+
+for i in range(len(test_data)):
+    predictions.append(classifier.classify(test_data[i][0]))
+    references.append(test_data[i][1])
+    
+CM = nltk.ConfusionMatrix(references, predictions)
+print("Confusion Matrix:")
+print(CM)							
+							</code></pre>	
+							<img src="images/project5results1.png" width = "70%", heigth = "33%" alt="" /><br>
+
+							The classifier achieves an outstanding accuracy of 99.6% when predicting whether the tweets in the test set have positive or negative sentiment.
+							Because of this high accuracy, I feel comfortable using the predictions of this classifier as target labels for our customer service tweets.
+							Nevertheless, it is important to keep in mind that a significant number of tweets in that dataset could be considered neutral, which makes using the classifier's predictions as labels less than ideal.
+							
+							The text processing of the Spotify customer support tweets is almost the same as in the previous codeblock.
+							The only differences being that there is no separate processing for negative and positive tweets necessary and we need to tokenize the tweets explicitly by using the TweetTokenizer function.
+							Finally, we use the classifier trained in the previous block to generate the sentiment labels for the tweets by and to @SpotifyCares.
+							<pre class="prettyprint lang-python"><code>
+# GENERATE TARGET LABELS ON SPOTIFY TWEETS
+
+# Retrieve the text of the tweets from and to the Spotify customer service account
+content_tweets = tweetsSpot['text'].reset_index().text
+
+# Tokenize the tweets
+tweet_tokenizer = TweetTokenizer()
+tweet_tokens = []
+for tweet in content_tweets:
+    tweet_tokens.append(tweet_tokenizer.tokenize(tweet))
+
+# Clean the list of tokens by using the remove noise function    
+cleaned_tokens_list = []
+
+for tokens in tweet_tokens:
+    cleaned_tokens_list.append(remove_noise(tokens, stop_words))
+    
+    
+# Convert the list of tokens into the right format for the classifier
+tokens_for_model = get_tweets_for_model(cleaned_tokens_list)
+
+Spot_dataset = [(tweet_dict) for tweet_dict in tokens_for_model]
+
+# Determine the sentiment of each tweet by using the naive Bayes classifier developed earlier
+sentiment = []
+for cleaned_tweet in Spot_dataset:
+    sentiment.append(classifier.classify(cleaned_tweet))
+
+tweets_sen = pd.concat([content_tweets, pd.Series(sentiment)], axis=1).rename(columns={0:"sentiment"})						
+							</code></pre>	
+							
+							<table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th></th>      <th>text</th>      <th>sentiment</th>    </tr>  </thead>  <tbody>    <tr>      <th>0</th>      <td>@115887 hmm. can you try restarting your device by holding the sleep/wake + volume down buttons for 10 seconds? keep us posted /ls</td>      <td>Positive</td>    </tr>    <tr>      <th>1</th>      <td>@spotifycares doesn’t work and i even tried deleting the app</td>      <td>Negative</td>    </tr>    <tr>      <th>...</th>      <td>...</td>      <td>...</td>    </tr>    <tr>      <th>74616</th>      <td>@823786 hey paul! could you dm us your account\'s username or email address, as well as your wife\'s? we\'ll take a look under the hood /gu https://t.co/ldfdzrinat</td>      <td>Positive</td>    </tr>    <tr>      <th>74617</th>      <td>@spotifycares i tried on many devices and browsers but does not work. really frustrated paying for a service she can\'t use. help!</td>      <td>Negative</td>    </tr>  </tbody></table>
+							
+							<p>
+							The chart below illustrates the amount of positive and negative tweets by and to @SpotifyCares over time.
+							It seems like since October 2017 there has been a huge increase in total amount of tweets.
+							However, this is most likely the date at which the data collection process took place.
+							Overall, we do see more positive than negative tweets.
+							This leads to imbalanced classes, but the difference does not appear so extreme that additional measures need to be taken to account for this.
+							</p>
+
+							<pre class="prettyprint lang-python"><code>
+# Add the sentiment to the original Spotify tweets dataset
+tweetsSpot = tweetsSpot.merge(tweets_sen, on = ["text"], how = "left")		
+
+# Add a 'date' variable in the appropriate format for visualization purposes
+tweetsSpot['created_at'] = pd.to_datetime(tweetsSpot['created_at'], format = '%a %b %d %X %z %Y')
+tweetsSpot['date'] = tweetsSpot['created_at'].dt.date
+startdate = pd.to_datetime("2017-06-01").date() # Initialize a start-date for the visualization
+
+visData = tweetsSpot[['date','sentiment','tweet_id']][tweetsSpot['date'] > startdate].groupby(['date','sentiment']).agg('count').unstack()
+visData.columns = visData.columns.droplevel(0)
+tidyvisData = visData.stack().reset_index().rename(columns={0:'count'})
+
+g = sns.lineplot(data = tidyvisData, x = "date", y = 'count', hue = 'sentiment', palette = ['#A3B9AA','#E68A99'], linewidth = 2)
+g.set_title('Sentiment of Spotify Customer Service Tweets and Replies over Time', size = 25)					
+							</code></pre>
+
+							<img src="images/project5tweetsovertime.png" width = "60%", heigth = "33%" alt="" />							
+							
+							<p>
+							The next section is all about predicting the sentiment of the replies to the customer support tweets based on the text of the customer support tweets themselves.
+							</p>
+
+						</div>
+					</section>									
+					
+
+				<!-- Predicting the Sentiment -->
+					<section id="predicting_the_sentiment" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Predicting the Sentiment</h2>
+							</div>
+							</br>
+
+							<p>
+							Before we can do the actual prediction, the data needs to be in the right format.
+							Therefore, we need to isolate the tweets that are in response to a @SpotifyCares tweet.
+							Once we saved those replies in the 'replyTweets' dataframe we can add the original @SpotifyCares tweets to each of the replies.
+							Finally, we remove all the features except for the text of the @Spotifycares tweet and the sentiment of the corresponding customer reply, which are all we need for the predictions.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>
+# Extract tweets that were in response to a @SpotifyCares tweet
+tweet_ids_by_Spotify = list(tweetsSpot["tweet_id"][tweetsSpot["author_id"] == "SpotifyCares"])
+replyTweets = tweetsSpot[tweetsSpot["in_response_to_tweet_id"].isin(tweet_ids_by_Spotify)].drop_duplicates(keep='first')	
+
+# Create a dataset in which the replies to the customer service tweets are merged with the original customer service tweets
+RepOrgTweets = replyTweets.merge(tweetsSpot, how = "left", left_on = ["in_response_to_tweet_id"], right_on = ["tweet_id"])		
+
+# Only keep the features required for the sentiment prediction (customer service tweets & sentiment of reply)
+ModelTweets = RepOrgTweets.drop(["inbound_x", "inbound_y", "created_at_x", "created_at_y",
+                                  "response_tweet_id_x", "response_tweet_id_y",
+                                  "in_response_to_tweet_id_x", "in_response_to_tweet_id_y",
+                                  "sentiment_y", "date_x", "date_y", "tweet_id_x", "tweet_id_y",
+								  "author_id_x", "author_id_y", "text_x"], axis = 1)					
+							</code></pre>	
+
+							<p>
+							The actual text processing and prediction is no different than the way in which it was performed earlier.
+							The tweets are separated according to positive and negative sentiment, after which they are tokenized.
+							The lists of tokens are then cleaned and formatted before being compiled into the final dataset, which also operates on a 70/30 train/test split.
+							Finally, the naive Bayes classifier is trained on the training set and tested on the test set and its performance is displayed below.
+							</p>
+
+							<pre class="prettyprint lang-python"><code>
+# Separate the customer service tweets that illicited a positive response and the ones that illicited a negative response
+positive_tweets = ModelTweets["text_y"][ModelTweets["sentiment_x"] == "Positive"]
+negative_tweets = ModelTweets["text_y"][ModelTweets["sentiment_x"] == "Negative"]
+
+
+default_stop_words = stopwords.words('english') # A dictionary with English stopwords
+keep_words = ["no", "nor", "not"] # Remove these words from the stop_words list
+stop_words = [word for word in default_stop_words if word not in keep_words]
+
+# Initialize tweet tokenizer
+tweet_tokenizer = TweetTokenizer()
+
+# Tokenize the tweets
+positive_tweet_tokens = []
+negative_tweet_tokens = []
+
+for tweet in positive_tweets:
+    positive_tweet_tokens.append(tweet_tokenizer.tokenize(tweet))
+
+for tweet in negative_tweets:
+    negative_tweet_tokens.append(tweet_tokenizer.tokenize(tweet))        
+
+# Clean the list of tokens by using the remove_noise function
+positive_cleaned_tokens_list = []
+negative_cleaned_tokens_list = []
+
+for tokens in positive_tweet_tokens:
+    positive_cleaned_tokens_list.append(remove_noise(tokens, stop_words))
+
+for tokens in negative_tweet_tokens:
+    negative_cleaned_tokens_list.append(remove_noise(tokens, stop_words))
+
+
+# Convert the lists of tokens into the right format required for the classifier 
+positive_tokens_for_model = get_tweets_for_model(positive_cleaned_tokens_list)
+negative_tokens_for_model = get_tweets_for_model(negative_cleaned_tokens_list)
+
+positive_dataset = [(tweet_dict, "Positive")
+                     for tweet_dict in positive_tokens_for_model]
+
+negative_dataset = [(tweet_dict, "Negative")
+                     for tweet_dict in negative_tokens_for_model]
+
+
+dataset = positive_dataset + negative_dataset
+
+random.seed(7)
+random.shuffle(dataset)
+
+# Create a 70/30 train/test split
+train_data = dataset[:round(len(dataset) * 0.70)]
+test_data = dataset[round(len(dataset) * 0.70):]
+
+# Train the naive Bayes classifier
+classifier = NaiveBayesClassifier.train(train_data)
+
+# Print the accuracy, most informative features and confusion matrix
+print("Accuracy is:", classify.accuracy(classifier, test_data))
+
+print(classifier.show_most_informative_features(10))
+
+predictions = []
+references = []
+
+for i in range(len(test_data)):
+    predictions.append(classifier.classify(test_data[i][0]))
+    references.append(test_data[i][1])
+
+
+CM = nltk.ConfusionMatrix(references, predictions)
+print("Confusion Matrix:")
+print(CM)  							
+							</code></pre>		
+							<img src="images/project5results2.png" width = "70%", heigth = "33%" alt="" />						
+							
+						</div>
+					</section>					
+								
+			
+				<!-- Results -->
+					<section id="results" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Results</h2>
+							</div>
+							</br>
+							
+							<p>
+							The classifier achieves an accuracy of 62.4%, which is significantly less than the 99.6% of the initial classifier trained and tested on the tweet samples.
+							This is not surprising however because we already took into account the existence of tweets with a neutral sentiment.
+							As a result, it is unlikely that our assumption of the generated sentiment labels accurately portraying the sentiment of the customer support tweets holds in reality.
+							Moreover, the sample tweets use emoticons coded as ":-)" or ":D" while the customer support tweets uses the emojis themselves.
+							The emojis explicitly convey a sentiment, which is why coding them in a congruent way could make a significant difference.
+							</p>
+							
+							<p>
+							Despite the subpar accuracy, there are still some interesting observations when examining the most informative features.
+							For example the words "cache-clearing" and "3/4" (which indicates 3/4g) has a significant negative to positive tweet ratio.
+							This implies that whenever these words are present in the customer service tweet, the customer reply often has a negative sentiment.
+							These types of indicators could be very valuable for a company to figure out what issues customers and customer support are struggling with.
+							</p>
+
+							<p>
+							Fortunately, there are plenty of ways in which we could potentially improve the model's performance, such as:
+							<ul style = "margin-left:10%; text-align:left">
+								<li>Using a dataset with more granular sentiment labels instead of the positive and negative sample tweets</li>
+								<li>Using a different classifier, such as LSTMs</li>
+								<li>Adding more steps to the text processing to for example account for sentence structure</li>
+								<li>Converting the emojis into the same format as in the original tweet samples</li>
+							</ul>
+							</p>
+
+							<p>
+							In the coming weeks, I will look into these various opportunities for improvement and update this project accordingly.
+							</p>
+
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Footer -->
+			<div id="footer">
+
+				<!-- Copyright -->
+					<ul class="copyright">
+						<li>&copy; Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+					</ul>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+
+	</body>
+</html
