@@ -113,7 +113,7 @@
 							</br>
 
 							<p>
-							In order to be able to predict the sentiment of replies to customer support tweets, a dataset of customer support tweets are necessary.
+							In order to be able to predict the sentiment of replies to customer support tweets, a dataset of customer support tweets is necessary.
 							Fortunately, Kaggle has a <a href = "https://www.kaggle.com/thoughtvector/customer-support-on-twitter">'Customer Support on Twitter' dataset</a> with close to 3 million tweets by and to large companies' customer support accounts.
 							The problem is that we need to know the sentiment of each tweet, which is not part of this dataset.
 							Of course it is virtually impossible to manually examine and label all tweets.
@@ -122,7 +122,7 @@
 							</p>
 							
 							<p>
-							But first, we need to import all the packages required for the analysis.
+							First, we need to import all the packages required for the analysis.
 							The complete code can be found on <a href = "https://github.com/ChrisTheunissen/Tweet-Sentiment-Analysis">my GitHub page</a>.
 							</p>
 							<pre class="prettyprint lang-python"><code>
@@ -145,9 +145,9 @@ sns.set(rc={'figure.figsize':(20,10)}, font_scale=1.5)
 							</code></pre>		
 
 							<p>
-							After importing the packages, I read the dataset, which I downloaded and stored as a csv file.
+							After importing the packages, I read in the dataset, which I downloaded and stored as a csv file.
 							Next, I make sure that the variables have the appropriate type.
-							I then display a few sample records of the dataset, which contains information such as the tweet ID, author ID, time of creation, text and response tweet ID for each tweet.
+							I then display a few sample records of the dataset, which contains information such as the tweet ID, author ID, time of creation, text, and response tweet ID for each tweet.
 							</p>
 							
 							<pre class="prettyprint lang-python"><code>
@@ -178,7 +178,7 @@ g.set_title('20 Most Prolific Customer Support Twitter Accounts', size = 25)
 							
 							<p>
 							Because it would be too intensive to use all of the 2.8 million tweets in the dataset for the analysis, I decided to only use the tweets from and to the Spotify customer support account (@SpotifyCares).
-							Mainly because there is a substantial number of SpotifyCares tweets but not to a degree that it has a significant negative effect on the computational speed.
+							Mainly because there is a substantial number of SpotifyCares tweets but not to a degree where it has a significant negative effect on the computational speed.
 							In addition, the SpotifyCares tweets are in English, so it will not be necessary to address foreign language issues.
 							</p>
 
@@ -219,6 +219,13 @@ tweetsSpot = tweets[(tweets["author_id"] == "SpotifyCares") | (tweets["text"].st
 									<li>Cleaning the text and removing noise (hyperlinks, twitterhandles and special characters)</li>
 									<li>Formatting the data</li>
 							</ul>
+							
+							The process of tokenizing is nothing more than splitting a string of text into a list of tokens, such as words in this case.
+							Lemmatization transforms these words in the tokens to their base form while taking into account. 
+							It can be seen as a more advanced form of stemming as lemmatization always returns an actual language word.
+							Returning words to their base form makes it easier to algorithmically match words.
+							For example, walking, walk and walks all convey the same action. 
+							Transforming all of these words to the baseform "walk" is a convenient way grouping words with the same meaning together.
 							The majority of the original code used for the text preprocessing and sentiment analysis has been written by Shaumik Daityari
 							and can be found in <a href = "https://www.digitalocean.com/community/tutorials/how-to-perform-sentiment-analysis-in-python-3-using-the-natural-language-toolkit-nltk">his excellent blog post on sentiment analysis using the NLTK library</a>.
 							</p>
