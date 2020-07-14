@@ -93,6 +93,7 @@
 							If it is possible, the potential benefits could be significant. 
 							For example, the company could easily figure out what type of customer support approach on Twitter results in positive customer feedback without having to resort to suboptimal means such as surveys.
 							Moreover, a specific look into the most informative features of the classifier could reveal impactful words or expressions that customer support employees should employ or avoid.
+							It could even give rise to applications that pre-emptively screen customer support tweets before they are being sent out, to check whether they are likely to result in positive or negative customer sentiment.
 							</p>
 							
 							<p>
@@ -277,6 +278,17 @@ def get_tweets_for_model(cleaned_tokens_list):
 							Fourth, the lists of processed positive and negative tokens are added together and randomized to avoid bias when training the model.
 							In addition, the randomized dataset is split according to a 70/30 ratio in which 70% is meant for training the classifier and the remaining 30% is used to test its performance.
 							Finally, the naive Bayes model is trained, tested and its results together with a list of most informative features are displayed.
+							</p>
+							
+							<p>
+							Why a naive Bayes classifier? Naive Bayes classifiers are widely used in text classification applications.
+							Mainly, because of the model's stringent conditional independence assumption and simple hypothesis function allow it to solve classification tasks quickly without being particularly resource intensive.
+							The classifier's high bias and low variance properties have proven valuable when working with highly dimensional data that suffers from a lot of noise, which text in general is.
+							A naive Bayes classifier does not take into account the context or dependencies between words.
+							Instead, it makes use of a bag-of-words approach in which each individual word's likelihood to belong in a positive or negative tweet is computed.
+						    While deep learning classifiers such as recurrent or convolutional neural networks exhibit impressive performance, they are too resource intensive for me to employ with my current hardware constraints.
+							Therefore, I chose to use naive Bayes classifiers instead, as they are efficient and tend to perform well for these type of applications. 
+							Moreover, naive Bayes classifiers are much more transparent than their deep learning counterparts, which allows us to examine which features the model deems to be the most informative.
 							</p>
 							
 							<pre class="prettyprint lang-python"><code>
