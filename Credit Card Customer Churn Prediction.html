@@ -1,0 +1,555 @@
+<!DOCTYPE HTML>
+<!--
+	Prologue by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Chris Theunissen Online Portfolio - Credit Card Customer Churn Prediction</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Header -->
+			<div id="header">
+
+				<div class="top">
+
+					<!-- Logo -->
+						<div id="logo">
+							<span class="image avatar48"><img src="images/PortfolioPFP.png" alt="" /></span>
+							<h1 id="title">Chris Theunissen</h1>
+							<p>Credit Card Churn Prediction</p>
+						</div>
+
+					<!-- Nav -->
+						<nav id="nav">
+							<ul>
+								<li><a href="#top" id="top-link"><span class="icon solid fa-newspaper">Title</span></a></li>
+								<li><a href="#introduction" id="introduction-link"><span class="icon solid fa-info-circle">Introduction</span></a></li>
+								<li><a href="#data_understanding" id="data_understanding-link"><span class="icon solid fa-database">Data Understanding</span></a></li>
+								<li><a href="#data_preparation" id="data_formatting-link"><span class="icon solid fa-puzzle-piece">Data Preparation</span></a></li>				
+								<li><a href="#modeling" id="modeling-link"><span class="icon solid fa-cogs">Modeling</span></a></li>
+								<li><a href="#results" id="results-link"><span class="icon solid fa-flag">Results</span></a></li>
+							</ul>
+						</nav>
+
+				</div>
+
+				<div class="bottom">
+
+					<!-- Social Icons -->
+						<ul class="icons">
+							<li><a href="https://christheunissen.github.io/ChrisTheunissen/" target="_self" class="icon solid fa-home"><span class="label">Home</span></a></li>							
+							<li><a href="https://www.linkedin.com/in/chris-theunissen" target="_blank" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
+							<li><a href="https://github.com/ChrisTheunissen" target="_blank" class="icon brands fa-github"><span class="label">Github</span></a></li>
+							<li><a href="mailto:christheunissen95@gmail.com" target="_blank" class="icon solid fa-envelope"><span class="label">Email</span></a></li>
+						</ul>
+
+				</div>
+
+			</div>
+
+		<!-- Main -->
+			<div id="main">
+
+				<!-- Top -->
+					<section id="top" class="one dark cover">
+						<div class="container">
+
+							<header>
+								<h2 class="alt"><strong>Credit Card Customer Churn Prediction</strong></h2>
+
+								<p>
+								In this project I compare the predictive performance of various machine learning classifiers when it comes to predicting customer attrition for a bank's credit card services.
+								The XGBoost algorithm outclassed all of the other selected classifiers and achieved an accuracy score of 97% and a recall score of 92%.
+								Numeric features such as total transaction amount, the number of transactions, the total revolving balance, and the number of products held by the customer proved to be highly predictive of customer churn.
+								In this post, I will go over the data exploration, data preprocessing, and modeling that were conducive to obtaining these results.
+								The entire analysis is done in Python.
+								</p>
+							</header>
+
+						</div>
+					</section>
+					
+				<!-- Introduction -->
+					<section id="introduction" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Introduction</h2>
+							</div>
+							</br>
+
+							<p>
+							This particular project was of interest to me, because customer retention is a major goal, not just for banks, but for all kinds of companies and organizations.
+							Being able to accurately predict customer attrition (or churn) is an immensely powerful tool when it comes to retaining customers.
+							For example, when you can accurately predict which customers are likely to cease their relationship with the business in advance, you are now in a position to try and keep said customers by for instance offering special promotions.
+							</p>
+							
+							<p>
+							I used a <a href = "https://www.kaggle.com/sakshigoyal7/credit-card-customers">public Kaggle dataset</a> for this task. It contains information on 10,000+ customers of a bank with 21 features including demographic information such as customer age, gender, and education level, but also variables related to the customers' credit card usage, such as total transaction amount, total revolving balance, and months of inactivity in the last 12 months.
+							The next section will explore the data in more detail, before moving on to the data preprocessing and modeling in the subsequent sections.
+							<a href = 'https://github.com/ChrisTheunissen/Credit-Card-Churn'>The complete Jupyter notebook</a> can be found on my GitHub page. The notebook contains additional figures as well as code I omitted from this post.
+							</p>
+							
+
+						</div>
+					</section>			
+					
+				<!-- Data Understanding -->
+					<section id="data_understanding" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Data Understanding</h2>
+							</div>
+							</br>
+
+							<p>
+							As mentioned above, the dataset contains 21 features worth of data on more than 10,000 customers. The features and their description look as follows:
+							
+							<ul style = "margin-left:10%; text-align:left">
+								<li>CLIENTNUM: Client number. Unique identifier for the customer holding the account</li>
+								<li>Attrition Flag: Internal event (customer activity) variable - if the account is closed then 1 else 0</li>
+								<li>Customer_Age: Demographic variable - Customer's Age in Years</li>
+								<li>Gender: Demographic variable - M=Male, F=Female</li>
+								<li>Dependent_count: Demographic variable - Number of dependents</li>
+								<li>Education_Level: Demographic variable - Educational Qualification of the account holder (example: high school, college graduate, etc.)</li>
+								<li>Marital_Status: Demographic variable - Married, Single, Divorced, Unknown</li>
+								<li>Income_Category: Demographic variable - Annual Income Category of the account holder</li>
+								<li>Card_Category: Product Variable - Type of Card (Blue, Silver, Gold, Platinum)
+								<li>Months_on_book: Period of relationship with bank</li>
+								<li>Total_Relationship_Count: Total no. of products held by the customer</li>
+								<li>Months_Inactive_12_mon: No. of months inactive in the last 12 months</li>
+								<li>Contacts_Count_12_mon: No. of Contacts in the last 12 months</li>
+								<li>Credit_Limit: Credit Limit on the Credit Card</li>
+								<li>Total_Revolving_Bal: Total Revolving Balance on the Credit Card</li>
+								<li>Avg_Open_To_Buy: Open to Buy Credit Line (Average of last 12 months)</li>
+								<li>Total_Amt_Chng_Q4_Q1: Change in Transaction Amount (Q4 over Q1)</li>
+								<li>Total_Trans_Amt: Total Transaction Amount (Last 12 months)</li>
+								<li>Total_Trans_Ct: Total Transaction Count (Last 12 months)</li>
+								<li>Total_Ct_Chng_Q4_Q1: Change in Transaction Count (Q4 over Q1)</li>
+								<li>Avg_Utilization_Ratio: Average Card Utilization Ratio</li>
+							</ul>
+							</p>
+							
+							<p>
+							The table below shows the first two and last two rows of the dataset.
+							</p>
+							
+							<font color="black"><b> churn dataframe </b></font>
+							<div style="overflow-x:auto;display: block; white-space: nowrap;">
+							<table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th></th>      <th>CLIENTNUM</th>      <th>Attrition_Flag</th>      <th>Customer_Age</th>      <th>Gender</th>      <th>Dependent_count</th>      <th>Education_Level</th>      <th>Marital_Status</th>      <th>Income_Category</th>      <th>Card_Category</th>      <th>Months_on_book</th>      <th>Total_Relationship_Count</th>      <th>Months_Inactive_12_mon</th>      <th>Contacts_Count_12_mon</th>      <th>Credit_Limit</th>      <th>Total_Revolving_Bal</th>      <th>Avg_Open_To_Buy</th>      <th>Total_Amt_Chng_Q4_Q1</th>      <th>Total_Trans_Amt</th>      <th>Total_Trans_Ct</th>      <th>Total_Ct_Chng_Q4_Q1</th>      <th>Avg_Utilization_Ratio</th>    </tr>  </thead>  <tbody>    <tr>      <th>0</th>      <td>768805383</td>      <td>Existing Customer</td>      <td>45</td>      <td>M</td>      <td>3</td>      <td>High School</td>      <td>Married</td>      <td>$60K - $80K</td>      <td>Blue</td>      <td>39</td>      <td>5</td>      <td>1</td>      <td>3</td>      <td>12691.0</td>      <td>777</td>      <td>11914.0</td>      <td>1.335</td>      <td>1144</td>      <td>42</td>      <td>1.625</td>      <td>0.061</td>    </tr>    <tr>      <th>1</th>      <td>818770008</td>      <td>Existing Customer</td>      <td>49</td>      <td>F</td>      <td>5</td>      <td>Graduate</td>      <td>Single</td>      <td>Less than $40K</td>      <td>Blue</td>      <td>44</td>      <td>6</td>      <td>1</td>      <td>2</td>      <td>8256.0</td>      <td>864</td>      <td>7392.0</td>      <td>1.541</td>      <td>1291</td>      <td>33</td>      <td>3.714</td>      <td>0.105</td>    </tr>    <tr>      <th>...</th>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>    </tr>    <tr>      <th>10125</th>      <td>717406983</td>      <td>Attrited Customer</td>      <td>30</td>      <td>M</td>      <td>2</td>      <td>Graduate</td>      <td>Unknown</td>      <td>$40K - $60K</td>      <td>Blue</td>      <td>36</td>      <td>4</td>      <td>3</td>      <td>3</td>      <td>5281.0</td>      <td>0</td>      <td>5281.0</td>      <td>0.535</td>      <td>8395</td>      <td>62</td>      <td>0.722</td>      <td>0.000</td>    </tr>    <tr>      <th>10126</th>      <td>714337233</td>      <td>Attrited Customer</td>      <td>43</td>      <td>F</td>      <td>2</td>      <td>Graduate</td>      <td>Married</td>      <td>Less than $40K</td>      <td>Silver</td>      <td>25</td>      <td>6</td>      <td>2</td>      <td>4</td>      <td>10388.0</td>      <td>1961</td>      <td>8427.0</td>      <td>0.703</td>      <td>10294</td>      <td>61</td>      <td>0.649</td>      <td>0.189</td>    </tr>  </tbody></table>
+							</div>
+							</br>
+							
+							<p>
+							In the Jupyter notebook visualizations for nearly every feature can be found. Below I will highlight the most interesting ones.
+							To start with a bar chart of customer attrition by income category. It's easy to see that most customers belong to the less than $40k income category.
+							What's interesting, is that the income categories at the far left and right end of the distribution ('Unknown' not being of much relevance) have a relatively higher rate of attrited customers (~17%) than the income categories in between.
+							Whether this difference is significant and will translate into predictive power remains to be seen.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>								
+ax = sns.countplot("Income_Category", data=churn, hue="Attrition_Flag", palette = ['#A3B9AA','#E68A99'], edgecolor = 'k',
+                  order = ["Less than $40K", "$40K - $60K", "$60K - $80K", "$80K - $120K", "$120K +", "Unknown"])
+ax.set_ylabel('Count')
+ax.set_ylim(0,3500)
+ax.set_title('Customer Attrition by Income Category')  
+ax.figure.set_facecolor('None')
+
+bars = ax.patches
+half = int(len(bars)/2)
+left_bars = bars[:half]
+right_bars = bars[half:]
+
+for left, right in zip(left_bars, right_bars):
+    height_l = left.get_height()
+    height_r = right.get_height()
+    total = height_l + height_r
+
+    ax.text(left.get_x() + left.get_width()/2., height_l + 40, '{0:.0%}'.format(height_l/total), ha="center")
+    ax.text(right.get_x() + right.get_width()/2., height_r + 40, '{0:.0%}'.format(height_r/total), ha="center")
+							</code></pre>
+							
+							<img src="images/Project6/fig1.png" width = "50%", height = "20%" alt="" />
+							
+							<p>
+							When we look at customer attrition by card category, it becomes apparent that by far most customers own a blue card, while the premium cards are less popular, which makes intuitive sense.
+							The premium cards, such as the gold but especially the platinum card do seem to have relatively more customer churn tied to them.
+							Only 20 customers in the dataset do in fact own a platinum card, so the difference might not be statistically significant, but it might still make a difference when it comes to modeling.
+							</p>
+							
+							<img src="images/Project6/fig2.png" width = "50%", height = "20%" alt="" />
+							
+							<p>
+							The distribution for the months on books feature shows a very peculiar spike around the 36 months value.
+							While the reason for the spike is unclear, but might have something to do with company or subscription policy.
+							The actual attrited and existing customer distributions do not seem to differ dramatically from each other.
+							The months on book feature is therefore not likely to have a substantial impact on the performance of the classifiers.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>							
+ax = sns.histplot(data = churn, x = "Months_on_book", hue = "Attrition_Flag",palette = ['#E68A99', '#A3B9AA'],
+                  edgecolor = 'k', hue_order = ["Attrited Customer", "Existing Customer"], alpha = 0.8) 
+ax.set_title('Months on book distribution', x = 0.5, y = 1.03)
+ax.figure.set_facecolor('None')		
+							</code></pre>
+							
+							<img src="images/Project6/fig3.png" width = "50%", height = "20%" alt="" />
+							
+							<p>
+							From the chart below, we can infer that generally speaking the higher the relationship count (the total number of products held by the customer), the lower the attrition rate.
+							This feature is likely to have significant predictive power. 
+							This finding is not unexpected either, as it has been a well-established strategy by banks to retain customers by offering them a range of products and services.
+							</p>
+							
+							<img src="images/Project6/fig4.png" width = "50%", height = "20%" alt="" />
+							
+							<p>
+							This next graphs shows that for customers who have been inactive for just a month in the last 12 months, the attrition rate is only 4%. However, inactivity for 3 or 4 months makes the attrition rate rise to 21% and 30% respectively.
+							Therefore, the months inactive are likely to carry some predictive power. It is interesting that this effect does not appear to carry through for 5 and 6 months of inactivity.
+							Perhaps, there is some form forgetfulness that comes into play after a few months have passed, because I had assumed that the longer the inactivity, the higher the attrition rate.
+							</p>
+							
+							<img src="images/Project6/fig5.png" width = "50%", height = "20%" alt="" />
+							
+							<p>
+							There appears to be a clear pattern in the graph below.
+							The higher the number of contacts in the last 12 months, the more likely it is for the customer to churn.
+							This feature is therefore likely to carry predictive power as well.
+							</p>
+							
+							<img src="images/Project6/fig6.png" width = "50%", height = "20%" alt="" />
+							
+							<p>
+							The following figure illustrates the total revolving balance distributions of existing and attrited customers.
+							The distribution of the Attrited Customer class differs substantially from the Existing Customer distribution.
+							There is a clear bell-shaped curve around a total revolving balance of 1500 for the existing customer distribution, which is almost completely absent in the distribution of the attrited customers.
+							There are also major spikes on both ends of the distributions. This graph reveals the total revolving balance to be a potentially powerful predictor.
+							</p>
+							
+							<img src="images/Project6/fig7.png" width = "50%", height = "20%" alt="" />
+							
+							<p>
+							The scatterplot and distributions below indicate that existing customers tend to have a higher total transaction amount and count on average than the attrited customers.
+							The intuitive logic where people who use their credit cards more often are less likely to cancel their credit cards also checks out.
+							The distinction between two classes is evident and both features will likely benefit the classifiers greatly.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>							
+ax = sns.jointplot(x="Total_Trans_Amt",y = "Total_Trans_Ct", data = churn, hue="Attrition_Flag",
+            palette = ['#A3B9AA','#E68A99'], size= 10, kind = 'scatter')
+ax.fig.suptitle('Total Transaction Count against Amount', x = 0.45, y = 1.03)
+ax.fig.set_facecolor('None')							
+							</code></pre>							
+							
+							<img src="images/Project6/fig8.png" width = "50%", height = "20%" alt="" />
+							</br>
+							
+							<p>
+							The figure below shows that existing customers tend to have a higher total transaction amount change between Q4 and Q1 on average than the attrited customers.
+							In terms of total count change the distinction seems a bit less clear cut, but still significant.
+							Both features are likely to prove valuable for the predictions.
+							</p>
+							
+							<img src="images/Project6/fig9.png" width = "50%", height = "20%" alt="" />
+							</br>
+							
+							<p>
+							Now that all features have been identified and the most interesting findings have been displayed, we can move on to the data preparation phase in which the data will be prepared for modeling.
+							</p>
+							
+
+						</div>
+					</section>
+					
+					
+				<!-- Data Preparation -->
+					<section id="data_preparation" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Data Preparation</h2>
+							</div>
+							</br>
+
+							<p>
+							This preparation phase consists of handling missing values, transforming the categorical variables into dummy variables, splitting the dataset into a train- and test set, standardizing the numerical features and addressing class imbalance through oversampling.
+							</p>
+							
+							<p>
+							I started processing the missing values by converting the "Uknown" string values to NaNs.
+							Inspired by <a href = "https://www.kaggle.com/kaanakkartal/forecast-with-lightgbm-87-recall-97-acc"> Kaan Akkartal's submitted notebook</a>, I use the matrix function from the missingno module, which produces a nullity matrix, allowing us to quickly visualize whether there are missing values and where they occur.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>		
+churn[churn == "Unknown"] = np.nan							
+mat = msno.matrix(churn)
+mat.figure.set_facecolor('None')
+							</code></pre>							
+							
+							<img src="images/Project6/fig10.png" width = "70%", height = "50%" alt="" />
+							</br>
+							</br>
+							
+							<p>
+							Missing values are clearly present in three of our features.
+							Out of our 10,127 samples, 1,519 values are missing for the education level feature (15%), 749 for the marital status feature (7%) and 1,112 for the income level feature (11%).
+							Why these three features have missing values is unclear. Because it involves three variables that are relatively sensitive, I assume privacy considerations might have played a role in this specific instance.
+							In a real-life scenario, it would be important to investigate the cause of the missing values, but in our case we can either choose to omit the rows with missing values or impute the missing data.
+							Because our dataset is not extremely large, simply omitting 15-33% of our data would probably not be the best idea.
+							Therefore, I settled for imputation. Because all three of these features are categorical, I chose to impute the mode (the most commonly observed value) of each respective feature.
+							</p>						
+
+							<pre class="prettyprint lang-python"><code>							
+churn["Marital_Status"] = churn["Marital_Status"].fillna(churn.Marital_Status.mode()[0])
+churn["Education_Level"] = churn["Education_Level"].fillna(churn.Education_Level.mode()[0])
+churn["Income_Category"] = churn["Income_Category"].fillna(churn.Income_Category.mode()[0])
+							</code></pre>
+							
+							<p>
+							Next, the categorical features need to be transformed into dummy variables. After every conversion, the first dummy column is dropped to avoid perfect collinearity.
+							After all dummies have been created, they are added to the dataframe, while their original counterparts are dropped.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>	
+churn = churn.join([pd.get_dummies(churn["Gender"], drop_first = True),
+                   pd.get_dummies(churn["Education_Level"], drop_first = True, prefix = "Edu"),
+                   pd.get_dummies(churn["Marital_Status"], drop_first = True, prefix = "Mar"),
+                   pd.get_dummies(churn["Income_Category"], drop_first = True, prefix = "Inc"),
+                   pd.get_dummies(churn["Card_Category"], drop_first = True, prefix = "Card"),
+                   pd.get_dummies(churn["Attrition_Flag"])])	
+
+churn = churn.drop(["Attrition_Flag", "Gender", "Education_Level", "Marital_Status","Income_Category", "Card_Category", "Existing Customer"], axis = 1)				   
+							</code></pre>
+							
+							To be able to validate the performance of our models, we need to hold out a partition of our data as a test set.
+							We keep 67% of the data to train our classifiers on and hold out 33% for testing purposes.
+							
+							<pre class="prettyprint lang-python"><code>		
+X_train, X_test, y_train, y_test = train_test_split(
+    churn.loc[:,"Customer_Age":"Card_Silver"], churn["Attrited Customer"], test_size=0.33, random_state=7)							
+							</code></pre>
+							
+							<p>
+							Because not all machine learning estimators can handle features that aren't standard normally distributed properly, we standardize the numerical features by applying sklearn's standard scaler.
+							The standard scaler standardizes features by removing the mean and scaling to unit variance.
+							We fit the scaler to the training data and subsequently transform the training as well as the test data.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>
+scaler = preprocessing.StandardScaler()
+
+X_train[['Customer_Age','Dependent_count','Months_on_book',
+       'Total_Relationship_Count', 'Months_Inactive_12_mon',
+       'Contacts_Count_12_mon', 'Credit_Limit', 'Total_Revolving_Bal',
+       'Avg_Open_To_Buy', 'Total_Amt_Chng_Q4_Q1', 'Total_Trans_Amt',
+       'Total_Trans_Ct', 'Total_Ct_Chng_Q4_Q1', 'Avg_Utilization_Ratio']] = scaler.fit_transform(X_train[['Customer_Age','Dependent_count','Months_on_book',
+                                                                                                          'Total_Relationship_Count', 'Months_Inactive_12_mon',
+                                                                                                          'Contacts_Count_12_mon', 'Credit_Limit', 'Total_Revolving_Bal',
+                                                                                                          'Avg_Open_To_Buy', 'Total_Amt_Chng_Q4_Q1', 'Total_Trans_Amt',
+                                                                                                          'Total_Trans_Ct', 'Total_Ct_Chng_Q4_Q1', 'Avg_Utilization_Ratio']])
+
+X_test[['Customer_Age','Dependent_count','Months_on_book',
+       'Total_Relationship_Count', 'Months_Inactive_12_mon',
+       'Contacts_Count_12_mon', 'Credit_Limit', 'Total_Revolving_Bal',
+       'Avg_Open_To_Buy', 'Total_Amt_Chng_Q4_Q1', 'Total_Trans_Amt',
+       'Total_Trans_Ct', 'Total_Ct_Chng_Q4_Q1', 'Avg_Utilization_Ratio']] = scaler.transform(X_test[['Customer_Age','Dependent_count','Months_on_book',
+                                                                                                     'Total_Relationship_Count', 'Months_Inactive_12_mon',
+                                                                                                     'Contacts_Count_12_mon', 'Credit_Limit', 'Total_Revolving_Bal',
+                                                                                                     'Avg_Open_To_Buy', 'Total_Amt_Chng_Q4_Q1', 'Total_Trans_Amt',
+                                                                                                     'Total_Trans_Ct', 'Total_Ct_Chng_Q4_Q1', 'Avg_Utilization_Ratio']])
+							
+							</code></pre>
+							
+							Some of the classifiers do not have built-in methods to address the imbalanced classes present in our target variable.
+							To address this issue, we create an additional training set in which the number of minority class samples is artificially increased through oversampling to achieve an equal split.
+
+							<pre class="prettyprint lang-python"><code>
+oversample = SMOTE()
+X_train_os, y_train_os = oversample.fit_resample(X_train, y_train)							
+							</code></pre>
+
+                    		<p>
+							The table below display the first two and last two rows of the final training dataset.
+							</p>							
+							
+							</br>
+							<font color="black"><b> prepared churn training features </b></font>
+							<div style="overflow-x:auto;display: block; white-space: nowrap;">
+							<table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th></th>      <th>Customer_Age</th>      <th>Dependent_count</th>      <th>Months_on_book</th>      <th>Total_Relationship_Count</th>      <th>Months_Inactive_12_mon</th>      <th>Contacts_Count_12_mon</th>      <th>Credit_Limit</th>      <th>Total_Revolving_Bal</th>      <th>Avg_Open_To_Buy</th>      <th>Total_Amt_Chng_Q4_Q1</th>      <th>Total_Trans_Amt</th>      <th>Total_Trans_Ct</th>      <th>Total_Ct_Chng_Q4_Q1</th>      <th>Avg_Utilization_Ratio</th>      <th>M</th>      <th>Edu_Doctorate</th>      <th>Edu_Graduate</th>      <th>Edu_High School</th>      <th>Edu_Post-Graduate</th>      <th>Edu_Uneducated</th>      <th>Mar_Married</th>      <th>Mar_Single</th>      <th>Inc_$40K - $60K</th>      <th>Inc_$60K - $80K</th>      <th>Inc_$80K - $120K</th>      <th>Inc_Less than $40K</th>      <th>Card_Gold</th>      <th>Card_Platinum</th>      <th>Card_Silver</th>    </tr>  </thead>  <tbody>    <tr>      <th>8439</th>      <td>-0.663322</td>      <td>1.271476</td>      <td>0.012660</td>      <td>-1.806011</td>      <td>-1.316635</td>      <td>-0.403355</td>      <td>-0.741265</td>      <td>-0.200947</td>      <td>-0.723412</td>      <td>-0.656724</td>      <td>0.063421</td>      <td>0.814924</td>      <td>0.009373</td>      <td>0.866369</td>      <td>1</td>      <td>0</td>      <td>1</td>      <td>0</td>      <td>0</td>      <td>0</td>      <td>1</td>      <td>0</td>      <td>0</td>      <td>0</td>      <td>0</td>      <td>1</td>      <td>0</td>      <td>0</td>      <td>0</td>    </tr>    <tr>      <th>7400</th>      <td>0.466451</td>      <td>-0.273883</td>      <td>0.770575</td>      <td>1.409362</td>      <td>-1.316635</td>      <td>-1.306577</td>      <td>0.131340</td>      <td>0.141178</td>      <td>0.118727</td>      <td>0.131397</td>      <td>0.058426</td>      <td>0.729938</td>      <td>0.138445</td>      <td>-0.524194</td>      <td>1</td>      <td>0</td>      <td>0</td>      <td>0</td>      <td>1</td>      <td>0</td>      <td>1</td>      <td>0</td>      <td>0</td>      <td>0</td>      <td>1</td>      <td>0</td>      <td>0</td>      <td>0</td>      <td>0</td>    </tr>    <tr>      <th>...</th>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>      <td>...</td>    </tr>    <tr>      <th>537</th>      <td>-0.161201</td>      <td>-0.273883</td>      <td>-1.376851</td>      <td>-0.519862</td>      <td>2.634872</td>      <td>0.499867</td>      <td>-0.797622</td>      <td>-1.429152</td>      <td>-0.669843</td>      <td>-0.395545</td>      <td>-1.088725</td>      <td>-1.607170</td>      <td>-1.210568</td>      <td>-0.992557</td>      <td>1</td>      <td>0</td>      <td>1</td>      <td>0</td>      <td>0</td>      <td>0</td>      <td>1</td>      <td>0</td>      <td>0</td>      <td>1</td>      <td>0</td>      <td>0</td>      <td>0</td>      <td>0</td>      <td>0</td>    </tr>    <tr>      <th>9412</th>      <td>-0.412261</td>      <td>1.271476</td>      <td>-0.745255</td>      <td>-1.806011</td>      <td>0.659118</td>      <td>-1.306577</td>      <td>2.332182</td>      <td>0.510378</td>      <td>2.286918</td>      <td>0.172636</td>      <td>3.077338</td>      <td>2.302175</td>      <td>-0.694279</td>      <td>-0.800129</td>      <td>1</td>      <td>0</td>      <td>0</td>      <td>0</td>      <td>0</td>      <td>1</td>      <td>1</td>      <td>0</td>      <td>0</td>      <td>1</td>      <td>0</td>      <td>0</td>      <td>0</td>      <td>0</td>      <td>1</td>    </tr>  </tbody></table>	
+							</div>
+							</br>		
+
+							<p>
+							Now that the data has been prepared, it can be used for modeling.
+							</p>
+
+						</div>
+					</section>									
+					
+
+				<!-- Modeling -->
+					<section id="modeling" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Modeling</h2>
+							</div>
+							</br>
+
+							<p>
+                            I selected the following algorithms for this classification task:
+								<ul style = "margin-left:30%; text-align:left">
+								<li>Logistic Regression</li>
+								<li>Decision Tree</li>
+								<li>k-Nearest Neighbors</li>
+								<li>Naive Bayes</li>
+								<li>Support Vector Machine</li>
+								<li>Random Forest</li>
+								<li>XGBoost</li>
+								</ul>
+							</p>
+							
+							<p>
+							All of the models are imported through the sklearn module, except for the XGBoost classifier, which originates from the XGBoost module.
+							Each of these models has a different way of approaching the problem and they all have their pros and cons when it comes to accuracy, speed, and transparency. 
+							I also attempted to optimize the parameters where possible through sklearn's GridSearchCV.
+							Besides the actual parameter grids, the implementation of every model is virtually the same.
+							Therefore, I will only display the code of the XGBoost's implementation below. The code used for the other classifiers can be found in <a href = 'https://github.com/ChrisTheunissen/Credit-Card-Churn'>the Jupyter notebook</a>.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>
+clf = XGBClassifier()
+scale_num = int(y_train.value_counts().values[0]/y_train.value_counts().values[1])
+
+param_grid = [
+  {'use_label_encoder': [False],
+   'scale_pos_weight': [scale_num],
+   'booster': ['gbtree'],
+   'max_depth':[3, 6, 10],
+   'min_child_weight': [1, 3, 5],
+   'gamma': [0, 0.1, 0.2],
+   'n_estimators': [50, 100, 200],
+   'tree_method': ['gpu_hist'],
+   'predictor':['gpu_predictor']}
+ ]
+
+clf = GridSearchCV(clf,
+                   param_grid = param_grid,
+                   cv = 5,
+                   verbose = 1,
+                   n_jobs = -1)
+
+clf.fit(X_train, y_train)
+print(clf.best_params_)
+
+							</code></pre>
+							
+							<p>
+							After the model has been trained and the parameters have been tuned, we can validate its performance on the test set.
+							The confusion matrix and classification report below illustrate how well the model performed on the test set.
+							The XGBoost classifier achieved an accuracy of 97%, which means that the classifier predicted 97% of the samples in the test correctly.
+							Because we are particularly interested in the ability of the model to identify customers who are at risk of churning, it's also important to look at the recall metric.
+							In this case, the recall shows us the correctly predicted churned customers relative to all the customers that churned.
+							The XGBoost algorithm achieved a recall score of 92%, meaning that it recognized 92% of the customers actually at risk of churning correctly.
+							</p>
+							
+							<pre class="prettyprint lang-python"><code>
+y_pred = clf.predict(X_test)
+
+print("Confusion Matrix:",confusion_matrix(y_test,y_pred),"", sep="\n")
+print("Classification Report:",classification_report(y_test,y_pred), sep="\n")							
+							</code></pre>
+							
+							</br>
+							<font color="black"><b> XGBoost confusion matrix </b></font>
+							<div style="overflow-x:auto;display: block; white-space: nowrap;">
+							<table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th></th>      <th>Predicted: Existing</th>      <th>Predicted: Attrited</th>    </tr>  </thead>  <tbody>    <tr>      <th>Actual: Existing</th>      <td>2777</td>      <td>50</td>    </tr>    <tr>      <th>Actual: Attrited</th>      <td>42</td>      <td>473</td>    </tr>  </tbody></table>							</div>
+							</br>	
+							
+							
+							<font color="black"><b> XGBoost classification report </b></font>
+							<div style="overflow-x:auto;display: block; white-space: nowrap;">
+							<table border="1" class="dataframe">  <thead>    <tr style="text-align: right;">      <th></th>      <th>precision</th>      <th>recall</th>      <th>f1-score</th>      <th>support</th>    </tr>  </thead>  <tbody>    <tr>      <th>0</th>      <td>0.99</td>      <td>0.98</td>      <td>0.98</td>      <td>2827</td>    </tr>    <tr>      <th>1</th>      <td>0.90</td>      <td>0.92</td>      <td>0.91</td>      <td>515</td>    </tr>    <tr>      <th>accuracy</th>      <td>-</td>      <td>-</td>      <td>0.97</td>      <td>0.97</td>    </tr>    <tr>      <th>macro avg</th>      <td>0.94</td>      <td>0.95</td>      <td>0.95</td>      <td>3342</td>    </tr>    <tr>      <th>weighted avg</th>      <td>0.97</td>      <td>0.97</td>      <td>0.97</td>      <td>3342</td>    </tr>  </tbody></table>							</div>
+							</br>								
+							
+							<p>
+							One of the advantages of the XGBoost classifier besides the strong performance, is the option to get an indication of the importance of each feature as plotted in the figure below.
+							It turns out that most of the features we expected would have predictive power are amongst the most important features according to the XGBoost classifier, including total transaction count, total revolving balance, total transaction amount, total relationship count, card category and total count and amount changed (Q4 over Q1).
+							</p>
+							<pre class="prettyprint lang-python"><code>
+Importance = pd.DataFrame({"Importance": clf.best_estimator_.feature_importances_*100}, index = X_train.columns)
+Importance_desc = Importance.sort_values(by = "Importance", axis = 0, ascending = False)							
+							
+ax = sns.barplot(x = "Importance", y = Importance_desc.index, data = Importance_desc,color = '#A3B9AA', edgecolor = 'k')
+ax.figure.set_size_inches(15, 12)
+ax.set_title('XGBoost Feature Importance Ranking', x = 0.45, y = 1.03)
+ax.figure.set_facecolor('None')							
+							</code></pre>
+							
+							<img src="images/Project6/fig12.png" width = "70%", height = "50%" alt="" />
+							
+							<p>
+							In the next section, the results of all models are compared.
+							</p>
+						</div>
+					</section>					
+								
+			
+				<!-- Results -->
+					<section id="results" class="three">
+						<div class="container">
+
+							<div class="imageContainer"><h2>Results</h2>
+							</div>
+							</br>
+
+							<p>
+							In this section, we compare the performance of all of our selected classifiers by looking at their accuracy and recall rates.
+							The figure below shows that the XGBoost classifier is the clear winner in terms of both accuracy and recall, with the random forest classifier being a close second.
+							This is not very surprising as these two models are popular for their superior performance when it comes to classification tasks.
+							The drawback is that they are more resource intensive to train and overall less transparent than the simpler models such as a logistic regression or simple decision tree.
+							</p>
+
+							<img src="images/Project6/fig13.png" width = "70%", height = "50%" alt="" />
+							
+							<p>
+							This project ultimately shows how valuable machine learning and predictive modeling can be.
+							Being able to predict which customers are at risk of leaving your company with such high accuracy is a huge advantage to many different types of organizations.
+							In this particular case, the bank could offer all customers predicted to be at risk of churning a special promotion to have a much better chance of retaining them, which is likely to be immensely profitable.
+						    </p>
+							
+							<p>
+							Of course, this particular dataset was remarkably clean besides some missing values and it had a lot of features with high predictive power, which you are unlikely to find in many real-life business scenarios.
+							That being said, hopefully this could serve as encouragement to make sure good care is put into data infrastructure and collection methods, because as this project shows: it pays off.
+							</p>
+
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Footer -->
+			<div id="footer">
+
+				<!-- Copyright -->
+					<ul class="copyright">
+						<li>&copy; Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+					</ul>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+
+	</body>
+</html
